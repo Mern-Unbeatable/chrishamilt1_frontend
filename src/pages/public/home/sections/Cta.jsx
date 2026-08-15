@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-export default function CtaSection() {
+export default function Cta() {
   return (
     <section className="bg-white py-16 lg:py-20">
       <div className="container mx-auto px-6 lg:px-8">

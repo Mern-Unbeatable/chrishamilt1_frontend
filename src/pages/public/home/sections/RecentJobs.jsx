@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router'
 import JobCard from '@/components/data-display/JobCard/JobCard'
 import { DEMO_RECENT_JOBS } from '@/data/demoData'
 
-export default function RecentJobsSection() {
+export default function RecentJobs() {
   const navigate = useNavigate()
 
   return (

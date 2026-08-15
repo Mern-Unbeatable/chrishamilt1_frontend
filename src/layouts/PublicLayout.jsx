@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router'
 import PublicNavbar from '@/layouts/PublicNavbar'
-import PublicFooter from '@/layouts/footer/PublicFooter'
+import Footer from '@/layouts/Footer'
 import ScrollToTop from '@/components/ScrollToTop'
 
 export default function PublicLayout() {
@@ -14,7 +14,7 @@ export default function PublicLayout() {
         <Outlet />
       </main>
       <footer>
-        <PublicFooter />
+        <Footer />
       </footer>
     </>
   )

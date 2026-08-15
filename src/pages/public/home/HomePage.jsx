@@ -1,25 +1,25 @@
-import BrowseByTradeSection from '@/pages/public/home/components/BrowseByTradeSection'
-import CtaSection from '@/pages/public/home/components/CtaSection'
-import CustomerTestimonialsSection from '@/pages/public/home/components/CustomerTestimonialsSection'
-import FaqSection from '@/pages/public/home/components/FaqSection'
-import HeroSection from '@/pages/public/home/components/HeroSection'
-import HowItWorksSection from '@/pages/public/home/components/HowItWorksSection'
-import MarketplaceMetricsSection from '@/pages/public/home/components/MarketplaceMetricsSection'
-import RecentJobsSection from '@/pages/public/home/components/RecentJobsSection'
-import WhyPreferTradeTrustSection from '@/pages/public/home/components/WhyPreferTradeTrustSection'
+import BrowseByTrade from '@/pages/public/home/sections/BrowseByTrade'
+import Cta from '@/pages/public/home/sections/Cta'
+import CustomerTestimonials from '@/pages/public/home/sections/CustomerTestimonials'
+import Faq from '@/pages/public/home/sections/Faq'
+import Hero from '@/pages/public/home/sections/Hero'
+import HowItWorks from '@/pages/public/home/sections/HowItWorks'
+import MarketplaceMetrics from '@/pages/public/home/sections/MarketplaceMetrics'
+import RecentJobs from '@/pages/public/home/sections/RecentJobs'
+import WhyPreferTradeTrust from '@/pages/public/home/sections/WhyPreferTradeTrust'
 
 export default function HomePage() {
   return (
     <>
-      <HeroSection />
-      <MarketplaceMetricsSection />
-      <BrowseByTradeSection />
-      <HowItWorksSection />
-      <WhyPreferTradeTrustSection />
-      <RecentJobsSection />
-      <CustomerTestimonialsSection />
-      <FaqSection />
-      <CtaSection />
+      <Hero />
+      <MarketplaceMetrics />
+      <BrowseByTrade />
+      <HowItWorks />
+      <WhyPreferTradeTrust />
+      <RecentJobs />
+      <CustomerTestimonials />
+      <Faq />
+      <Cta />
     </>
   )
 }
