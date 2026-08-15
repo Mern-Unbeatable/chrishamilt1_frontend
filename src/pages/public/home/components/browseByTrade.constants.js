@@ -1,0 +1,33 @@
+import {
+  Box,
+  Building2,
+  Droplets,
+  Flame,
+  Grid2x2,
+  Grid3x3,
+  Hammer,
+  Home,
+  Leaf,
+  Paintbrush,
+  Sparkles,
+  Sun,
+  Wrench,
+  Zap,
+} from 'lucide-react'
+
+export const TRADE_CATEGORIES = [
+  { icon: Droplets, name: 'Plumbing', jobs: 234 },
+  { icon: Zap, name: 'Electrical', jobs: 189 },
+  { icon: Home, name: 'Roofing', jobs: 156 },
+  { icon: Hammer, name: 'Carpentry', jobs: 143 },
+  { icon: Paintbrush, name: 'Painting', jobs: 211 },
+  { icon: Sparkles, name: 'Cleaning', jobs: 178 },
+  { icon: Leaf, name: 'Gardening', jobs: 165 },
+  { icon: Wrench, name: 'Handyman', jobs: 298 },
+  { icon: Grid2x2, name: 'Flooring', jobs: 127 },
+  { icon: Flame, name: 'Heating', jobs: 193 },
+  { icon: Building2, name: 'Building', jobs: 89 },
+  { icon: Sun, name: 'Renovation', jobs: 76 },
+  { icon: Grid3x3, name: 'Tiling', jobs: 134 },
+  { icon: Box, name: 'Flat Pack', jobs: 203 },
+]

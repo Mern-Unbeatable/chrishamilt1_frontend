@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@import "./variables.css";
+
+@theme {
+  --color-primary: #EAF2FE;
+  --color-secondary: #E6EFFE;
+  --color-primary-foreground: #1E3A8A;
+  --color-btn-primary: #0160F2;
+  --color-muted-foreground: #64748b;
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-border: #e2e8f0;
+  --color-sidebar: #f8fafc;
+  --color-sidebar-foreground: #0f172a;
+  --color-sidebar-accent: #EAF2FE;
+  --color-sidebar-accent-foreground: #1E3A8A;
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+}
+
+button {
+  cursor: pointer;
+}
