@@ -5,11 +5,23 @@
 
 export const DEMO_JOB_DETAILS = {
   id: '1',
-  status: 'Completed',
-  statusVariant: 'completed',
+  status: 'Open',
+  statusVariant: 'open',
+  category: 'Plumbing',
+  urgency: 'High Urgency',
+  urgencyVariant: 'high',
+  postedAt: '2 hours ago',
+  distance: '3.2 miles away',
   title: 'Complete Bathroom Renovation — Full Replumb & Tile',
   location: 'Kensington, London',
-  price: '£8,000',
+  price: '£2,400 – £3,200',
+  customer: {
+    name: 'Sarah M.',
+    avatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=128&q=80',
+    phone: '+44 7911 234 567',
+    email: 'sarah.morrison@email.co.uk',
+  },
   tradesman: {
     name: 'James Hartley',
     initials: 'JH',
@@ -22,32 +34,24 @@ export const DEMO_JOB_DETAILS = {
   },
   description: {
     summary:
-      'We are looking for an experienced bathroom fitter to completely renovate our master ensuite. The project involves stripping out the existing suite, replumbing for a new walk-in shower and double vanity, retiling all wall and floor surfaces, and installing new sanitaryware.',
-    full: 'We are looking for an experienced bathroom fitter to completely renovate our master ensuite. The project involves stripping out the existing suite, replumbing for a new walk-in shower and double vanity, retiling all wall and floor surfaces, and installing new sanitaryware.\n\nThe bathroom is approximately 3.2m x 2.4m. All waste pipes will need rerouting for the new layout. We have already purchased the tiles, shower screen, and vanity unit — the tradesman will need to supply all plumbing fittings, adhesive, grout, and labour.\n\nWe require someone who can manage the project from start to finish, including coordination with an electrician for the heated towel rail and downlights. Previous bathroom portfolio photos are essential.',
+      'We are looking for an experienced plumber and tiler to completely renovate our master bathroom in a Victorian townhouse. The project involves a full strip-out of the existing suite, complete replumbing for a new walk-in shower and double vanity unit, and full retiling of all wall and floor surfaces.',
+    full: 'We are looking for an experienced plumber and tiler to completely renovate our master bathroom in a Victorian townhouse. The project involves a full strip-out of the existing suite, complete replumbing for a new walk-in shower and double vanity unit, and full retiling of all wall and floor surfaces.\n\nThe bathroom is approximately 3.2m x 2.4m. All waste pipes will need rerouting for the new layout. We have already purchased the tiles, shower screen, and vanity unit — the tradesman will need to supply all plumbing fittings, adhesive, grout, and labour.\n\nWe require someone who can manage the project from start to finish, including coordination with an electrician for the heated towel rail and downlights. Previous bathroom portfolio photos are essential.',
   },
   requirements: [
-    'City & Guilds Level 2/3 Plumbing or equivalent NVQ qualification',
-    'Gas Safe registered engineer (if any gas work required)',
-    'Public liability insurance minimum £2 million',
-    'Minimum 3 years bathroom fitting experience with verifiable references',
-    'Ability to project manage and coordinate with other trades if needed',
+    'City & Guilds or NVQ Level 3 in Plumbing',
+    'Gas Safe registered (for boiler disconnection)',
+    'Public liability insurance minimum £2m',
+    'Minimum 5 years experience in bathroom renovations',
+    'References available and verifiable upon request',
   ],
   preferredStart: '15 August 2026',
   completionBy: '30 September 2026',
   specialNotes:
-    'Property is a third-floor flat with no lift — please factor in manual handling of materials. Parking permit available for one van on street. We have two cats so please keep the bathroom door closed during works. Dust sheets required in hallway.',
+    'Access available Mon–Fri 8am–6pm. Parking permit can be arranged. House is occupied during works — please consider dust management.',
   photos: [
     {
       src: 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=1200&q=80',
       alt: 'Renovated bathroom with walk-in shower',
-    },
-    {
-      src: 'https://images.unsplash.com/photo-1620626011761-996317b59421?auto=format&fit=crop&w=400&q=80',
-      alt: 'Bathroom vanity and mirror',
-    },
-    {
-      src: 'https://images.unsplash.com/photo-1507652313519-3dd907912343?auto=format&fit=crop&w=400&q=80',
-      alt: 'Modern bathroom tiles',
     },
     {
       src: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400&q=80',
@@ -63,6 +67,74 @@ export const DEMO_JOB_DETAILS = {
     },
   ],
 }
+
+export const DEMO_SIMILAR_JOBS = [
+  {
+    id: '2',
+    title: 'Bathroom Suite Installation',
+    location: 'Chelsea',
+    distance: '1.8 mi',
+    priceRange: '£1,800–£2,400',
+    postedAt: '1h ago',
+    urgency: 'Medium Urgency',
+    urgencyVariant: 'medium',
+    leadCost: '£14',
+    image:
+      'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: '3',
+    title: 'Full Kitchen Replumb & Fitting',
+    location: 'Fulham',
+    distance: '2.4 mi',
+    priceRange: '£3,200–£4,500',
+    postedAt: '3h ago',
+    urgency: 'High Urgency',
+    urgencyVariant: 'high',
+    leadCost: '£18',
+    image:
+      'https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: '4',
+    title: 'En-Suite Shower Room Refit',
+    location: 'Notting Hill',
+    distance: '1.2 mi',
+    priceRange: '£2,100–£2,800',
+    postedAt: '30m ago',
+    urgency: 'Low Urgency',
+    urgencyVariant: 'low',
+    leadCost: '£12',
+    image:
+      'https://images.unsplash.com/photo-1620626011761-996317b59421?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: '5',
+    title: 'Boiler Replacement & Pipework',
+    location: 'Hammersmith',
+    distance: '3.1 mi',
+    priceRange: '£2,500–£3,200',
+    postedAt: '5h ago',
+    urgency: 'High Urgency',
+    urgencyVariant: 'high',
+    leadCost: '£16',
+    image:
+      'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: '6',
+    title: 'Wet Room Conversion',
+    location: 'Paddington',
+    distance: '2.8 mi',
+    priceRange: '£4,000–£5,500',
+    postedAt: '6h ago',
+    urgency: 'Medium Urgency',
+    urgencyVariant: 'medium',
+    leadCost: '£20',
+    image:
+      'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=600&q=80',
+  },
+]
 
 export const DEMO_RECENT_JOBS = [
   {
@@ -91,6 +163,134 @@ export const DEMO_RECENT_JOBS = [
     postedAt: '6h ago',
     category: 'Kitchen Fitting',
     viewLeadTo: '/jobs/1',
+  },
+  {
+    id: '4',
+    title: 'Boiler Replacement & Gas Safety Check',
+    location: 'Leeds, West Yorkshire',
+    priceRange: '£2,200–£3,500',
+    postedAt: '8h ago',
+    category: 'Heating & Gas',
+    viewLeadTo: '/jobs/1',
+  },
+  {
+    id: '5',
+    title: 'Full House Rewire (3 Bed Semi)',
+    location: 'Bristol, Avon',
+    priceRange: '£4,500–£6,000',
+    postedAt: '12h ago',
+    category: 'Electrical',
+    viewLeadTo: '/jobs/1',
+  },
+]
+
+export const DEMO_BROWSE_JOB_CATEGORIES = [
+  'All Trade Categories',
+  'Heating & Gas',
+  'Plumbing',
+  'Electrical',
+  'Building & Construction',
+  'Kitchen & Bathroom',
+  'Roofing',
+  'Kitchen Fitting',
+]
+
+export const DEMO_BROWSE_BUDGETS = [
+  'Any Budget',
+  'Under £1,000',
+  '£1,000–£5,000',
+  '£5,000–£10,000',
+  '£10,000+',
+]
+
+export const DEMO_BROWSE_JOBS = [
+  {
+    id: '1',
+    title: 'Kitchen Extension Renovation',
+    location: 'Salford, Manchester',
+    priceRange: '£8,000–£12,000',
+    postedAt: '2h ago',
+    category: 'Kitchen Fitting',
+  },
+  {
+    id: '2',
+    title: 'Kitchen Extension Renovation',
+    location: 'Salford, Manchester',
+    priceRange: '£8,000–£12,000',
+    postedAt: '4h ago',
+    category: 'Kitchen Fitting',
+  },
+  {
+    id: '3',
+    title: 'Kitchen Extension Renovation',
+    location: 'Salford, Manchester',
+    priceRange: '£8,000–£12,000',
+    postedAt: '6h ago',
+    category: 'Kitchen Fitting',
+  },
+  {
+    id: '4',
+    title: 'Boiler Replacement & Gas Safety Check',
+    location: 'Leeds, West Yorkshire',
+    priceRange: '£2,200–£3,500',
+    postedAt: '8h ago',
+    category: 'Heating & Gas',
+  },
+  {
+    id: '5',
+    title: 'Full House Rewire (3 Bed Semi)',
+    location: 'Bristol, Avon',
+    priceRange: '£4,500–£6,000',
+    postedAt: '12h ago',
+    category: 'Electrical',
+  },
+  {
+    id: '6',
+    title: 'Emergency Burst Pipe Repair',
+    location: 'Camden, London',
+    priceRange: '£150–£400',
+    postedAt: '1d ago',
+    category: 'Plumbing',
+  },
+  {
+    id: '7',
+    title: 'Loft Conversion & Insulation',
+    location: 'Edinburgh, Scotland',
+    priceRange: '£15,000–£22,000',
+    postedAt: '1d ago',
+    category: 'Building & Construction',
+  },
+  {
+    id: '8',
+    title: 'Flat Roof Replacement',
+    location: 'Cardiff, Wales',
+    priceRange: '£3,800–£5,200',
+    postedAt: '2d ago',
+    category: 'Roofing',
+  },
+  {
+    id: '9',
+    title: 'Bathroom Suite Installation',
+    location: 'Nottingham, East Midlands',
+    priceRange: '£2,500–£4,000',
+    postedAt: '2d ago',
+    category: 'Kitchen & Bathroom',
+  },
+  {
+    id: '10',
+    title: 'Garden Decking & Fencing',
+    location: 'Brighton, East Sussex',
+    priceRange: '£900–£1,800',
+    postedAt: '3d ago',
+    category: 'Building & Construction',
+  },
+  {
+    id: '11',
+    title: 'Consumer Unit Upgrade',
+    location: 'Sheffield, South Yorkshire',
+    priceRange: '£650–£950',
+    postedAt: '3d ago',
+    category: 'Electrical',
   },
 ]
 
@@ -467,7 +667,129 @@ export const DEMO_TOKEN_PRICING = [
     price: '£200',
     tokens: 1000,
     rateLabel: '£0.20 per token',
-    description: 'For established businesses with high lead volume.',
+    description: 'Maximum value for active tradesmen consistently winning new work.',
     featured: false,
+  },
+]
+
+export const DEMO_ABOUT_TRADES = [
+  { id: 'plumbing', label: 'Plumbers & Heating' },
+  { id: 'electrical', label: 'Electricians' },
+  { id: 'roofing', label: 'Roofers & Joiners' },
+  { id: 'building', label: 'Builders & Painters' },
+]
+
+export const DEMO_ABOUT_STORY = {
+  intro:
+    'Finding reliable tradesmen shouldn\'t be difficult, and skilled professionals deserve access to genuine job opportunities without unnecessary barriers.',
+  body:
+    'Our platform was created to simplify the process by bringing customers and verified tradesmen together in one secure, transparent, and easy-to-use marketplace. Whether you\'re looking for a plumber, electrician, roofer, or builder, we make it easier to connect with trusted professionals across the UK.',
+  highlights: [
+    {
+      title: 'Customer First Approach',
+      description:
+        'Post any job for free and receive verified quotes with transparent ratings.',
+    },
+    {
+      title: 'Fair Tradesmen Growth',
+      description:
+        'Pay only for the leads you choose to accept. No expensive locking subscriptions.',
+    },
+  ],
+}
+
+export const DEMO_ABOUT_PURPOSE = [
+  {
+    id: 'mission',
+    eyebrow: 'Core Purpose',
+    title: 'Our Mission',
+    description:
+      'Our mission is to make hiring trusted tradesmen simple, transparent, and stress-free while providing professionals with high-quality job opportunities that help grow their businesses.',
+    points: [
+      'Stress-Free Homeowner Experience',
+      'Sustainable Business Growth for Tradesmen',
+    ],
+  },
+  {
+    id: 'vision',
+    eyebrow: 'Future Goal',
+    title: 'Our Vision',
+    description:
+      "To become the UK's most trusted online marketplace for home improvement and trade services by delivering a secure, reliable, and user-friendly experience for both customers and tradesmen.",
+    points: [
+      "UK's Premier Trade Marketplace Standard",
+      'Advanced Technology & Uncompromised Safety',
+    ],
+  },
+]
+
+export const DEMO_ABOUT_PLATFORM_FEATURES = [
+  {
+    id: 'verified',
+    title: 'Verified Tradesmen',
+    description:
+      'Every tradesman is reviewed through our verification process before joining the marketplace.',
+    to: '/how-it-works',
+  },
+  {
+    id: 'leads',
+    title: 'Quality Job Leads',
+    description: 'Tradesmen receive access to genuine customer job requests.',
+    to: '/jobs',
+  },
+  {
+    id: 'messaging',
+    title: 'Secure Communication',
+    description:
+      'Customers and tradesmen can communicate directly through our built-in messaging system.',
+    to: '/how-it-works',
+  },
+  {
+    id: 'tokens',
+    title: 'Token-Based Marketplace',
+    description:
+      'Purchase only the job leads you need without paying a monthly subscription.',
+    to: '/pricing',
+  },
+  {
+    id: 'payments',
+    title: 'Secure Payments',
+    description: 'Safe online payments for purchasing tokens and accessing services.',
+    to: '/pricing',
+  },
+  {
+    id: 'reviews',
+    title: 'Transparent Reviews',
+    description:
+      'Read honest customer reviews and ratings before hiring a tradesman.',
+    to: '/how-it-works',
+  },
+]
+
+export const DEMO_ABOUT_MARKETPLACE_ADVANTAGE = [
+  {
+    id: 'verified',
+    tag: 'Verified Trust',
+    title: 'Verified Professionals',
+    description: 'Work only with verified and trusted tradesmen.',
+  },
+  {
+    id: 'speed',
+    tag: 'Speed & Ease',
+    title: 'Fast & Easy',
+    description: 'Post a job in minutes and receive responses quickly.',
+  },
+  {
+    id: 'clarity',
+    tag: 'Full Clarity',
+    title: 'Transparent Process',
+    description: 'Clear pricing, genuine reviews, and secure communication.',
+  },
+  {
+    id: 'uk',
+    tag: '100% UK Native',
+    title: 'UK Focused',
+    description:
+      'Built specifically for customers and tradesmen across the United Kingdom.',
   },
 ]

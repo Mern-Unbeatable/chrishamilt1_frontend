@@ -1,12 +1,13 @@
-import PageHeader from '@/components/PageHeader'
+import Cta from '@/pages/public/home/sections/Cta'
+import PricingHero from '@/pages/public/pricing/sections/PricingHero'
+import PricingPlans from '@/pages/public/pricing/sections/PricingPlans'
 
 export default function PricingPage() {
   return (
-    <section className="container mx-auto px-6 py-16 lg:px-8">
-      <PageHeader
-        title="Pricing"
-        description="Transparent plans for users and tradesmen."
-      />
-    </section>
+    <>
+      <PricingHero />
+      <PricingPlans />
+      <Cta />
+    </>
   )
 }

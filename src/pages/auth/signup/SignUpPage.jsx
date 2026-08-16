@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { Building2, User } from 'lucide-react'
+import { Building2, ArrowLeft, User } from 'lucide-react'
 import registerImage from '@/assets/register.png'
 import Logo from '@/components/Logo'
 import { cn } from '@/helpers/cn'
@@ -30,7 +30,14 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
+    <div className="relative grid min-h-screen lg:grid-cols-2">
+      <Link
+        to="/"
+        className="fixed top-5 right-6 z-50 flex items-center gap-1.5 text-sm font-medium text-[#64748B] transition-colors hover:text-[#111827]"
+      >
+        <ArrowLeft className="size-4" />
+        Back
+      </Link>
       <div className="relative hidden min-h-[280px] lg:block">
         <img
           src={registerImage}

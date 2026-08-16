@@ -46,7 +46,7 @@ export function DropdownTrigger({ className, children, ...props }) {
   )
 }
 
-export function DropdownMenu({ className, children, ...props }) {
+export function DropdownMenu({ className, children, align = 'left', ...props }) {
   const { open } = useContext(DropdownContext)
 
   if (!open) return null
@@ -54,7 +54,8 @@ export function DropdownMenu({ className, children, ...props }) {
   return (
     <div
       className={cn(
-        'absolute right-0 z-50 mt-2 min-w-40 overflow-hidden rounded-md border border-border bg-white py-1 shadow-lg',
+        'absolute top-full z-[100] mt-2 max-h-60 min-w-full overflow-y-auto rounded-lg border border-[#E5E7EB] bg-white py-1 shadow-lg',
+        align === 'right' ? 'right-0' : 'left-0',
         className,
       )}
       {...props}

@@ -1,4 +1,7 @@
 import { Star } from 'lucide-react'
+import billieAvatar from '@/assets/testimonials/billie.webp'
+import snoopAvatar from '@/assets/testimonials/snoop.jpg'
+import pitbullAvatar from '@/assets/testimonials/pitbull.jpg'
 
 const TESTIMONIALS = [
   {
@@ -8,7 +11,7 @@ const TESTIMONIALS = [
     name: 'Sarah Nichols',
     location: 'Brighton',
     service: 'Plumbing',
-    initials: 'SN',
+    avatar: billieAvatar,
   },
   {
     id: '2',
@@ -17,7 +20,7 @@ const TESTIMONIALS = [
     name: 'Marcus Williams',
     location: 'Newcastle',
     service: 'Kitchen Fitting',
-    initials: 'MW',
+    avatar: snoopAvatar,
   },
   {
     id: '3',
@@ -26,15 +29,15 @@ const TESTIMONIALS = [
     name: 'Priya Sharma',
     location: 'Leicester',
     service: 'Electrical',
-    initials: 'PS',
+    avatar: pitbullAvatar,
   },
 ]
 
 export default function CustomerTestimonials() {
   return (
-    <section className="bg-white py-16 lg:py-20">
+    <section data-scroll-section className="bg-white py-16 lg:py-20">
       <div className="container mx-auto px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
+        <div data-scroll-header className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#111827] sm:text-4xl">
             What Our Customers Say
           </h2>
@@ -47,6 +50,7 @@ export default function CustomerTestimonials() {
           {TESTIMONIALS.map((item) => (
             <article
               key={item.id}
+              data-scroll-item
               className="flex h-full flex-col rounded-xl border border-[#E5E7EB] bg-white p-8"
             >
               <div className="flex gap-0.5">
@@ -62,9 +66,11 @@ export default function CustomerTestimonials() {
                 &ldquo;{item.quote}&rdquo;
               </blockquote>
               <div className="mt-8 flex items-center gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-btn-primary">
-                  {item.initials}
-                </div>
+                <img
+                  src={item.avatar}
+                  alt=""
+                  className="size-10 shrink-0 rounded-full object-cover"
+                />
                 <div>
                   <p className="text-sm font-semibold text-[#111827]">{item.name}</p>
                   <p className="text-xs text-[#64748B]">

@@ -1,12 +1,21 @@
-import PageHeader from '@/components/PageHeader'
+import AboutHero from '@/pages/public/about/sections/AboutHero'
+import AboutStory from '@/pages/public/about/sections/AboutStory'
+import AboutPurpose from '@/pages/public/about/sections/AboutPurpose'
+import AboutPlatformFeatures from '@/pages/public/about/sections/AboutPlatformFeatures'
+import AboutMarketplaceAdvantage from '@/pages/public/about/sections/AboutMarketplaceAdvantage'
+import MarketplaceMetrics from '@/pages/public/home/sections/MarketplaceMetrics'
+import Cta from '@/pages/public/home/sections/Cta'
 
 export default function AboutPage() {
   return (
-    <section className="container mx-auto px-6 py-16 lg:px-8">
-      <PageHeader
-        title="About Us"
-        description="Learn about our mission to connect customers with reliable tradesmen."
-      />
-    </section>
+    <>
+      <AboutHero />
+      <AboutStory />
+      <AboutPurpose />
+      <AboutPlatformFeatures />
+      <AboutMarketplaceAdvantage />
+      {/* <MarketplaceMetrics /> */}
+      <Cta />
+    </>
   )
 }

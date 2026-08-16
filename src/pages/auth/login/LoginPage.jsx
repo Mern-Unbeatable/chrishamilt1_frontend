@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
-import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Eye, EyeOff, Home, Lock, Mail } from 'lucide-react'
 import loginImage from '@/assets/login.png'
 import {
   DEMO_USERS,
@@ -38,7 +38,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
+    <div className="relative grid min-h-screen lg:grid-cols-2">
+      <Link
+        to="/"
+        className="fixed top-5 right-6 z-50 flex items-center gap-1.5 text-sm font-medium text-[#64748B] transition-colors hover:text-[#111827]"
+      >
+        <ArrowLeft className="size-4" />
+        Back
+      </Link>
       <div className="relative hidden min-h-[280px] lg:block">
         <img
           src={loginImage}

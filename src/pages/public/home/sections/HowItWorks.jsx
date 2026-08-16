@@ -7,7 +7,6 @@ import {
   Send,
   Shield,
   ShieldCheck,
-  Sparkles,
   User,
 } from 'lucide-react'
 import { cn } from '@/helpers/cn'
@@ -83,11 +82,11 @@ export default function HowItWorks() {
   const content = AUDIENCES[activeTab]
 
   return (
-    <section className="bg-secondary py-16 lg:py-20">
+    <section data-scroll-section className="bg-secondary py-16 lg:py-20">
       <div className="container mx-auto px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#BFDBFE] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-btn-primary">
-            <Sparkles className="size-3.5" />
+        <div data-scroll-header className="mx-auto max-w-3xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#BFDBFE] bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-btn-primary">
+
             Seamless Marketplace Flow
           </div>
 
@@ -126,7 +125,8 @@ export default function HowItWorks() {
             return (
               <article
                 key={`${activeTab}-${step.title}`}
-                className="relative rounded-3xl bg-white p-8 shadow-[0_1px_3px_rgba(15,23,42,0.06)]"
+                data-scroll-item
+                className="relative rounded-2xl bg-white p-8 shadow-[0_1px_3px_rgba(15,23,42,0.06)]"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div
@@ -153,7 +153,7 @@ export default function HowItWorks() {
           })}
         </div>
 
-        <div className="mt-12 flex justify-center">
+        <div data-scroll-item className="mt-12 flex justify-center">
           <Link
             to={content.cta.to}
             className="inline-flex items-center gap-2 rounded-full bg-btn-primary px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]"

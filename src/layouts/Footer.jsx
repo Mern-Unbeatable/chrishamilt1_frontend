@@ -4,8 +4,8 @@ import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTwitter } from 'react-icons/f
 import Logo from '@/components/Logo'
 
 const CUSTOMER_LINKS = [
-  { label: 'Post a Job', to: '/services' },
-  { label: 'Browse Tradesmen', to: '/services' },
+  { label: 'Post a Job', to: '/auth/signup' },
+  { label: 'Browse Jobs', to: '/jobs' },
   { label: 'How It Works', to: '/how-it-works' },
   { label: 'Safety & Trust', to: '/about' },
   { label: 'Customer Reviews', to: '/about' },

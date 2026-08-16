@@ -35,9 +35,9 @@ const TRADES = [
 
 export default function BrowseByTrade() {
   return (
-    <section className="bg-white pb-20 pt-4 lg:pb-24">
+    <section data-scroll-section className="bg-white pb-20 pt-4 lg:pb-24">
       <div className="container mx-auto px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
+        <div data-scroll-header className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#111827] sm:text-4xl">
             Browse by Trade
           </h2>
@@ -53,7 +53,8 @@ export default function BrowseByTrade() {
             return (
               <Link
                 key={trade.name}
-                to="/services"
+                data-scroll-item
+                to="/jobs"
                 className="flex flex-col items-center rounded-xl bg-primary px-4 py-6 text-center transition-colors hover:bg-[#DCE9FD]"
               >
                 <span className="flex size-10 items-center justify-center rounded-full bg-btn-primary text-white">

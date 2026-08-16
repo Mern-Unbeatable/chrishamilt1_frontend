@@ -54,9 +54,9 @@ const FEATURES = [
 
 export default function WhyPreferTradeTrust() {
   return (
-    <section className="bg-[#F2F2F280] py-16 lg:py-20">
+    <section data-scroll-section className="bg-[#F2F2F280] py-16 lg:py-20">
       <div className="container mx-auto px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
+        <div data-scroll-header className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-btn-primary">
             Built for Trust & Higher Quality
           </p>
@@ -76,7 +76,8 @@ export default function WhyPreferTradeTrust() {
             return (
               <article
                 key={feature.title}
-                className="rounded-2xl border border-[#E5E7EB] bg-white p-8"
+                data-scroll-item
+                className="rounded-2xl bg-white p-8"
               >
                 <div
                   className={`mb-5 flex size-10 items-center justify-center rounded-lg ${feature.iconClassName}`}

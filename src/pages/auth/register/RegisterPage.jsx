@@ -1,4 +1,5 @@
 import { Link, Navigate, useSearchParams } from 'react-router'
+import { ArrowLeft } from 'lucide-react'
 import registerImage from '@/assets/register.png'
 
 const VALID_ROLES = new Set(['customer', 'tradesman'])
@@ -59,7 +60,14 @@ export default function RegisterPage() {
   const roleLabel = role === 'tradesman' ? 'Tradesman' : 'Customer'
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
+    <div className="relative grid min-h-screen lg:grid-cols-2">
+      <Link
+        to="/"
+        className="fixed top-5 right-6 z-50 flex items-center gap-1.5 text-sm font-medium text-[#64748B] transition-colors hover:text-[#111827]"
+      >
+        <ArrowLeft className="size-4" />
+        Back
+      </Link>
       <div className="relative hidden min-h-[280px] lg:block">
         <img
           src={registerImage}

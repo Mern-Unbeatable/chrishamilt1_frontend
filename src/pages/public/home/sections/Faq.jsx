@@ -45,9 +45,9 @@ export default function Faq() {
   const [openId, setOpenId] = useState(null)
 
   return (
-    <section className="bg-primary py-16 lg:py-20">
+    <section data-scroll-section className="bg-primary py-16 lg:py-20">
       <div className="container mx-auto px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
+        <div data-scroll-header className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#111827] sm:text-4xl">
             Frequently Asked Questions
           </h2>
@@ -63,6 +63,7 @@ export default function Faq() {
             return (
               <div
                 key={item.id}
+                data-scroll-item
                 className="overflow-hidden rounded-xl bg-white shadow-[0_1px_3px_rgba(15,23,42,0.06)]"
               >
                 <button

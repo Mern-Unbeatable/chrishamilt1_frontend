@@ -45,6 +45,7 @@ function RatingStars({ rating }) {
  */
 export default function JobDetails({
   job,
+  showSummary = true,
   showTradesman = true,
   showGallery = true,
   onMessage,
@@ -76,27 +77,29 @@ export default function JobDetails({
 
   return (
     <div className={cn('space-y-6', className)}>
-      <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8">
-        <span
-          className={cn(
-            'inline-flex rounded-full px-3 py-1 text-xs font-semibold',
-            STATUS_STYLES[statusVariant] ?? STATUS_STYLES.open,
-          )}
-        >
-          {status}
-        </span>
+      {showSummary ? (
+        <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8">
+          <span
+            className={cn(
+              'inline-flex rounded-full px-3 py-1 text-xs font-semibold',
+              STATUS_STYLES[statusVariant] ?? STATUS_STYLES.open,
+            )}
+          >
+            {status}
+          </span>
 
-        <h1 className="mt-4 text-2xl font-bold tracking-[-0.02em] text-[var(--primary-text)] sm:text-3xl">
-          {title}
-        </h1>
+          <h1 className="mt-4 text-2xl font-bold tracking-[-0.02em] text-[var(--primary-text)] sm:text-3xl">
+            {title}
+          </h1>
 
-        <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-[var(--secondary-text)]">
-          <MapPin className="size-4 shrink-0" />
-          {location}
-        </p>
+          <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-[var(--secondary-text)]">
+            <MapPin className="size-4 shrink-0" />
+            {location}
+          </p>
 
-        <p className="mt-6 text-2xl font-bold text-[var(--primary-text)]">{price}</p>
-      </section>
+          <p className="mt-6 text-2xl font-bold text-[var(--primary-text)]">{price}</p>
+        </section>
+      ) : null}
 
       {showTradesman && tradesman ? (
         <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8">
@@ -152,12 +155,12 @@ export default function JobDetails({
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--secondary-text)]">
+          <h2 className="text-xs lg:text-sm font-semibold uppercase tracking-[0.12em] text-[var(--secondary-text)]">
             Job Description
           </h2>
 
           <div className="mt-5">
-            <p className="whitespace-pre-line text-sm leading-7 text-[var(--secondary-text)]">
+            <p className="whitespace-pre-line text-sm lg:text-base leading-7 text-[var(--secondary-text)]">
               {displayText}
             </p>
 
@@ -182,7 +185,7 @@ export default function JobDetails({
               </h3>
               <ul className="mt-4 space-y-3">
                 {requirements.map((item) => (
-                  <li key={item} className="flex gap-3 text-sm leading-6 text-[var(--secondary-text)]">
+                  <li key={item} className="flex gap-3 text-sm lg:text-base leading-6 text-[var(--secondary-text)]">
                     <Check className="mt-0.5 size-4 shrink-0 text-btn-primary" strokeWidth={2.5} />
                     <span>{item}</span>
                   </li>

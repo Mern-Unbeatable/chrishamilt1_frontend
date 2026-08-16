@@ -8,10 +8,11 @@ import RoleGuard from '@/app/router/RoleGuard'
 import HomePage from '@/pages/public/home/HomePage'
 import AboutPage from '@/pages/public/about/AboutPage'
 import ContactPage from '@/pages/public/contact/ContactPage'
-import ServicesPage from '@/pages/public/services/ServicesPage'
+import BrowseJobsPage from '@/pages/public/jobs/BrowseJobsPage'
+import JobDetailsPage from '@/pages/public/jobs/JobDetailsPage'
+import CategoriesPage from '@/pages/public/categories/CategoriesPage'
 import HowItWorksPage from '@/pages/public/how-it-works/HowItWorksPage'
 import PricingPage from '@/pages/public/pricing/PricingPage'
-import JobDetailsPage from '@/pages/public/jobs/JobDetailsPage'
 import DeveloperPage from '@/pages/public_page/DeveloperPage'
 import LoginPage from '@/pages/auth/login/LoginPage'
 import RegisterPage from '@/pages/auth/register/RegisterPage'
@@ -35,7 +36,9 @@ export const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'contact', element: <ContactPage /> },
-      { path: 'services', element: <ServicesPage /> },
+      { path: 'services', element: <Navigate to="/jobs" replace /> },
+      { path: 'jobs', element: <BrowseJobsPage /> },
+      { path: 'categories', element: <CategoriesPage /> },
       { path: 'how-it-works', element: <HowItWorksPage /> },
       { path: 'pricing', element: <PricingPage /> },
       { path: 'jobs/:jobId', element: <JobDetailsPage /> },

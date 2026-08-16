@@ -2,9 +2,12 @@ import { Link } from 'react-router'
 
 export default function Cta() {
   return (
-    <section className="bg-white py-16 lg:py-20">
+    <section data-scroll-section className="bg-white py-16 lg:py-20">
       <div className="container mx-auto px-6 lg:px-8">
-        <div className="rounded-3xl bg-btn-primary px-6 py-14 text-center sm:px-10 lg:py-16">
+        <div
+          data-scroll-item
+          className="rounded-3xl bg-btn-primary px-6 py-14 text-center sm:px-10 lg:py-16"
+        >
           <h2 className="text-3xl font-bold tracking-[-0.02em] text-white sm:text-4xl">
             Ready to Get Started?
           </h2>

@@ -39,17 +39,17 @@ export default function TokenPricingCard({
         {planName}
       </p>
 
-      <p className="mt-4 text-4xl font-bold text-[var(--primary-text)]">{price}</p>
+      <p className="mt-4 text-4xl lg:text-5xl font-extrabold text-[var(--primary-text)]">{price}</p>
 
-      <p className="mt-3 inline-flex items-center gap-2 text-base font-semibold text-btn-primary sm:text-lg">
+      <p className="mt-3 inline-flex items-center gap-2 text-base font-semibold text-btn-primary sm:text-lg lg:text-2xl">
         <span className="flex size-6 items-center justify-center rounded-full border border-btn-primary text-xs font-bold">
           T
         </span>
         {tokens} Tokens
       </p>
 
-      <p className="mt-2 text-sm text-[var(--secondary-text)]">{rateLabel}</p>
-      <p className="mt-4 flex-1 text-sm leading-6 text-[var(--secondary-text)]">
+      <p className="mt-5 text-sm text-[var(--secondary-text)] lg:text-base">{rateLabel}</p>
+      <p className="mt-4 flex-1 text-sm leading-6 text-[var(--secondary-text)] lg:text-base">
         {description}
       </p>
 
@@ -57,7 +57,7 @@ export default function TokenPricingCard({
         <button
           type="button"
           onClick={onBuyTokens}
-          className="mt-6 w-full rounded-xl bg-btn-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]"
+          className="mt-6 w-full rounded-xl bg-btn-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] lg:text-base"
         >
           {buyLabel}
         </button>
