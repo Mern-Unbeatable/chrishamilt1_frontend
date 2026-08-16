@@ -10,7 +10,7 @@ export default function JobDetailsPage() {
       <div className="container mx-auto px-6 lg:px-8">
         <JobDetails
           job={DEMO_JOB_DETAILS}
-          onMessage={() => navigate('/user/messages')}
+          onMessage={() => navigate('/auth/login')}
         />
       </div>
     </section>

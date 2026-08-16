@@ -19,7 +19,7 @@ const TABS = [
 
 const AUDIENCES = {
   homeowners: {
-    cta: { label: 'Post Your Job for Free', to: '/auth/register' },
+    cta: { label: 'Post Your Job for Free', to: '/auth/signup' },
     steps: [
       {
         step: '01',
@@ -48,7 +48,7 @@ const AUDIENCES = {
     ],
   },
   tradesmen: {
-    cta: { label: 'Post Your Job for Free', to: '/auth/register' },
+    cta: { label: 'Post Your Job for Free', to: '/auth/signup' },
     steps: [
       {
         step: '01',

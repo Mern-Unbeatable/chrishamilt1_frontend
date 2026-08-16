@@ -1,7 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 import PublicLayout from '@/layouts/PublicLayout'
 import AuthLayout from '@/layouts/AuthLayout'
-import UserLayout from '@/layouts/UserLayout'
 import TradesmanLayout from '@/layouts/TradesmanLayout'
 import AdminLayout from '@/layouts/AdminLayout'
 import AuthGuard from '@/app/router/AuthGuard'
@@ -16,19 +15,8 @@ import JobDetailsPage from '@/pages/public/jobs/JobDetailsPage'
 import DeveloperPage from '@/pages/public_page/DeveloperPage'
 import LoginPage from '@/pages/auth/login/LoginPage'
 import RegisterPage from '@/pages/auth/register/RegisterPage'
-import UserDashboardPage from '@/pages/user/dashboard/UserDashboardPage'
-import UserBookingsPage from '@/pages/user/bookings/UserBookingsPage'
-import UserProfilePage from '@/pages/user/profile/UserProfilePage'
-import MessagesPage from '@/pages/shared/MessagesPage'
-import TradesmanDashboardPage from '@/pages/tradesman/dashboard/TradesmanDashboardPage'
-import TradesmanJobsPage from '@/pages/tradesman/jobs/TradesmanJobsPage'
-import TradesmanJobDetailsPage from '@/pages/tradesman/jobs/TradesmanJobDetailsPage'
-import TradesmanSchedulePage from '@/pages/tradesman/schedule/TradesmanSchedulePage'
-import TradesmanProfilePage from '@/pages/tradesman/profile/TradesmanProfilePage'
-import AdminDashboardPage from '@/pages/admin/dashboard/AdminDashboardPage'
-import AdminUsersPage from '@/pages/admin/users/AdminUsersPage'
-import AdminTradesmenPage from '@/pages/admin/tradesmen/AdminTradesmenPage'
-import AdminSettingsPage from '@/pages/admin/settings/AdminSettingsPage'
+import SignUpPage from '@/pages/auth/signup/SignUpPage'
+import DashboardComingSoonPage from '@/pages/shared/DashboardComingSoonPage'
 import NotFoundPage from '@/pages/error/NotFoundPage'
 
 export const router = createBrowserRouter([
@@ -58,28 +46,8 @@ export const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       { path: 'login', element: <LoginPage /> },
+      { path: 'signup', element: <SignUpPage /> },
       { path: 'register', element: <RegisterPage /> },
-    ],
-  },
-  {
-    path: 'user',
-    element: <AuthGuard />,
-    children: [
-      {
-        element: <RoleGuard allowedRoles={['user']} />,
-        children: [
-          {
-            element: <UserLayout />,
-            children: [
-              { index: true, element: <Navigate to="dashboard" replace /> },
-              { path: 'dashboard', element: <UserDashboardPage /> },
-              { path: 'bookings', element: <UserBookingsPage /> },
-              { path: 'messages', element: <MessagesPage /> },
-              { path: 'profile', element: <UserProfilePage /> },
-            ],
-          },
-        ],
-      },
     ],
   },
   {
@@ -93,12 +61,17 @@ export const router = createBrowserRouter([
             element: <TradesmanLayout />,
             children: [
               { index: true, element: <Navigate to="dashboard" replace /> },
-              { path: 'dashboard', element: <TradesmanDashboardPage /> },
-              { path: 'jobs', element: <TradesmanJobsPage /> },
-              { path: 'jobs/:jobId', element: <TradesmanJobDetailsPage /> },
-              { path: 'messages', element: <MessagesPage /> },
-              { path: 'schedule', element: <TradesmanSchedulePage /> },
-              { path: 'profile', element: <TradesmanProfilePage /> },
+              { path: 'dashboard', element: <DashboardComingSoonPage title="Dashboard" /> },
+              { path: 'browse-jobs', element: <DashboardComingSoonPage title="Browse Jobs" /> },
+              { path: 'quotes', element: <DashboardComingSoonPage title="My Quotes" /> },
+              { path: 'jobs', element: <DashboardComingSoonPage title="My Jobs" /> },
+              { path: 'jobs/:jobId', element: <DashboardComingSoonPage title="Job Details" /> },
+              { path: 'messages', element: <DashboardComingSoonPage title="Messages" /> },
+              { path: 'wallet', element: <DashboardComingSoonPage title="Wallet & Tokens" /> },
+              { path: 'earnings', element: <DashboardComingSoonPage title="Earnings" /> },
+              { path: 'reviews', element: <DashboardComingSoonPage title="Reviews" /> },
+              { path: 'profile', element: <DashboardComingSoonPage title="My Profile" /> },
+              { path: 'schedule', element: <Navigate to="/tradesman/dashboard" replace /> },
             ],
           },
         ],
@@ -116,10 +89,15 @@ export const router = createBrowserRouter([
             element: <AdminLayout />,
             children: [
               { index: true, element: <Navigate to="dashboard" replace /> },
-              { path: 'dashboard', element: <AdminDashboardPage /> },
-              { path: 'users', element: <AdminUsersPage /> },
-              { path: 'tradesmen', element: <AdminTradesmenPage /> },
-              { path: 'settings', element: <AdminSettingsPage /> },
+              { path: 'dashboard', element: <DashboardComingSoonPage title="Dashboard" /> },
+              { path: 'customers', element: <DashboardComingSoonPage title="Customers" /> },
+              { path: 'users', element: <Navigate to="/admin/customers" replace /> },
+              { path: 'tradesmen', element: <DashboardComingSoonPage title="Tradesman" /> },
+              { path: 'jobs', element: <DashboardComingSoonPage title="Jobs" /> },
+              { path: 'categories', element: <DashboardComingSoonPage title="Categories" /> },
+              { path: 'tokens', element: <DashboardComingSoonPage title="Token Management" /> },
+              { path: 'profile', element: <DashboardComingSoonPage title="My Profile" /> },
+              { path: 'settings', element: <Navigate to="/admin/profile" replace /> },
             ],
           },
         ],

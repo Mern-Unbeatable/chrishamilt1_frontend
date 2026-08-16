@@ -46,7 +46,7 @@ export const COMPONENT_DOCS = [
         type: '() => void',
         required: false,
         description:
-          'Runs when Message is clicked. Pass from parent e.g. () => navigate("/user/messages"). Component never navigates itself.',
+          'Runs when Message is clicked. Pass from parent e.g. () => navigate("/auth/login"). Component never navigates itself.',
       },
       {
         name: 'messageLabel',
@@ -66,7 +66,7 @@ export const COMPONENT_DOCS = [
     requiredExample: `<JobDetails job={DEMO_JOB_DETAILS} />`,
     optionalExample: `<JobDetails
   job={DEMO_JOB_DETAILS}
-  onMessage={() => navigate('/user/messages')}
+  onMessage={() => navigate('/auth/login')}
   className="px-3 sm:px-0"
 />`,
     previewId: 'job-details',

@@ -15,13 +15,13 @@ export default function Cta() {
 
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              to="/auth/register"
+              to="/auth/signup"
               className="inline-flex min-w-[180px] items-center justify-center rounded-lg border border-white px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
             >
               Post a Job
             </Link>
             <Link
-              to="/auth/register"
+              to="/auth/signup"
               className="inline-flex min-w-[180px] items-center justify-center rounded-lg bg-white px-6 py-3 text-sm font-semibold text-btn-primary transition-colors hover:bg-[#F8FAFC]"
             >
               Join as Tradesman

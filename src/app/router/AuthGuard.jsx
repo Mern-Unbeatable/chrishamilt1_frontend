@@ -1,10 +1,11 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
+import { getDemoSession } from '@/auth/demoAuth'
 
 export default function AuthGuard() {
   const location = useLocation()
-  const isAuthenticated = false
+  const session = getDemoSession()
 
-  if (!isAuthenticated) {
+  if (!session) {
     return (
       <Navigate
         to="/auth/login"

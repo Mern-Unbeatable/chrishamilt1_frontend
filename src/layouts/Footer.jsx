@@ -12,7 +12,7 @@ const CUSTOMER_LINKS = [
 ]
 
 const TRADESMAN_LINKS = [
-  { label: 'Join as a Tradesman', to: '/auth/register' },
+  { label: 'Join as a Tradesman', to: '/auth/signup' },
   { label: 'How Leads Work', to: '/how-it-works' },
   { label: 'Token Packages', to: '/pricing' },
   { label: 'Verification Process', to: '/about' },

@@ -7,7 +7,7 @@ const navLinks = [
   { label: 'Categories', to: '/services' },
   { label: 'Pricing', to: '/pricing' },
   { label: 'About', to: '/about' },
-  { label: 'My Job Post', to: '/user/bookings' },
+  { label: 'My Job Post', to: '/auth/signup' },
 ]
 
 export default function PublicNavbar() {
@@ -49,7 +49,7 @@ export default function PublicNavbar() {
             Login
           </NavLink>
           <NavLink
-            to="/auth/register"
+            to="/auth/signup"
             className="rounded-full border border-[#E5E7EB] bg-white px-6 py-2.5 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#F8FAFC]"
           >
             Register
