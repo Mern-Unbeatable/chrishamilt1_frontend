@@ -3,21 +3,32 @@ import { NavLink, Link, useLocation } from 'react-router'
 import { Menu, X } from 'lucide-react'
 import Logo from '@/components/Logo'
 import { cn } from '@/helpers/cn'
+import { useSectionInView } from '@/hooks/useSectionInView'
 
 const navLinks = [
   { label: 'Browse Job', to: '/jobs' },
-  { label: 'Categories', to: '/categories' },
+  { label: 'Categories', to: '/#categories', sectionId: 'categories' },
   { label: 'Pricing', to: '/pricing' },
   { label: 'About', to: '/about' },
   // { label: 'My Job Post', to: '/auth/signup' },
 ]
 
+function isNavLinkActive(link, location, defaultActive, sectionInView) {
+  if (link.sectionId) {
+    return location.pathname === '/' && sectionInView
+  }
+
+  return defaultActive
+}
+
 export default function PublicNavbar() {
-  const { pathname } = useLocation()
+  const location = useLocation()
+  const { pathname } = location
   const hasGradientHero =
     pathname === '/' || pathname === '/jobs' || pathname === '/pricing' || pathname === '/about'
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const categoriesInView = useSectionInView('categories', pathname === '/')
 
   useEffect(() => { setOpen(false) }, [pathname])
 
@@ -54,7 +65,14 @@ export default function PublicNavbar() {
                 className={({ isActive }) =>
                   cn(
                     'text-sm font-medium transition-colors hover:text-btn-primary',
-                    isActive ? 'text-btn-primary' : 'text-[#64748B]',
+                    isNavLinkActive(
+                      link,
+                      location,
+                      isActive,
+                      link.sectionId === 'categories' ? categoriesInView : false,
+                    )
+                      ? 'text-btn-primary'
+                      : 'text-[#64748B]',
                   )
                 }
               >
@@ -116,7 +134,14 @@ export default function PublicNavbar() {
               className={({ isActive }) =>
                 cn(
                   'flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-colors',
-                  isActive ? 'bg-[#EFF6FF] text-btn-primary' : 'text-[#374151] hover:bg-[#F8FAFC]',
+                  isNavLinkActive(
+                    link,
+                    location,
+                    isActive,
+                    link.sectionId === 'categories' ? categoriesInView : false,
+                  )
+                    ? 'bg-[#EFF6FF] text-btn-primary'
+                    : 'text-[#374151] hover:bg-[#F8FAFC]',
                 )
               }
             >

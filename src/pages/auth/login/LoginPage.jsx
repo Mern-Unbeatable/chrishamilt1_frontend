@@ -151,7 +151,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-8 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4">
+          {/* <div className="mt-8 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
               Demo login
             </p>
@@ -170,7 +170,7 @@ export default function LoginPage() {
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
 
           <p className="mt-8 text-center text-sm text-[#64748B]">
             Don&apos;t have an account?{' '}
