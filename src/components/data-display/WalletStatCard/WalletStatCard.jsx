@@ -11,6 +11,11 @@ const TONE_STYLES = {
   teal: 'bg-[#ECFEFF] text-[#0891B2]',
   orange: 'bg-[#FFF7ED] text-[#EA580C]',
   green: 'bg-[#ECFDF5] text-[#059669]',
+  blue: 'bg-[#EFF6FF] text-[#2563EB]',
+  purple: 'bg-[#F5F3FF] text-[#7C3AED]',
+  yellow: 'bg-[#FEFCE8] text-[#CA8A04]',
+  pink: 'bg-[#FDF2F8] text-[#DB2777]',
+  red: 'bg-[#FEF2F2] text-[#DC2626]',
 }
 
 /**
@@ -22,6 +27,7 @@ export default function WalletStatCard({
   subtext,
   icon = 'tokens',
   iconTone = 'teal',
+  uppercaseLabel = false,
   className = '',
 }) {
   const Icon = typeof icon === 'string' ? ICONS[icon] ?? PoundSterling : icon
@@ -34,7 +40,14 @@ export default function WalletStatCard({
       )}
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-[var(--secondary-text)]">{label}</p>
+        <p
+          className={cn(
+            'text-sm text-[var(--secondary-text)]',
+            uppercaseLabel && 'text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]',
+          )}
+        >
+          {label}
+        </p>
         <span
           className={cn(
             'flex size-9 shrink-0 items-center justify-center rounded-full',
@@ -45,7 +58,7 @@ export default function WalletStatCard({
         </span>
       </div>
 
-      <p className="mt-4 text-3xl font-bold text-[var(--primary-text)] sm:text-4xl">
+      <p className="mt-4 text-2xl font-bold tracking-tight text-[var(--primary-text)] sm:text-[1.75rem] lg:text-[2rem]">
         {value}
       </p>
 

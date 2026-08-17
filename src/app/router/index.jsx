@@ -18,6 +18,7 @@ import UserGuard from '@/app/router/UserGuard'
 import LoginPage from '@/pages/auth/login/LoginPage'
 import RegisterPage from '@/pages/auth/register/RegisterPage'
 import SignUpPage from '@/pages/auth/signup/SignUpPage'
+import TradesmanDashboardPage from '@/pages/tradesman/dashboard/TradesmanDashboardPage'
 import DashboardComingSoonPage from '@/pages/shared/DashboardComingSoonPage'
 import MessagesPage from '@/pages/shared/MessagesPage'
 import UserProfilePage from '@/pages/user/profile/UserProfilePage'
@@ -84,7 +85,7 @@ export const router = createBrowserRouter([
             element: <TradesmanLayout />,
             children: [
               { index: true, element: <Navigate to="dashboard" replace /> },
-              { path: 'dashboard', element: <DashboardComingSoonPage title="Dashboard" /> },
+              { path: 'dashboard', element: <TradesmanDashboardPage /> },
               { path: 'browse-jobs', element: <DashboardComingSoonPage title="Browse Jobs" /> },
               { path: 'quotes', element: <DashboardComingSoonPage title="My Quotes" /> },
               { path: 'jobs', element: <DashboardComingSoonPage title="My Jobs" /> },
