@@ -1,24 +1,24 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
-import {
-  authenticateDemoUser,
-  clearDemoSession,
-  getDemoSession,
-} from '@/auth/demoAuth'
+import { getRememberMePreference } from '@/auth/authStorage'
+import { getSession, login as loginRequest, logout as logoutRequest } from '@/auth/authService'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(() => getDemoSession())
+  const [session, setSession] = useState(() => getSession())
 
-  const login = useCallback((email, password) => {
-    const user = authenticateDemoUser(email, password)
+  const login = useCallback(async (email, password, options = {}) => {
+    const rememberMe = options.rememberMe ?? getRememberMePreference()
+    const user = await loginRequest({ email, password, rememberMe })
+
     if (!user) return null
+
     setSession(user)
     return user
   }, [])
 
-  const logout = useCallback(() => {
-    clearDemoSession()
+  const logout = useCallback(async () => {
+    await logoutRequest()
     setSession(null)
   }, [])
 
@@ -27,6 +27,8 @@ export function AuthProvider({ children }) {
       session,
       isAuthenticated: Boolean(session),
       isUser: session?.role === 'user',
+      isTradesman: session?.role === 'tradesman',
+      isAdmin: session?.role === 'admin',
       login,
       logout,
     }),

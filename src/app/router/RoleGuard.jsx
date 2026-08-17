@@ -1,8 +1,9 @@
 import { Navigate, Outlet } from 'react-router'
-import { getDemoSession, getDashboardHome } from '@/auth/demoAuth'
+import { useAuth } from '@/auth/AuthProvider'
+import { getDashboardHome } from '@/auth/authService'
 
 export default function RoleGuard({ allowedRoles = [] }) {
-  const session = getDemoSession()
+  const { session } = useAuth()
 
   if (!session) {
     return <Navigate to="/auth/login" replace />

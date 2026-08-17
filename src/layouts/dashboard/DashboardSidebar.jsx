@@ -1,7 +1,7 @@
 import { LogOut, X } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router'
 import Logo from '@/components/Logo'
-import { clearDemoSession } from '@/auth/demoAuth'
+import { useAuth } from '@/auth/AuthProvider'
 import { cn } from '@/helpers/cn'
 import { DASHBOARD_HEADER_CLASS } from '@/layouts/dashboard/constants'
 
@@ -11,9 +11,10 @@ export default function DashboardSidebar({
   onClose,
 }) {
   const navigate = useNavigate()
+  const { logout } = useAuth()
 
-  const handleLogout = () => {
-    clearDemoSession()
+  const handleLogout = async () => {
+    await logout()
     navigate('/auth/login', { replace: true })
   }
 
