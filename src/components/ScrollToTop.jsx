@@ -1,32 +1,42 @@
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { useLocation } from 'react-router'
 import { scrollToHash } from '@/helpers/scrollToHash'
+import { disableBrowserScrollRestoration, scrollToTop } from '@/helpers/scrollToTop'
 
 export default function ScrollToTop() {
-  const { pathname, hash } = useLocation()
+  const { pathname, hash, key } = useLocation()
 
-  useEffect(() => {
-    if (!hash) {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
-      return undefined
-    }
+  useLayoutEffect(() => {
+    disableBrowserScrollRestoration()
+  }, [])
 
-    let attempts = 0
-    let timeoutId
+  useLayoutEffect(() => {
+    if (hash) {
+      let attempts = 0
+      let timeoutId
 
-    const tryScroll = () => {
-      if (scrollToHash(hash)) return
+      const tryScroll = () => {
+        if (scrollToHash(hash, 'auto')) return
 
-      attempts += 1
-      if (attempts < 12) {
-        timeoutId = window.setTimeout(tryScroll, 50)
+        attempts += 1
+        if (attempts < 12) {
+          timeoutId = window.setTimeout(tryScroll, 50)
+        }
       }
+
+      timeoutId = window.setTimeout(tryScroll, 0)
+
+      return () => window.clearTimeout(timeoutId)
     }
 
-    timeoutId = window.setTimeout(tryScroll, 0)
+    scrollToTop()
 
-    return () => window.clearTimeout(timeoutId)
-  }, [pathname, hash])
+    const frameId = window.requestAnimationFrame(() => {
+      scrollToTop()
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
+  }, [pathname, hash, key])
 
   return null
 }

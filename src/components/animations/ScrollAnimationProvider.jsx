@@ -2,10 +2,11 @@ import { useLayoutEffect, useRef } from 'react'
 import { useLocation } from 'react-router'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
 import { initScrollAnimations } from '@/lib/scrollAnimations'
+import { scrollToTop } from '@/helpers/scrollToTop'
 
 export default function ScrollAnimationProvider({ children }) {
   const containerRef = useRef(null)
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
 
   useLayoutEffect(() => {
     const root = containerRef.current
@@ -15,7 +16,10 @@ export default function ScrollAnimationProvider({ children }) {
       initScrollAnimations(root)
     }, root)
 
-    const refresh = () => ScrollTrigger.refresh()
+    const refresh = () => {
+      ScrollTrigger.refresh()
+      if (!hash) scrollToTop()
+    }
     requestAnimationFrame(refresh)
     window.addEventListener('load', refresh)
 
@@ -23,7 +27,7 @@ export default function ScrollAnimationProvider({ children }) {
       window.removeEventListener('load', refresh)
       ctx.revert()
     }
-  }, [pathname])
+  }, [pathname, hash])
 
   return <div ref={containerRef}>{children}</div>
 }
