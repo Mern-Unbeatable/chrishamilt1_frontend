@@ -5,12 +5,29 @@ const DEFAULT_TRIGGER = {
   toggleActions: 'play none none reverse',
 }
 
+export const SCROLL_ANIMATION_MEDIA = '(min-width: 1536px)'
+
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
+export function shouldRunScrollAnimations() {
+  if (typeof window === 'undefined') return false
+  if (prefersReducedMotion()) return false
+  return window.matchMedia(SCROLL_ANIMATION_MEDIA).matches
+}
+
+export function subscribeScrollAnimationBreakpoint(onChange) {
+  const mediaQuery = window.matchMedia(SCROLL_ANIMATION_MEDIA)
+  const handler = () => onChange(mediaQuery.matches)
+
+  mediaQuery.addEventListener('change', handler)
+
+  return () => mediaQuery.removeEventListener('change', handler)
+}
+
 export function initScrollAnimations(root) {
-  if (!root || prefersReducedMotion()) return undefined
+  if (!root || !shouldRunScrollAnimations()) return undefined
 
   gsap.utils.toArray('[data-scroll-hero]', root).forEach((hero) => {
     const items = gsap.utils.toArray('[data-scroll-hero-item]', hero)
