@@ -74,7 +74,7 @@ export default function RegisterPage() {
       <div className="flex items-center justify-center bg-white px-6 py-12 sm:px-10 lg:px-16">
         <div className="w-full max-w-[400px]">
           <h1 className="text-[1.75rem] font-bold leading-tight tracking-[-0.02em] text-[#111827] sm:text-[2rem]">
-            Create your Account
+            Create your Account 
           </h1>
           <p className="mt-2 text-sm text-[#64748B]">Signing up as {roleLabel}</p>
 
