@@ -1,5 +1,3 @@
-const SESSION_KEY = 'tradetrust_demo_session'
-
 export const DEMO_CREDENTIALS = {
   user: { email: 'user@tradetrust.uk', password: 'demo123' },
   tradesman: { email: 'tradesman@tradetrust.uk', password: 'demo123' },
@@ -47,27 +45,7 @@ export function authenticateDemoUser(email, password) {
   const credentials = DEMO_CREDENTIALS[role]
   if (password !== credentials.password) return null
 
-  return setDemoSession(role)
-}
-
-export function getDemoSession() {
-  try {
-    const raw = sessionStorage.getItem(SESSION_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch {
-    return null
-  }
-}
-
-export function setDemoSession(role) {
-  const user = DEMO_USERS[role]
-  if (!user) return null
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(user))
-  return user
-}
-
-export function clearDemoSession() {
-  sessionStorage.removeItem(SESSION_KEY)
+  return DEMO_USERS[role]
 }
 
 export function getDashboardHome(role) {

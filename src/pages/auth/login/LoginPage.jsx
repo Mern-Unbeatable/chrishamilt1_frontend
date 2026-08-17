@@ -4,11 +4,9 @@ import { ArrowRight, ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { loginImage } from '@/assets/authImages'
 import AuthHeroImage from '@/components/auth/AuthHeroImage'
 import { useAuth } from '@/auth/AuthProvider'
-import {
-  DEMO_CREDENTIALS,
-  DEMO_USERS,
-  getDashboardHome,
-} from '@/auth/demoAuth'
+import { getRememberMePreference } from '@/auth/authStorage'
+import { getDashboardHome } from '@/auth/authService'
+import { DEMO_CREDENTIALS } from '@/auth/demoAuth'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -17,11 +15,16 @@ export default function LoginPage() {
   const [email, setEmail] = useState(DEMO_CREDENTIALS.user.email)
   const [password, setPassword] = useState(DEMO_CREDENTIALS.user.password)
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
+  const [rememberMe, setRememberMe] = useState(() => getRememberMePreference())
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const loginAs = (nextEmail, nextPassword = DEMO_CREDENTIALS.user.password) => {
-    const user = login(nextEmail, nextPassword)
+  const loginAs = async (nextEmail, nextPassword) => {
+    setIsSubmitting(true)
+
+    const user = await login(nextEmail, nextPassword, { rememberMe })
+
+    setIsSubmitting(false)
 
     if (!user) {
       setError('Invalid email or password. Use the demo credentials below.')
@@ -43,9 +46,9 @@ export default function LoginPage() {
     })
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    loginAs(email, password)
+    await loginAs(email, password)
   }
 
   return (
@@ -151,9 +154,10 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-btn-primary text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]"
+              disabled={isSubmitting}
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-btn-primary text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Sign In
+              {isSubmitting ? 'Signing in…' : 'Sign In'}
               <ArrowRight className="size-4" strokeWidth={2.25} />
             </button>
           </form>

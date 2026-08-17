@@ -1,11 +1,11 @@
 import { Menu } from 'lucide-react'
 import Logo from '@/components/Logo'
-import { getDemoSession } from '@/auth/demoAuth'
+import { useAuth } from '@/auth/AuthProvider'
 import { cn } from '@/helpers/cn'
 import { DASHBOARD_HEADER_CLASS } from '@/layouts/dashboard/constants'
 
 export default function DashboardHeader({ onMenuOpen }) {
-  const session = getDemoSession()
+  const { session } = useAuth()
 
   return (
     <header

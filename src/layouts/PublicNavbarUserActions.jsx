@@ -23,8 +23,8 @@ export default function PublicNavbarUserActions({ compact = false }) {
   const isProfileActive = isPathPrefixActive(pathname, '/user/profile')
   const isPostJobActive = pathname === '/post-job'
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate('/', { replace: true })
   }
 

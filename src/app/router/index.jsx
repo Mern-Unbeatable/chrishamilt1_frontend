@@ -3,6 +3,7 @@ import PublicLayout from '@/layouts/PublicLayout'
 import AuthLayout from '@/layouts/AuthLayout'
 import TradesmanLayout from '@/layouts/TradesmanLayout'
 import AdminLayout from '@/layouts/AdminLayout'
+import GuestGuard from '@/app/router/GuestGuard'
 import AuthGuard from '@/app/router/AuthGuard'
 import RoleGuard from '@/app/router/RoleGuard'
 import HomePage from '@/pages/public/home/HomePage'
@@ -79,9 +80,14 @@ export const router = createBrowserRouter([
     path: 'auth',
     element: <AuthLayout />,
     children: [
-      { path: 'login', element: <LoginPage /> },
-      { path: 'signup', element: <SignUpPage /> },
-      { path: 'register', element: <RegisterPage /> },
+      {
+        element: <GuestGuard />,
+        children: [
+          { path: 'login', element: <LoginPage /> },
+          { path: 'signup', element: <SignUpPage /> },
+          { path: 'register', element: <RegisterPage /> },
+        ],
+      },
     ],
   },
   {

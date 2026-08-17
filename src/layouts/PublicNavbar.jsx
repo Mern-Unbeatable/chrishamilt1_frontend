@@ -7,6 +7,7 @@ import { prefetchAuthImagesOnIntent } from '@/helpers/prefetchAuthImages'
 import { useSectionInView } from '@/hooks/useSectionInView'
 import { useAuth } from '@/auth/AuthProvider'
 import PublicNavbarUserActions from '@/layouts/PublicNavbarUserActions'
+import PublicNavbarTradesmanActions from '@/layouts/PublicNavbarTradesmanActions'
 
 const BASE_NAV_LINKS = [
   { label: 'Browse Job', to: '/jobs', matchPrefix: '/jobs' },
@@ -36,7 +37,8 @@ function isNavLinkActive(link, location, defaultActive, sectionInView) {
 export default function PublicNavbar() {
   const location = useLocation()
   const { pathname } = location
-  const { isUser } = useAuth()
+  const { isUser, isTradesman } = useAuth()
+  const showAuthActions = isUser || isTradesman
   const hasGradientHero =
     pathname === '/' || pathname === '/jobs' || pathname === '/pricing' || pathname === '/about'
   const [open, setOpen] = useState(false)
@@ -75,7 +77,7 @@ export default function PublicNavbar() {
         <div
           className={cn(
             'container mx-auto grid h-[72px] items-center gap-4 px-5 lg:px-8',
-            isUser
+            isUser || isTradesman
               ? 'grid-cols-[1fr_auto] lg:grid-cols-[200px_1fr_auto]'
               : 'grid-cols-[1fr_auto] lg:grid-cols-[220px_1fr_220px]',
           )}
@@ -108,8 +110,12 @@ export default function PublicNavbar() {
 
           <div className="flex items-center justify-end gap-2">
             <div className="hidden items-center lg:flex">
-              {isUser ? (
-                <PublicNavbarUserActions />
+              {showAuthActions ? (
+                isUser ? (
+                  <PublicNavbarUserActions />
+                ) : (
+                  <PublicNavbarTradesmanActions />
+                )
               ) : (
                 <div className="flex items-center gap-3">
                   <NavLink
@@ -194,8 +200,12 @@ export default function PublicNavbar() {
         </nav>
 
         <div className="border-t border-[#F1F5F9] p-5">
-          {isUser ? (
-            <PublicNavbarUserActions compact />
+          {showAuthActions ? (
+            isUser ? (
+              <PublicNavbarUserActions compact />
+            ) : (
+              <PublicNavbarTradesmanActions compact />
+            )
           ) : (
             <div className="flex flex-col gap-3">
               <Link

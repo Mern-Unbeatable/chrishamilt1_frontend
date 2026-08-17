@@ -1,9 +1,9 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
-import { getDemoSession } from '@/auth/demoAuth'
+import { useAuth } from '@/auth/AuthProvider'
 
 export default function AuthGuard() {
   const location = useLocation()
-  const session = getDemoSession()
+  const { session } = useAuth()
 
   if (!session) {
     return (
