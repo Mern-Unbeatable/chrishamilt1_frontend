@@ -625,16 +625,16 @@ export const DEMO_WALLET_STATS = [
   },
   {
     id: 'used',
-    label: 'Tokens used',
-    value: '52',
+    label: 'Tokens used (Jul)',
+    value: '42',
     subtext: '',
     icon: 'used',
     iconTone: 'orange',
   },
   {
     id: 'purchased',
-    label: 'Tokens purchased',
-    value: '200',
+    label: 'Tokens purchased (Jul)',
+    value: '150',
     subtext: '',
     icon: 'purchased',
     iconTone: 'green',
@@ -679,7 +679,7 @@ export const DEMO_TRADESMAN_PROFILE = {
   warehouses: [
     {
       id: 'wh-1',
-      address: '1320/C Road No. 13/x, House no. 1320/C, Flat No. 5D',
+      address: '4140 Parker Rd. Allentown, New Mexico 31134',
     },
   ],
   currentPassword: '',
@@ -717,7 +717,7 @@ export const DEMO_TOKEN_PRICING = [
     price: '£120',
     tokens: 500,
     rateLabel: '£0.24 per token',
-    description: 'Best value for active tradesmen submitting regular quotes.',
+    description: 'Best choice for growing businesses purchasing leads regularly.',
     featured: true,
     badgeLabel: 'Most popular',
   },
@@ -727,7 +727,7 @@ export const DEMO_TOKEN_PRICING = [
     price: '£200',
     tokens: 1000,
     rateLabel: '£0.20 per token',
-    description: 'Maximum value for active tradesmen consistently winning new work.',
+    description: 'Maximum value for active tradesmen purchasing multiple leads every week.',
     featured: false,
   },
 ]

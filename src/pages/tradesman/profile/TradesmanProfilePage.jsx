@@ -9,6 +9,7 @@ export default function TradesmanProfilePage() {
       onUpdateProfile={() => {}}
       onSaveWarehouses={() => {}}
       onChangePassword={() => {}}
+      onUploadAvatar={() => {}}
     />
   )
 }

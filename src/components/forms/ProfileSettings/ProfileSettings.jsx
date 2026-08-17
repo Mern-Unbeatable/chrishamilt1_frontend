@@ -19,7 +19,7 @@ const ROLE_CONFIG = {
   tradesman: {
     layout: 'dashboard',
     showPageHeader: true,
-    showAvatarUpload: false,
+    showAvatarUpload: true,
     showAccountPhone: true,
     showAddressFields: false,
     showWarehouses: true,
@@ -183,7 +183,7 @@ function CardHeader({ children }) {
 
 function SectionTitle({ children }) {
   return (
-    <h3 className="text-sm font-semibold text-[var(--primary-text)]">{children}</h3>
+    <h3 className="text-base font-semibold text-[var(--primary-text)]">{children}</h3>
   )
 }
 
@@ -215,6 +215,31 @@ function AvatarUpload({ form, fileRef, fileInputId, onPick }) {
       </button>
     </div>
   )
+}
+
+function AvatarHeader({ form, showUpload, fileRef, fileInputId, onPick }) {
+  if (showUpload) {
+    return (
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <AvatarUpload
+          form={form}
+          fileRef={fileRef}
+          fileInputId={fileInputId}
+          onPick={onPick}
+        />
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-base font-semibold text-[var(--primary-text)] sm:text-lg">
+            {form.displayName || form.name || '—'}
+          </h2>
+          <p className="truncate text-sm text-[var(--secondary-text)]">
+            {form.displayEmail || form.email || '—'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return <AvatarDisplay form={form} />
 }
 
 function AvatarDisplay({ form }) {
@@ -411,7 +436,7 @@ export default function ProfileSettings({
   )
 
   const warehouseSection = cfg.showWarehouses ? (
-    <div className="mt-8 border-t border-[#F3F4F6] pt-8">
+    <div className="mt-8">
       <SectionTitle>Ware house location</SectionTitle>
       <div className="mt-4 space-y-4">
         {warehouses.map((item, index) => (
@@ -438,7 +463,7 @@ export default function ProfileSettings({
   ) : null
 
   const passwordSectionInline = (
-    <div className="mt-8 border-t border-[#F3F4F6] pt-8">
+    <div className="mt-8">
       <SectionTitle>Change password</SectionTitle>
       <div className="mt-4">{passwordFields}</div>
       <div className={cn('mt-5 flex', alignClass(cfg.passwordActionsAlign))}>
@@ -565,7 +590,13 @@ export default function ProfileSettings({
         </div>
       ) : (
         <Card className="p-5 sm:p-8">
-          <AvatarDisplay form={form} />
+          <AvatarHeader
+            form={form}
+            showUpload={cfg.showAvatarUpload}
+            fileRef={fileRef}
+            fileInputId={fileInputId}
+            onPick={handleAvatarPick}
+          />
           <div className="mt-8">{accountFieldsDashboard}</div>
           {warehouseSection}
           {passwordSectionInline}

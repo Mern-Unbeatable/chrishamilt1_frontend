@@ -28,6 +28,7 @@ export default function WalletStatCard({
   icon = 'tokens',
   iconTone = 'teal',
   uppercaseLabel = false,
+  subtextClassName = '',
   className = '',
 }) {
   const Icon = typeof icon === 'string' ? ICONS[icon] ?? PoundSterling : icon
@@ -63,7 +64,7 @@ export default function WalletStatCard({
       </p>
 
       {subtext ? (
-        <p className="mt-1 text-sm text-[var(--secondary-text)]">{subtext}</p>
+        <p className={cn('mt-1 text-sm text-[var(--secondary-text)]', subtextClassName)}>{subtext}</p>
       ) : null}
     </article>
   )

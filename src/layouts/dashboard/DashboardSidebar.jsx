@@ -31,8 +31,7 @@ export default function DashboardSidebar({
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-[min(280px,88vw)] flex-col border-r border-[#E5E7EB] bg-white transition-transform duration-300 ease-in-out',
-          'lg:static lg:z-auto lg:w-[260px] lg:shrink-0 lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex h-screen w-[min(280px,88vw)] flex-col border-r border-[#E5E7EB] bg-white transition-transform duration-300 ease-in-out lg:w-[260px]',
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         )}
       >

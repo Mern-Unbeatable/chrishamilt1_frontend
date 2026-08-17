@@ -19,6 +19,16 @@ import LoginPage from '@/pages/auth/login/LoginPage'
 import RegisterPage from '@/pages/auth/register/RegisterPage'
 import SignUpPage from '@/pages/auth/signup/SignUpPage'
 import TradesmanDashboardPage from '@/pages/tradesman/dashboard/TradesmanDashboardPage'
+import TradesmanBrowseJobsPage from '@/pages/tradesman/browse-jobs/TradesmanBrowseJobsPage'
+import TradesmanBrowseJobDetailsPage from '@/pages/tradesman/browse-jobs/TradesmanBrowseJobDetailsPage'
+import TradesmanQuotesPage from '@/pages/tradesman/quotes/TradesmanQuotesPage'
+import TradesmanJobsPage from '@/pages/tradesman/jobs/TradesmanJobsPage'
+import TradesmanJobDetailsPage from '@/pages/tradesman/jobs/TradesmanJobDetailsPage'
+import TradesmanMessagesPage from '@/pages/tradesman/messages/TradesmanMessagesPage'
+import TradesmanWalletPage from '@/pages/tradesman/wallet/TradesmanWalletPage'
+import TradesmanEarningsPage from '@/pages/tradesman/earnings/TradesmanEarningsPage'
+import TradesmanReviewsPage from '@/pages/tradesman/reviews/TradesmanReviewsPage'
+import TradesmanProfilePage from '@/pages/tradesman/profile/TradesmanProfilePage'
 import DashboardComingSoonPage from '@/pages/shared/DashboardComingSoonPage'
 import MessagesPage from '@/pages/shared/MessagesPage'
 import UserProfilePage from '@/pages/user/profile/UserProfilePage'
@@ -86,15 +96,16 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <Navigate to="dashboard" replace /> },
               { path: 'dashboard', element: <TradesmanDashboardPage /> },
-              { path: 'browse-jobs', element: <DashboardComingSoonPage title="Browse Jobs" /> },
-              { path: 'quotes', element: <DashboardComingSoonPage title="My Quotes" /> },
-              { path: 'jobs', element: <DashboardComingSoonPage title="My Jobs" /> },
-              { path: 'jobs/:jobId', element: <DashboardComingSoonPage title="Job Details" /> },
-              { path: 'messages', element: <DashboardComingSoonPage title="Messages" /> },
-              { path: 'wallet', element: <DashboardComingSoonPage title="Wallet & Tokens" /> },
-              { path: 'earnings', element: <DashboardComingSoonPage title="Earnings" /> },
-              { path: 'reviews', element: <DashboardComingSoonPage title="Reviews" /> },
-              { path: 'profile', element: <DashboardComingSoonPage title="My Profile" /> },
+              { path: 'browse-jobs', element: <TradesmanBrowseJobsPage /> },
+              { path: 'browse-jobs/:jobId', element: <TradesmanBrowseJobDetailsPage /> },
+              { path: 'quotes', element: <TradesmanQuotesPage /> },
+              { path: 'jobs', element: <TradesmanJobsPage /> },
+              { path: 'jobs/:jobId', element: <TradesmanJobDetailsPage /> },
+              { path: 'messages', element: <TradesmanMessagesPage /> },
+              { path: 'wallet', element: <TradesmanWalletPage /> },
+              { path: 'earnings', element: <TradesmanEarningsPage /> },
+              { path: 'reviews', element: <TradesmanReviewsPage /> },
+              { path: 'profile', element: <TradesmanProfilePage /> },
               { path: 'schedule', element: <Navigate to="/tradesman/dashboard" replace /> },
             ],
           },
