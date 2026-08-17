@@ -28,14 +28,14 @@ export default function DashboardLayout({ navItems }) {
   }, [mobileOpen])
 
   return (
-    <div className="flex min-h-screen bg-[#F3F4F6]">
+    <div className="min-h-screen bg-[#F3F4F6]">
       <DashboardSidebar
         navItems={navItems}
         mobileOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-col lg:pl-[260px]">
         <DashboardHeader onMenuOpen={() => setMobileOpen(true)} />
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <Outlet />

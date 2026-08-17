@@ -151,6 +151,14 @@ export default function JobCard({
             >
               {title}
             </button>
+          ) : variant === 'browse' && onViewLead ? (
+            <button
+              type="button"
+              onClick={onViewLead}
+              className="text-left text-base font-semibold text-[var(--primary-text)] transition-colors hover:text-btn-primary sm:text-lg"
+            >
+              {title}
+            </button>
           ) : (
             <h3 className="text-base font-semibold text-[var(--primary-text)] sm:text-lg">{title}</h3>
           )}
