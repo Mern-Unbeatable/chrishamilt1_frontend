@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
+import ScrollToTop from '@/components/ScrollToTop'
 import DashboardHeader from '@/layouts/dashboard/DashboardHeader'
 import DashboardSidebar from '@/layouts/dashboard/DashboardSidebar'
 
@@ -29,6 +30,7 @@ export default function DashboardLayout({ navItems }) {
 
   return (
     <div className="min-h-screen bg-[#F3F4F6]">
+      <ScrollToTop />
       <DashboardSidebar
         navItems={navItems}
         mobileOpen={mobileOpen}
