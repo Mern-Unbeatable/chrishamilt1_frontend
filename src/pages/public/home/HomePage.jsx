@@ -21,8 +21,8 @@ export default function HomePage() {
       {/* <MarketplaceMetrics /> */}
       <BrowseByTrade />
       <HowItWorks />
-      <WhyPreferTradeTrust />
       <RecentJobs />
+      <WhyPreferTradeTrust />
       <CustomerTestimonials />
       <Faq />
       <Cta />
