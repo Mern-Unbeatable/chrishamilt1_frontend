@@ -1,6 +1,12 @@
+import { useEffect } from 'react'
 import { Outlet } from 'react-router'
+import { prefetchAuthImages } from '@/helpers/prefetchAuthImages'
 
-/** Auth pages (login, register) are self-contained full-screen layouts. */
+
 export default function AuthLayout() {
+  useEffect(() => {
+    prefetchAuthImages({ highPriority: true })
+  }, [])
+
   return <Outlet />
 }

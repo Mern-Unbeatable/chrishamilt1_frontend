@@ -5,13 +5,13 @@ import {
 } from '@/data/demoData'
 
 function formatNow() {
-  return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
 }
 
 /**
  * Frontend-only chat state. Swap internals later for API.
  */
-export default function useMessages({ defaultActiveId = 'ope' } = {}) {
+export default function useMessages({ defaultActiveId = 'marcus-bell' } = {}) {
   const [chats, setChats] = useState(DEMO_MESSENGER_CHATS)
   const [messagesByChat, setMessagesByChat] = useState(DEMO_MESSENGER_MESSAGES)
   const [activePartnerId, setActivePartnerId] = useState(defaultActiveId)
@@ -26,6 +26,14 @@ export default function useMessages({ defaultActiveId = 'ope' } = {}) {
 
   const selectChat = useCallback((id) => {
     setActivePartnerId(id)
+
+    if (!id) return
+
+    setChats((current) =>
+      current.map((chat) =>
+        chat.id === id ? { ...chat, unreadCount: 0 } : chat,
+      ),
+    )
   }, [])
 
   const sendMessage = useCallback(
@@ -40,6 +48,8 @@ export default function useMessages({ defaultActiveId = 'ope' } = {}) {
         id: `local-${Date.now()}`,
         sender: 'me',
         text: value,
+        time: formatNow(),
+        read: true,
       }
 
       setMessagesByChat((current) => ({
@@ -50,7 +60,7 @@ export default function useMessages({ defaultActiveId = 'ope' } = {}) {
       setChats((current) =>
         current.map((chat) =>
           chat.id === activePartnerId
-            ? { ...chat, lastMessage: value, time: formatNow() }
+            ? { ...chat, lastMessage: value, time: formatNow(), unreadCount: 0 }
             : chat,
         ),
       )

@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-export default function Cta() {
+export default function Cta({ postJobTo = '/auth/signup' }) {
   return (
     <section data-scroll-section className="bg-white py-16 lg:py-20">
       <div className="container mx-auto px-6 lg:px-8">
@@ -18,7 +18,7 @@ export default function Cta() {
 
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              to="/auth/signup"
+              to={postJobTo}
               className="inline-flex min-w-[180px] items-center justify-center rounded-lg border border-white px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
             >
               Post a Job

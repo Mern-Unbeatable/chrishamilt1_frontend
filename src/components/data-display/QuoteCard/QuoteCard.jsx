@@ -1,4 +1,5 @@
 import {
+  Check,
   Eye,
   MessageCircle,
   Pencil,
@@ -17,9 +18,6 @@ const STATUS_STYLES = {
 
 const OUTLINE_BUTTON =
   'inline-flex items-center justify-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-medium text-[var(--primary-text)] transition-colors hover:bg-[#F8FAFC] sm:px-4'
-
-const OUTLINE_PRIMARY_BUTTON =
-  'inline-flex items-center justify-center gap-2 rounded-lg border border-btn-primary bg-white px-4 py-2 text-sm font-semibold text-btn-primary transition-colors hover:bg-[#EFF6FF]'
 
 function RatingStars({ rating }) {
   const fullStars = Math.floor(rating)
@@ -154,6 +152,9 @@ function TradesmanQuoteCard({
   )
 }
 
+const TEXT_LINK_BUTTON =
+  'inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-btn-primary transition-colors hover:text-[#0150CC]'
+
 function CustomerQuoteCard({
   tradesman,
   amount,
@@ -164,8 +165,12 @@ function CustomerQuoteCard({
   submittedAt,
   proposalPreview,
   statusVariant = 'submitted',
+  onHireTradesman,
+  hireTradesmanLabel = 'Hire Tradesman',
   onViewDetails,
-  viewDetailsLabel = 'View details',
+  viewDetailsLabel = 'View Details',
+  onMessage,
+  messageLabel = 'Message',
   className = '',
 }) {
   const {
@@ -214,7 +219,7 @@ function CustomerQuoteCard({
         <div className="sm:text-right">
           <p className="text-2xl font-bold text-btn-primary sm:text-3xl">{amount}</p>
           <p className="mt-0.5 text-xs text-[var(--secondary-text)] sm:text-sm">
-            Total quote
+            Total Quote
           </p>
         </div>
       </div>
@@ -246,11 +251,31 @@ function CustomerQuoteCard({
         </p>
       </div>
 
-      {onViewDetails ? (
-        <div className="mt-5">
-          <button type="button" onClick={onViewDetails} className={OUTLINE_PRIMARY_BUTTON}>
-            {viewDetailsLabel}
-          </button>
+      {onHireTradesman || onViewDetails || onMessage ? (
+        <div className="mt-5 flex flex-wrap items-center gap-3 sm:gap-4">
+          {onHireTradesman ? (
+            <button
+              type="button"
+              onClick={onHireTradesman}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-btn-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] sm:px-5"
+            >
+              <Check className="size-4 shrink-0" strokeWidth={2.25} />
+              {hireTradesmanLabel}
+            </button>
+          ) : null}
+
+          {onViewDetails ? (
+            <button type="button" onClick={onViewDetails} className={TEXT_LINK_BUTTON}>
+              {viewDetailsLabel}
+            </button>
+          ) : null}
+
+          {onMessage ? (
+            <button type="button" onClick={onMessage} className={TEXT_LINK_BUTTON}>
+              <MessageCircle className="size-4 shrink-0" strokeWidth={1.75} />
+              {messageLabel}
+            </button>
+          ) : null}
         </div>
       ) : null}
     </article>
@@ -271,7 +296,11 @@ export default function QuoteCard({
   responseTime,
   submittedAt,
   proposalPreview,
+  onHireTradesman,
+  hireTradesmanLabel,
   viewDetailsLabel,
+  onMessage,
+  messageLabel,
   quoteId,
   status,
   statusVariant,
@@ -284,7 +313,6 @@ export default function QuoteCard({
   onEditQuote,
   onWithdraw,
   onMessageCustomer,
-  messageLabel,
   className = '',
 }) {
   if (variant === 'customer') {
@@ -299,8 +327,12 @@ export default function QuoteCard({
         submittedAt={submittedAt}
         proposalPreview={proposalPreview}
         statusVariant={statusVariant}
+        onHireTradesman={onHireTradesman}
+        hireTradesmanLabel={hireTradesmanLabel}
         onViewDetails={onViewDetails}
         viewDetailsLabel={viewDetailsLabel}
+        onMessage={onMessage}
+        messageLabel={messageLabel}
         className={className}
       />
     )

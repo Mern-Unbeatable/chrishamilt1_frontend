@@ -1,31 +1,22 @@
-import { ArrowLeft, Send } from 'lucide-react'
+import {
+  ArrowLeft,
+  CheckCheck,
+  Image,
+  Mic,
+  Paperclip,
+  Send,
+  Smile,
+} from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/helpers/cn'
+import UserAvatar from '@/components/common/messenger/components/UserAvatar'
 
-function UserAvatar({ chat, size = 'sm' }) {
-  const sizeClass = size === 'sm' ? 'size-9 text-xs' : 'size-11 text-sm'
-
-  if (chat?.avatar) {
-    return (
-      <img
-        src={chat.avatar}
-        alt={chat.name}
-        className={cn('rounded-full object-cover', sizeClass)}
-      />
-    )
-  }
-
-  return (
-    <div
-      className={cn(
-        'flex items-center justify-center rounded-full bg-primary font-semibold text-btn-primary',
-        sizeClass,
-      )}
-    >
-      {chat?.initials}
-    </div>
-  )
-}
+const COMPOSER_ACTIONS = [
+  { icon: Paperclip, label: 'Attach file' },
+  { icon: Image, label: 'Attach image' },
+  { icon: Mic, label: 'Voice message' },
+  { icon: Smile, label: 'Emoji' },
+]
 
 export default function ChatArea({
   activeChat,
@@ -33,8 +24,7 @@ export default function ChatArea({
   onBack,
   onSendMessage,
   isSending = false,
-  placeholder = 'Type a message...',
-  sendLabel = 'SMS',
+  placeholder = 'Write a message...',
 }) {
   const [inputText, setInputText] = useState('')
   const messagesContainerRef = useRef(null)
@@ -61,9 +51,9 @@ export default function ChatArea({
 
   if (!activeChat) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-2 bg-[#F8F8F8] px-6 text-center">
-        <h3 className="text-lg font-semibold text-[var(--primary-text)]">Your Messages</h3>
-        <p className="max-w-sm text-sm text-[var(--secondary-text)]">
+      <div className="flex h-full min-h-[320px] flex-col items-center justify-center gap-2 bg-white px-6 py-10 text-center">
+        <h3 className="text-lg font-semibold text-[#111827]">Your Messages</h3>
+        <p className="max-w-sm text-sm leading-6 text-[#64748B]">
           Select a conversation from the sidebar to start chatting.
         </p>
       </div>
@@ -71,35 +61,46 @@ export default function ChatArea({
   }
 
   return (
-    <div className="flex h-full flex-col bg-white">
-      <div className="flex items-center gap-3 border-b border-[#E5E7EB] bg-[#F5F5F5] px-4 py-3">
+    <div className="flex h-full min-h-0 flex-col bg-white">
+      <div className="flex shrink-0 items-center gap-3 border-b border-[#E5E7EB] bg-white px-4 py-3 sm:px-5 sm:py-3.5">
         <button
           type="button"
           onClick={onBack}
-          className="rounded-md p-1.5 text-[var(--primary-text)] hover:bg-white/70 md:hidden"
+          className="rounded-md p-1.5 text-[#111827] hover:bg-[#F8FAFC] md:hidden"
           aria-label="Back to inbox"
         >
           <ArrowLeft className="size-5" />
         </button>
 
-        <UserAvatar chat={activeChat} />
-        <div className="min-w-0">
-          <h2 className="truncate text-sm font-bold text-[var(--primary-text)] sm:text-base">
-            {activeChat.name}
-          </h2>
-          <p className="inline-flex items-center gap-1.5 text-xs text-[var(--secondary-text)]">
-            <span className="size-2 rounded-full bg-emerald-500" />
-            {activeChat.online ? 'Active' : 'Offline'}
+        <div className="relative shrink-0">
+          <UserAvatar chat={activeChat} size="lg" />
+          {activeChat.online ? (
+            <span className="absolute right-0 bottom-0 size-2.5 rounded-full border-2 border-white bg-[#22C55E]" />
+          ) : null}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-base font-bold text-[#111827]">{activeChat.name}</h2>
+          <p
+            className={cn(
+              'text-xs font-medium',
+              activeChat.online ? 'text-[#16A34A]' : 'text-[#64748B]',
+            )}
+          >
+            {activeChat.online ? 'Online now' : 'Offline'}
           </p>
         </div>
       </div>
 
-      <div ref={messagesContainerRef} className="flex-1 space-y-3 overflow-y-auto bg-[#F8FAFC] px-4 py-5">
+      <div
+        ref={messagesContainerRef}
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-[#F8FAFC] px-3 py-4 sm:space-y-4 sm:px-5 sm:py-5"
+      >
         {messages.map((message) => {
           if (message.type === 'date') {
             return (
               <div key={message.id} className="flex justify-center py-1">
-                <span className="text-xs text-[#94A3B8]">{message.label}</span>
+                <span className="text-xs font-medium text-[#94A3B8]">{message.label}</span>
               </div>
             )
           }
@@ -109,43 +110,69 @@ export default function ChatArea({
           return (
             <div
               key={message.id}
-              className={cn('flex items-end gap-2', isMine ? 'justify-end' : 'justify-start')}
+              className={cn('flex', isMine ? 'justify-end' : 'justify-start')}
             >
-              {!isMine ? <UserAvatar chat={activeChat} size="sm" /> : null}
               <div
                 className={cn(
-                  'max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-6',
+                  'max-w-[88%] rounded-lg px-3.5 py-2.5 text-sm leading-6 sm:max-w-[min(100%,480px)] sm:px-4 sm:py-3',
                   isMine
-                    ? 'rounded-br-md bg-[#64748B] text-white'
-                    : 'rounded-bl-md bg-[#E2E8F0] text-[var(--primary-text)]',
+                    ? 'bg-btn-primary text-white'
+                    : 'border border-[#E5E7EB] bg-white text-[#111827] shadow-[0_1px_2px_rgba(15,23,42,0.03)]',
                 )}
               >
-                {message.text}
+                <p className="whitespace-pre-wrap break-words">{message.text}</p>
+                <div
+                  className={cn(
+                    'mt-1.5 flex items-center justify-end gap-1 text-[10px] leading-none',
+                    isMine ? 'text-white/75' : 'text-[#94A3B8]',
+                  )}
+                >
+                  <span>{message.time}</span>
+                  {isMine && message.read !== false ? (
+                    <CheckCheck className="size-3.5" strokeWidth={2.25} />
+                  ) : null}
+                </div>
               </div>
             </div>
           )
         })}
       </div>
 
-      <form onSubmit={handleSubmit} className="border-t border-[#E5E7EB] bg-white px-4 py-4">
-        <div className="flex items-center gap-3 rounded-full border border-[#E5E7EB] bg-white px-4 py-2">
-          <input
-            type="text"
-            value={inputText}
-            onChange={(event) => setInputText(event.target.value)}
-            placeholder={placeholder}
-            className="min-w-0 flex-1 bg-transparent text-sm text-[var(--primary-text)] outline-none placeholder:text-[#94A3B8]"
-          />
+      <form
+        onSubmit={handleSubmit}
+        className="shrink-0 border-t border-[#E5E7EB] bg-white px-3 pt-3 pb-4 sm:px-5 sm:pt-4 sm:pb-5"
+      >
+        <div className="flex items-end gap-2 sm:items-center sm:gap-3">
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+            {COMPOSER_ACTIONS.map(({ icon: Icon, label }) => (
+              <button
+                key={label}
+                type="button"
+                className="flex size-8 items-center justify-center rounded-md text-[#94A3B8] transition-colors hover:bg-[#F8FAFC] hover:text-[#64748B] sm:size-9"
+                aria-label={label}
+              >
+                <Icon className="size-[17px] sm:size-[18px]" strokeWidth={1.75} />
+              </button>
+            ))}
+          </div>
+
+          <div className="flex min-w-0 flex-1 items-center rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2.5 sm:px-4">
+            <input
+              type="text"
+              value={inputText}
+              onChange={(event) => setInputText(event.target.value)}
+              placeholder={placeholder}
+              className="min-w-0 flex-1 bg-transparent text-sm text-[#111827] outline-none placeholder:text-[#94A3B8]"
+            />
+          </div>
 
           <button
             type="submit"
-            disabled={isSending}
-            className="flex shrink-0 flex-col items-center justify-center text-[var(--secondary-text)] transition-colors hover:text-btn-primary disabled:opacity-50"
+            disabled={isSending || !inputText.trim()}
+            className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-btn-primary text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-45 sm:size-11"
+            aria-label="Send message"
           >
-            <span className="flex size-9 items-center justify-center rounded-full bg-[#F1F5F9]">
-              <Send className="size-4" />
-            </span>
-            <span className="mt-1 text-[10px] font-medium uppercase">{sendLabel}</span>
+            <Send className="size-[17px] sm:size-[18px]" strokeWidth={2} />
           </button>
         </div>
       </form>

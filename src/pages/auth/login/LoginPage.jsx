@@ -1,40 +1,51 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
-import { ArrowRight, ArrowLeft, Eye, EyeOff, Home, Lock, Mail } from 'lucide-react'
-import loginImage from '@/assets/login.png'
+import { ArrowRight, ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { loginImage } from '@/assets/authImages'
+import AuthHeroImage from '@/components/auth/AuthHeroImage'
+import { useAuth } from '@/auth/AuthProvider'
 import {
+  DEMO_CREDENTIALS,
   DEMO_USERS,
   getDashboardHome,
-  resolveDemoRole,
-  setDemoSession,
 } from '@/auth/demoAuth'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [email, setEmail] = useState('tradesman@tradetrust.uk')
+  const { login } = useAuth()
+  const [email, setEmail] = useState(DEMO_CREDENTIALS.user.email)
+  const [password, setPassword] = useState(DEMO_CREDENTIALS.user.password)
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const [error, setError] = useState('')
 
-  const loginAs = (nextEmail) => {
-    const role = resolveDemoRole(nextEmail)
+  const loginAs = (nextEmail, nextPassword = DEMO_CREDENTIALS.user.password) => {
+    const user = login(nextEmail, nextPassword)
 
-    if (!role) {
-      navigate('/', { replace: true })
+    if (!user) {
+      setError('Invalid email or password. Use the demo credentials below.')
       return
     }
 
-    setDemoSession(role)
-    const fallback = getDashboardHome(role)
+    setError('')
+
+    if (user.role === 'user') {
+      const redirectTo = location.state?.from || '/'
+      navigate(redirectTo, { replace: true })
+      return
+    }
+
+    const fallback = getDashboardHome(user.role)
     const redirectTo = location.state?.from || fallback
-    navigate(redirectTo.startsWith(`/${role}`) ? redirectTo : fallback, {
+    navigate(redirectTo.startsWith(`/${user.role}`) ? redirectTo : fallback, {
       replace: true,
     })
   }
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    loginAs(email)
+    loginAs(email, password)
   }
 
   return (
@@ -46,13 +57,7 @@ export default function LoginPage() {
         <ArrowLeft className="size-4" />
         Back
       </Link>
-      <div className="relative hidden min-h-[280px] lg:block">
-        <img
-          src={loginImage}
-          alt=""
-          className="absolute inset-0 size-full object-cover"
-        />
-      </div>
+      <AuthHeroImage src={loginImage} />
 
       <div className="flex items-center justify-center bg-white px-6 py-12 sm:px-10 lg:px-16">
         <div className="w-full max-w-[400px]">
@@ -61,16 +66,19 @@ export default function LoginPage() {
               Welcome Back
             </h1>
             <p className="mx-auto mt-3 max-w-[340px] text-sm leading-6 text-[#64748B] sm:text-[15px]">
-              Sign in to your tradesman or admin dashboard on TradeTrust UK.
+              Sign in to post jobs, message tradesmen, or access your dashboard.
             </p>
           </div>
 
           <form className="mt-10 space-y-5" onSubmit={handleSubmit}>
+            {error ? (
+              <p className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
+                {error}
+              </p>
+            ) : null}
+
             <div className="space-y-2">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-[#64748B]"
-              >
+              <label htmlFor="email" className="block text-sm font-medium text-[#64748B]">
                 Email Address
               </label>
               <div className="relative">
@@ -82,7 +90,7 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   autoComplete="email"
-                  value={email}
+                  // value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="name@example.com"
                   className="h-12 w-full rounded-lg border border-[#E2E8F0] bg-white pr-4 pl-11 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#94A3B8] focus:border-btn-primary focus:ring-2 focus:ring-btn-primary/15"
@@ -92,10 +100,7 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-[#64748B]"
-                >
+                <label htmlFor="password" className="block text-sm font-medium text-[#64748B]">
                   Password
                 </label>
                 <Link
@@ -114,6 +119,8 @@ export default function LoginPage() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
+                  // value={password}
+                  onChange={(event) => setPassword(event.target.value)}
                   placeholder="••••••••"
                   className="h-12 w-full rounded-lg border border-[#E2E8F0] bg-white pr-11 pl-11 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#94A3B8] focus:border-btn-primary focus:ring-2 focus:ring-btn-primary/15"
                 />
@@ -156,14 +163,14 @@ export default function LoginPage() {
               Demo login
             </p>
             <p className="mt-2 text-xs leading-5 text-[#64748B]">
-              Use any password. Email decides the dashboard role (tradesman or admin).
+              Password for all demo accounts: <strong>{DEMO_CREDENTIALS.user.password}</strong>
             </p>
             <div className="mt-3 flex flex-col gap-2">
               {Object.values(DEMO_USERS).map((user) => (
                 <button
                   key={user.role}
                   type="button"
-                  onClick={() => loginAs(user.email)}
+                  onClick={() => loginAs(user.email, DEMO_CREDENTIALS[user.role].password)}
                   className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-left text-sm text-[#111827] transition-colors hover:border-btn-primary hover:text-btn-primary"
                 >
                   {user.roleLabel}: {user.email}

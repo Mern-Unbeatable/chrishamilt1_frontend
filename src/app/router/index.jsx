@@ -14,10 +14,18 @@ import CategoriesPage from '@/pages/public/categories/CategoriesPage'
 import HowItWorksPage from '@/pages/public/how-it-works/HowItWorksPage'
 import PricingPage from '@/pages/public/pricing/PricingPage'
 import DeveloperPage from '@/pages/public_page/DeveloperPage'
+import UserGuard from '@/app/router/UserGuard'
 import LoginPage from '@/pages/auth/login/LoginPage'
 import RegisterPage from '@/pages/auth/register/RegisterPage'
 import SignUpPage from '@/pages/auth/signup/SignUpPage'
 import DashboardComingSoonPage from '@/pages/shared/DashboardComingSoonPage'
+import MessagesPage from '@/pages/shared/MessagesPage'
+import UserProfilePage from '@/pages/user/profile/UserProfilePage'
+import PostJobPage from '@/pages/user/jobs/PostJobPage'
+import MyJobsPage from '@/pages/user/jobs/MyJobsPage'
+import JobQuotesPage from '@/pages/user/jobs/JobQuotesPage'
+import UserBookingsPage from '@/pages/user/bookings/UserBookingsPage'
+import BookingDetailsPage from '@/pages/user/bookings/BookingDetailsPage'
 import NotFoundPage from '@/pages/error/NotFoundPage'
 
 export const router = createBrowserRouter([
@@ -42,6 +50,18 @@ export const router = createBrowserRouter([
       { path: 'how-it-works', element: <HowItWorksPage /> },
       { path: 'pricing', element: <PricingPage /> },
       { path: 'jobs/:jobId', element: <JobDetailsPage /> },
+      {
+        element: <UserGuard />,
+        children: [
+          { path: 'post-job', element: <PostJobPage /> },
+          { path: 'my-jobs', element: <MyJobsPage /> },
+          { path: 'my-jobs/:jobId/quotes', element: <JobQuotesPage /> },
+          { path: 'my-bookings', element: <UserBookingsPage /> },
+          { path: 'my-bookings/:bookingId', element: <BookingDetailsPage /> },
+          { path: 'messages', element: <MessagesPage /> },
+          { path: 'user/profile', element: <UserProfilePage /> },
+        ],
+      },
     ],
   },
   {

@@ -153,7 +153,7 @@ export default function JobDetails({
         </section>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 xl:items-start">
         <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8">
           <h2 className="text-xs lg:text-sm font-semibold uppercase tracking-[0.12em] text-[var(--secondary-text)]">
             Job Description
@@ -228,7 +228,7 @@ export default function JobDetails({
         </section>
 
         {showGallery && photos.length > 0 ? (
-          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8">
+          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8 xl:self-start">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--secondary-text)]">
                 Photo Gallery
@@ -246,14 +246,14 @@ export default function JobDetails({
               />
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
-              {photos.slice(0, 5).map((photo, index) => (
+            <div className="mt-4 flex flex-wrap gap-2 sm:gap-3">
+              {photos.map((photo, index) => (
                 <button
                   key={photo.src}
                   type="button"
                   onClick={() => setActivePhotoIndex(index)}
                   className={cn(
-                    'overflow-hidden rounded-lg border-2 transition-colors',
+                    'size-16 overflow-hidden rounded-lg border-2 transition-colors sm:size-[72px]',
                     activePhotoIndex === index ? 'border-btn-primary' : 'border-transparent',
                   )}
                 >

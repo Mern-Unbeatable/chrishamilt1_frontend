@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import BrowseByTrade from '@/pages/public/home/sections/BrowseByTrade'
 import Cta from '@/pages/public/home/sections/Cta'
 import CustomerTestimonials from '@/pages/public/home/sections/CustomerTestimonials'
@@ -7,8 +8,13 @@ import HowItWorks from '@/pages/public/home/sections/HowItWorks'
 import MarketplaceMetrics from '@/pages/public/home/sections/MarketplaceMetrics'
 import RecentJobs from '@/pages/public/home/sections/RecentJobs'
 import WhyPreferTradeTrust from '@/pages/public/home/sections/WhyPreferTradeTrust'
+import { scheduleAuthImagePrefetch } from '@/helpers/prefetchAuthImages'
 
 export default function HomePage() {
+  useEffect(() => {
+    scheduleAuthImagePrefetch()
+  }, [])
+
   return (
     <>
       <Hero />

@@ -14,22 +14,24 @@ export default function Messenger({
   onSelectChat,
   onSend,
   isSending = false,
-  sidebarTitle = 'Recent Messages',
-  placeholder = 'Type a message...',
-  sendLabel = 'SMS',
+  sidebarTitle = 'Messages',
+  placeholder = 'Write a message...',
   className = '',
 }) {
+  const showInbox = !activePartnerId
+  const showChat = Boolean(activePartnerId)
+
   return (
     <div
       className={cn(
-        'flex h-full w-full min-h-[480px] flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white sm:min-h-[560px] md:flex-row',
+        'flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl border border-[#E5E7EB] bg-white shadow-[0_4px_24px_-8px_rgba(15,23,42,0.08)] md:flex-row',
         className,
       )}
     >
       <div
         className={cn(
-          'w-full shrink-0 md:w-80 lg:w-96',
-          activePartnerId ? 'hidden md:block' : 'block',
+          'flex h-full min-h-0 w-full shrink-0 flex-col md:w-[300px] lg:w-[340px]',
+          showInbox ? 'flex' : 'hidden md:flex',
         )}
       >
         <Sidebar
@@ -42,8 +44,8 @@ export default function Messenger({
 
       <div
         className={cn(
-          'min-h-[360px] min-w-0 flex-1 md:min-h-0',
-          !activePartnerId ? 'hidden md:block' : 'block',
+          'flex h-full min-h-0 min-w-0 flex-1 flex-col',
+          showChat ? 'flex' : 'hidden md:flex',
         )}
       >
         <ChatArea
@@ -53,7 +55,6 @@ export default function Messenger({
           onSendMessage={onSend}
           isSending={isSending}
           placeholder={placeholder}
-          sendLabel={sendLabel}
         />
       </div>
     </div>

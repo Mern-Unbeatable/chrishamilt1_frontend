@@ -1,6 +1,7 @@
 import { Link, Navigate, useSearchParams } from 'react-router'
 import { ArrowLeft } from 'lucide-react'
-import registerImage from '@/assets/register.png'
+import { registerImage } from '@/assets/authImages'
+import AuthHeroImage from '@/components/auth/AuthHeroImage'
 
 const VALID_ROLES = new Set(['customer', 'tradesman'])
 
@@ -68,13 +69,7 @@ export default function RegisterPage() {
         <ArrowLeft className="size-4" />
         Back
       </Link>
-      <div className="relative hidden min-h-[280px] lg:block">
-        <img
-          src={registerImage}
-          alt=""
-          className="absolute inset-0 size-full object-cover"
-        />
-      </div>
+      <AuthHeroImage src={registerImage} />
 
       <div className="flex items-center justify-center bg-white px-6 py-12 sm:px-10 lg:px-16">
         <div className="w-full max-w-[400px]">

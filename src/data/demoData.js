@@ -3,6 +3,9 @@
  * Import: import { DEMO_JOB_DETAILS } from '@/data/demoData'
  */
 
+const DEMO_JOB_CARD_IMAGE =
+  'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&q=80'
+
 export const DEMO_JOB_DETAILS = {
   id: '1',
   status: 'Open',
@@ -145,6 +148,7 @@ export const DEMO_RECENT_JOBS = [
     postedAt: '2h ago',
     category: 'Kitchen Fitting',
     viewLeadTo: '/jobs/1',
+    image: DEMO_JOB_CARD_IMAGE,
   },
   {
     id: '2',
@@ -154,6 +158,7 @@ export const DEMO_RECENT_JOBS = [
     postedAt: '4h ago',
     category: 'Kitchen Fitting',
     viewLeadTo: '/jobs/1',
+    image: DEMO_JOB_CARD_IMAGE,
   },
   {
     id: '3',
@@ -163,6 +168,7 @@ export const DEMO_RECENT_JOBS = [
     postedAt: '6h ago',
     category: 'Kitchen Fitting',
     viewLeadTo: '/jobs/1',
+    image: DEMO_JOB_CARD_IMAGE,
   },
   {
     id: '4',
@@ -172,6 +178,8 @@ export const DEMO_RECENT_JOBS = [
     postedAt: '8h ago',
     category: 'Heating & Gas',
     viewLeadTo: '/jobs/1',
+    image:
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '5',
@@ -181,6 +189,8 @@ export const DEMO_RECENT_JOBS = [
     postedAt: '12h ago',
     category: 'Electrical',
     viewLeadTo: '/jobs/1',
+    image:
+      'https://images.unsplash.com/photo-1620626011761-996317b59421?auto=format&fit=crop&w=400&q=80',
   },
 ]
 
@@ -296,63 +306,113 @@ export const DEMO_BROWSE_JOBS = [
 
 export const DEMO_MESSENGER_CHATS = [
   {
-    id: 'techprint',
-    name: 'TechPrint Hub',
-    lastMessage: 'Thanks for the update on the bathroom job.',
-    time: '4:27pm',
+    id: 'marcus-bell',
+    name: 'Marcus Bell',
+    subject: 'Garden office electrics',
+    lastMessage: 'Thanks, that works for me. Can you confirm the visit slot?',
+    time: '09:42',
+    unreadCount: 2,
     online: true,
-    initials: 'TH',
+    initials: 'MB',
     avatar: null,
   },
   {
-    id: 'maker-store',
-    name: '3D Maker Store',
-    lastMessage: 'Can you send the revised quote by tomorrow?',
-    time: '3:12pm',
+    id: 'sarah-hughes',
+    name: 'Sarah Hughes',
+    subject: 'Bathroom replumb quote',
+    lastMessage: 'Could you share availability for next week?',
+    time: 'YESTERDAY',
+    unreadCount: 0,
+    online: true,
+    initials: 'SH',
+    avatar: null,
+  },
+  {
+    id: 'james-wood',
+    name: 'James Wood',
+    subject: 'Kitchen extension wiring',
+    lastMessage: 'Photos uploaded — please review when you can.',
+    time: 'MON',
+    unreadCount: 1,
     online: false,
-    initials: '3M',
+    initials: 'JW',
     avatar: null,
   },
   {
-    id: 'printmaster',
-    name: 'PrintMaster',
-    lastMessage: 'The tiles arrived this morning.',
-    time: '1:45pm',
-    online: true,
-    initials: 'PM',
-    avatar: null,
-  },
-  {
-    id: 'ope',
-    name: 'Ope',
-    lastMessage: 'Kwasia 😂',
-    time: '12:08pm',
-    online: true,
-    initials: 'O',
+    id: 'priya-sharma',
+    name: 'Priya Sharma',
+    subject: 'Consumer unit upgrade',
+    lastMessage: 'Happy to proceed once you confirm the start date.',
+    time: 'SUN',
+    unreadCount: 0,
+    online: false,
+    initials: 'PS',
     avatar: null,
   },
 ]
 
 export const DEMO_MESSENGER_MESSAGES = {
-  ope: [
-    { id: 'date-1', type: 'date', label: 'Thursday, Jan 4 • 6:21 PM' },
-    { id: 'msg-1', sender: 'them', text: 'Hello, are you available for a quote this week?' },
-    { id: 'msg-2', sender: 'me', text: 'Yes, I can visit on Friday morning.' },
-    { id: 'msg-3', sender: 'them', text: 'Perfect. Can you also look at the ensuite while you are there?' },
-    { id: 'msg-4', sender: 'me', text: 'Kwasia 😂' },
+  'marcus-bell': [
+    { id: 'date-1', type: 'date', label: 'Today' },
+    {
+      id: 'msg-1',
+      sender: 'them',
+      text: 'Hi, I posted a job for garden office electrics. Are you available for a site visit this week?',
+      time: '09:12',
+    },
+    {
+      id: 'msg-2',
+      sender: 'me',
+      text: 'Morning Marcus — yes, I can visit Thursday or Friday morning. Which works best for you?',
+      time: '09:18',
+      read: true,
+    },
+    {
+      id: 'msg-3',
+      sender: 'them',
+      text: 'Friday morning would be ideal. The office is at the bottom of the garden with its own consumer unit.',
+      time: '09:24',
+    },
+    {
+      id: 'msg-4',
+      sender: 'me',
+      text: 'Perfect. I will bring the NICEIC paperwork and check the existing feed from the house.',
+      time: '09:31',
+      read: true,
+    },
+    {
+      id: 'msg-5',
+      sender: 'them',
+      text: 'Thanks, that works for me. Can you confirm the visit slot?',
+      time: '09:42',
+    },
   ],
-  techprint: [
-    { id: 'date-1', type: 'date', label: 'Wednesday, Jan 3 • 4:27 PM' },
-    { id: 'msg-1', sender: 'them', text: 'Thanks for the update on the bathroom job.' },
-    { id: 'msg-2', sender: 'me', text: 'No problem. I will send photos once the tiling is done.' },
+  'sarah-hughes': [
+    { id: 'date-1', type: 'date', label: 'Yesterday' },
+    {
+      id: 'msg-1',
+      sender: 'them',
+      text: 'Could you share availability for next week?',
+      time: '16:20',
+    },
   ],
-  'maker-store': [
-    { id: 'date-1', type: 'date', label: 'Tuesday, Jan 2 • 3:12 PM' },
-    { id: 'msg-1', sender: 'them', text: 'Can you send the revised quote by tomorrow?' },
+  'james-wood': [
+    { id: 'date-1', type: 'date', label: 'Monday' },
+    {
+      id: 'msg-1',
+      sender: 'them',
+      text: 'Photos uploaded — please review when you can.',
+      time: '11:05',
+    },
   ],
-  printmaster: [
-    { id: 'date-1', type: 'date', label: 'Monday, Jan 1 • 1:45 PM' },
-    { id: 'msg-1', sender: 'them', text: 'The tiles arrived this morning.' },
+  'priya-sharma': [
+    { id: 'date-1', type: 'date', label: 'Sunday' },
+    {
+      id: 'msg-1',
+      sender: 'them',
+      text: 'Happy to proceed once you confirm the start date.',
+      time: '14:48',
+    },
   ],
 }
 

@@ -76,7 +76,9 @@ function QuoteCardPreview() {
         <QuoteCard
           variant="customer"
           {...customerQuote}
+          onHireTradesman={() => {}}
           onViewDetails={() => {}}
+          onMessage={() => {}}
         />
       </div>
     </PreviewFrame>
@@ -157,8 +159,8 @@ function MessengerPreview() {
   const state = useMessages()
 
   return (
-    <PreviewFrame className="h-[480px] sm:h-[560px]">
-      <Messenger {...state} placeholder="Text message form MTN" className="h-full" />
+    <PreviewFrame className="h-[min(680px,calc(100dvh-8rem))] min-h-[520px] p-4 sm:p-6">
+      <Messenger {...state} placeholder="Write a message..." className="h-full min-h-0" />
     </PreviewFrame>
   )
 }

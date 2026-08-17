@@ -729,7 +729,7 @@ export const COMPONENT_DOCS = [
         name: 'sidebarTitle',
         type: 'string',
         required: false,
-        defaultValue: "'Recent Messages'",
+        defaultValue: "'Messages'",
         description: 'Sidebar heading.',
       },
       {
@@ -745,8 +745,8 @@ export const COMPONENT_DOCS = [
 <Messenger {...state} />`,
     optionalExample: `<Messenger
   {...state}
-  sidebarTitle="Recent Messages"
-  placeholder="Text message form MTN"
+  sidebarTitle="Messages"
+  placeholder="Write a message..."
   className="h-[600px]"
 />`,
     previewId: 'messenger',

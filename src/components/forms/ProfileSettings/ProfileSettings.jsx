@@ -6,7 +6,7 @@ import { DEMO_PROFILE_CITY_OPTIONS, DEMO_PROFILE_REGION_OPTIONS } from '@/data/d
 const ROLE_CONFIG = {
   user: {
     layout: 'account',
-    showPageHeader: false,
+    showPageHeader: true,
     showAvatarUpload: true,
     showAccountPhone: true,
     showAddressFields: true,
@@ -189,7 +189,7 @@ function SectionTitle({ children }) {
 
 function AvatarUpload({ form, fileRef, fileInputId, onPick }) {
   return (
-    <div className="relative inline-flex shrink-0">
+    <div className="relative inline-flex shrink-0 self-start">
       <div className="flex size-20 items-center justify-center overflow-hidden rounded-full bg-[#E5E7EB] text-[var(--secondary-text)] sm:size-24">
         {form.avatarUrl ? (
           <img src={form.avatarUrl} alt="" className="size-full object-cover" />
@@ -453,7 +453,7 @@ export default function ProfileSettings({
     <Card>
       <CardHeader>Account setting</CardHeader>
       <div className="p-5 sm:p-6">
-        <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
           <AvatarUpload
             form={form}
             fileRef={fileRef}
@@ -554,7 +554,7 @@ export default function ProfileSettings({
           <h1 className="text-2xl font-bold tracking-tight text-[var(--primary-text)] sm:text-3xl">
             {title}
           </h1>
-          <p className="mt-1.5 text-sm text-[var(--secondary-text)]">{subtitle}</p>
+          <p className="mt-1.5 text-sm lg:text-base text-[var(--secondary-text)]">{subtitle}</p>
         </header>
       ) : null}
 

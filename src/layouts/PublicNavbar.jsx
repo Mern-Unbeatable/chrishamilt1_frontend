@@ -1,21 +1,33 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { NavLink, Link, useLocation } from 'react-router'
 import { Menu, X } from 'lucide-react'
 import Logo from '@/components/Logo'
 import { cn } from '@/helpers/cn'
+import { prefetchAuthImagesOnIntent } from '@/helpers/prefetchAuthImages'
 import { useSectionInView } from '@/hooks/useSectionInView'
+import { useAuth } from '@/auth/AuthProvider'
+import PublicNavbarUserActions from '@/layouts/PublicNavbarUserActions'
 
-const navLinks = [
-  { label: 'Browse Job', to: '/jobs' },
+const BASE_NAV_LINKS = [
+  { label: 'Browse Job', to: '/jobs', matchPrefix: '/jobs' },
   { label: 'Categories', to: '/#categories', sectionId: 'categories' },
   { label: 'Pricing', to: '/pricing' },
   { label: 'About', to: '/about' },
-  // { label: 'My Job Post', to: '/auth/signup' },
 ]
+
+const USER_NAV_LINK = { label: 'My Job Post', to: '/my-jobs', matchPrefix: '/my-jobs' }
+
+function isPathPrefixActive(pathname, prefix) {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`)
+}
 
 function isNavLinkActive(link, location, defaultActive, sectionInView) {
   if (link.sectionId) {
     return location.pathname === '/' && sectionInView
+  }
+
+  if (link.matchPrefix) {
+    return isPathPrefixActive(location.pathname, link.matchPrefix)
   }
 
   return defaultActive
@@ -24,11 +36,17 @@ function isNavLinkActive(link, location, defaultActive, sectionInView) {
 export default function PublicNavbar() {
   const location = useLocation()
   const { pathname } = location
+  const { isUser } = useAuth()
   const hasGradientHero =
     pathname === '/' || pathname === '/jobs' || pathname === '/pricing' || pathname === '/about'
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const categoriesInView = useSectionInView('categories', pathname === '/')
+
+  const navLinks = useMemo(
+    () => (isUser ? [...BASE_NAV_LINKS, USER_NAV_LINK] : BASE_NAV_LINKS),
+    [isUser],
+  )
 
   useEffect(() => { setOpen(false) }, [pathname])
 
@@ -54,10 +72,17 @@ export default function PublicNavbar() {
           isSolid ? 'bg-secondary' : 'bg-transparent',
         )}
       >
-        <div className="container mx-auto grid h-[72px] grid-cols-[1fr_auto] items-center gap-4 px-5 lg:grid-cols-[220px_1fr_220px] lg:px-8">
+        <div
+          className={cn(
+            'container mx-auto grid h-[72px] items-center gap-4 px-5 lg:px-8',
+            isUser
+              ? 'grid-cols-[1fr_auto] lg:grid-cols-[200px_1fr_auto]'
+              : 'grid-cols-[1fr_auto] lg:grid-cols-[220px_1fr_220px]',
+          )}
+        >
           <Logo />
 
-          <nav className="hidden items-center justify-center gap-8 lg:flex">
+          <nav className="hidden items-center justify-center gap-6 xl:gap-8 lg:flex">
             {navLinks.map((link) => (
               <NavLink
                 key={link.label}
@@ -82,13 +107,29 @@ export default function PublicNavbar() {
           </nav>
 
           <div className="flex items-center justify-end gap-2">
-            <div className="hidden items-center gap-3 lg:flex">
-              <NavLink to="/auth/login" className="rounded-full bg-btn-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]">
-                Login
-              </NavLink>
-              <NavLink to="/auth/signup" className="rounded-full border border-[#E5E7EB] bg-white px-6 py-2.5 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#F8FAFC]">
-                Register
-              </NavLink>
+            <div className="hidden items-center lg:flex">
+              {isUser ? (
+                <PublicNavbarUserActions />
+              ) : (
+                <div className="flex items-center gap-3">
+                  <NavLink
+                    to="/auth/login"
+                    onMouseEnter={prefetchAuthImagesOnIntent}
+                    onFocus={prefetchAuthImagesOnIntent}
+                    className="rounded-full bg-btn-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]"
+                  >
+                    Login
+                  </NavLink>
+                  <NavLink
+                    to="/auth/signup"
+                    onMouseEnter={prefetchAuthImagesOnIntent}
+                    onFocus={prefetchAuthImagesOnIntent}
+                    className="rounded-full border border-[#E5E7EB] bg-white px-6 py-2.5 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#F8FAFC]"
+                  >
+                    Register
+                  </NavLink>
+                </div>
+              )}
             </div>
             <button
               type="button"
@@ -110,10 +151,12 @@ export default function PublicNavbar() {
         )}
       />
 
-      <aside className={cn(
-        'fixed top-0 right-0 z-40 flex h-full w-[300px] flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out lg:hidden',
-        open ? 'translate-x-0' : 'translate-x-full',
-      )}>
+      <aside
+        className={cn(
+          'fixed top-0 right-0 z-40 flex h-full w-[300px] flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out lg:hidden',
+          open ? 'translate-x-0' : 'translate-x-full',
+        )}
+      >
         <div className="flex h-[72px] items-center justify-between border-b border-[#F1F5F9] px-5">
           <Logo />
           <button
@@ -150,13 +193,29 @@ export default function PublicNavbar() {
           ))}
         </nav>
 
-        <div className="flex flex-col gap-3 border-t border-[#F1F5F9] p-5">
-          <Link to="/auth/login" className="flex h-11 items-center justify-center rounded-full bg-btn-primary text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]">
-            Login
-          </Link>
-          <Link to="/auth/signup" className="flex h-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-sm font-semibold text-[#111827] transition-colors hover:bg-[#F8FAFC]">
-            Register
-          </Link>
+        <div className="border-t border-[#F1F5F9] p-5">
+          {isUser ? (
+            <PublicNavbarUserActions compact />
+          ) : (
+            <div className="flex flex-col gap-3">
+              <Link
+                to="/auth/login"
+                onMouseEnter={prefetchAuthImagesOnIntent}
+                onFocus={prefetchAuthImagesOnIntent}
+                className="flex h-11 items-center justify-center rounded-full bg-btn-primary text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]"
+              >
+                Login
+              </Link>
+              <Link
+                to="/auth/signup"
+                onMouseEnter={prefetchAuthImagesOnIntent}
+                onFocus={prefetchAuthImagesOnIntent}
+                className="flex h-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-sm font-semibold text-[#111827] transition-colors hover:bg-[#F8FAFC]"
+              >
+                Register
+              </Link>
+            </div>
+          )}
         </div>
       </aside>
     </>

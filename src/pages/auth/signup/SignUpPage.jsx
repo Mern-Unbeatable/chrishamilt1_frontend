@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { Building2, ArrowLeft, User } from 'lucide-react'
-import registerImage from '@/assets/register.png'
+import { registerImage } from '@/assets/authImages'
+import AuthHeroImage from '@/components/auth/AuthHeroImage'
 import Logo from '@/components/Logo'
 import { cn } from '@/helpers/cn'
 
@@ -38,13 +39,7 @@ export default function SignUpPage() {
         <ArrowLeft className="size-4" />
         Back
       </Link>
-      <div className="relative hidden min-h-[280px] lg:block">
-        <img
-          src={registerImage}
-          alt=""
-          className="absolute inset-0 size-full object-cover"
-        />
-      </div>
+      <AuthHeroImage src={registerImage} />
 
       <div className="flex items-center justify-center bg-white px-6 py-12 sm:px-10 lg:px-16">
         <div className="w-full max-w-[420px]">
