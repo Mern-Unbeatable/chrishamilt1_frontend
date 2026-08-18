@@ -608,6 +608,65 @@ export const DEMO_ADMIN_CUSTOMERS = [
   },
 ]
 
+export const DEMO_ADMIN_TRADESMEN = [
+  {
+    id: '1',
+    tradesmanName: 'Annette Black',
+    email: 'nathan.roberts@example.com',
+    phoneNumber: '(629) 555-0129',
+    location: '6391 Elgin St.\nCelina, Delaware 10299',
+    status: 'Active',
+  },
+  {
+    id: '2',
+    tradesmanName: 'Leslie Alexander',
+    email: 'tim.jennings@example.com',
+    phoneNumber: '(603) 555-0123',
+    location: '8502 Preston Rd.\nInglewood, Maine 98380',
+    status: 'Active',
+  },
+  {
+    id: '3',
+    tradesmanName: 'Devon Lane',
+    email: 'debra.holt@example.com',
+    phoneNumber: '(704) 555-0127',
+    location: '3891 Ranchview Dr.\nRichardson, California 62639',
+    status: 'Active',
+  },
+  {
+    id: '4',
+    tradesmanName: 'Eleanor Pena',
+    email: 'ronald.richards@example.com',
+    phoneNumber: '(201) 555-0124',
+    location: '4140 Parker Rd.\nAllentown, New Mexico 31134',
+    status: 'Suspend',
+  },
+  {
+    id: '5',
+    tradesmanName: 'Ronald Richards',
+    email: 'esther.howard@example.com',
+    phoneNumber: '(907) 555-0101',
+    location: '2715 Ash Dr.\nSan Jose, South Dakota 83475',
+    status: 'Active',
+  },
+  {
+    id: '6',
+    tradesmanName: 'Esther Howard',
+    email: 'robert.fox@example.com',
+    phoneNumber: '(808) 555-0111',
+    location: '4517 Washington Ave.\nManchester, Kentucky 39495',
+    status: 'Active',
+  },
+  {
+    id: '7',
+    tradesmanName: 'Robert Fox',
+    email: 'jenny.wilson@example.com',
+    phoneNumber: '(316) 555-0116',
+    location: '2464 Royal Ln.\nMesa, New Jersey 45463',
+    status: 'Active',
+  },
+]
+
 export const DEMO_TABLE_MENU_ACTIONS = [
   { id: 'view', label: 'View', onClick: () => {} },
   { id: 'edit', label: 'Edit', onClick: () => {} },

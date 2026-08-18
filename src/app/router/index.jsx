@@ -30,7 +30,16 @@ import TradesmanWalletPage from '@/pages/tradesman/wallet/TradesmanWalletPage'
 import TradesmanEarningsPage from '@/pages/tradesman/earnings/TradesmanEarningsPage'
 import TradesmanReviewsPage from '@/pages/tradesman/reviews/TradesmanReviewsPage'
 import TradesmanProfilePage from '@/pages/tradesman/profile/TradesmanProfilePage'
-import DashboardComingSoonPage from '@/pages/shared/DashboardComingSoonPage'
+import AdminCustomersPage from '@/pages/admin/customers/AdminCustomersPage'
+import AdminTradesmenPage from '@/pages/admin/tradesmen/AdminTradesmenPage'
+import AdminTradesmanDetailsPage from '@/pages/admin/tradesmen/AdminTradesmanDetailsPage'
+import AdminJobsPage from '@/pages/admin/jobs/AdminJobsPage'
+import AdminJobDetailsPage from '@/pages/admin/jobs/AdminJobDetailsPage'
+import AdminJobQuotesPage from '@/pages/admin/jobs/AdminJobQuotesPage'
+import AdminCategoriesPage from '@/pages/admin/categories/AdminCategoriesPage'
+import AdminTokenManagementPage from '@/pages/admin/tokens/AdminTokenManagementPage'
+import AdminDashboardPage from '@/pages/admin/dashboard/AdminDashboardPage'
+import AdminSettingsPage from '@/pages/admin/settings/AdminSettingsPage'
 import MessagesPage from '@/pages/shared/MessagesPage'
 import UserProfilePage from '@/pages/user/profile/UserProfilePage'
 import PostJobPage from '@/pages/user/jobs/PostJobPage'
@@ -130,14 +139,17 @@ export const router = createBrowserRouter([
             element: <AdminLayout />,
             children: [
               { index: true, element: <Navigate to="dashboard" replace /> },
-              { path: 'dashboard', element: <DashboardComingSoonPage title="Dashboard" /> },
-              { path: 'customers', element: <DashboardComingSoonPage title="Customers" /> },
+              { path: 'dashboard', element: <AdminDashboardPage /> },
+              { path: 'customers', element: <AdminCustomersPage /> },
               { path: 'users', element: <Navigate to="/admin/customers" replace /> },
-              { path: 'tradesmen', element: <DashboardComingSoonPage title="Tradesman" /> },
-              { path: 'jobs', element: <DashboardComingSoonPage title="Jobs" /> },
-              { path: 'categories', element: <DashboardComingSoonPage title="Categories" /> },
-              { path: 'tokens', element: <DashboardComingSoonPage title="Token Management" /> },
-              { path: 'profile', element: <DashboardComingSoonPage title="My Profile" /> },
+              { path: 'tradesmen', element: <AdminTradesmenPage /> },
+              { path: 'tradesmen/:tradesmanId', element: <AdminTradesmanDetailsPage /> },
+              { path: 'jobs', element: <AdminJobsPage /> },
+              { path: 'jobs/:jobId', element: <AdminJobDetailsPage /> },
+              { path: 'jobs/:jobId/quotes', element: <AdminJobQuotesPage /> },
+              { path: 'categories', element: <AdminCategoriesPage /> },
+              { path: 'tokens', element: <AdminTokenManagementPage /> },
+              { path: 'profile', element: <AdminSettingsPage /> },
               { path: 'settings', element: <Navigate to="/admin/profile" replace /> },
             ],
           },

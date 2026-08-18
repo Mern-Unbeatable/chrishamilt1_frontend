@@ -12,6 +12,7 @@ const STATUS_STYLES = {
   rejected: 'bg-[#FEF2F2] text-[#DC2626]',
   withdrawn: 'bg-[#F1F5F9] text-[#64748B]',
   submitted: 'bg-[#FFFBEB] text-[#D97706]',
+  paid: 'bg-[#ECFDF5] text-[#059669]',
   default: 'bg-[#F1F5F9] text-[#64748B]',
 }
 

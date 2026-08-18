@@ -7,7 +7,7 @@ const URGENCY_STYLES = {
   low: 'bg-[#ECFDF5] text-[#059669]',
 }
 
-export default function JobDetailsSummary({ job, onSendQuote }) {
+export default function JobDetailsSummary({ job, onSendQuote, sendQuoteLabel = 'Send Quote' }) {
   const {
     category,
     urgency,
@@ -73,7 +73,7 @@ export default function JobDetailsSummary({ job, onSendQuote }) {
             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-btn-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] sm:w-auto"
           >
             <Mail className="size-4" />
-            Send Quote
+            {sendQuoteLabel}
           </button>
         ) : null}
       </div>
