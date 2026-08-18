@@ -13,6 +13,8 @@ export default function TokenPricingCard({
   featured = false,
   badgeLabel = 'Most popular',
   onBuyTokens,
+  onEdit,
+  onDelete,
   buyLabel = 'Buy Tokens',
   className = '',
 }) {
@@ -53,7 +55,28 @@ export default function TokenPricingCard({
         {description}
       </p>
 
-      {onBuyTokens ? (
+      {onEdit || onDelete ? (
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          {onEdit ? (
+            <button
+              type="button"
+              onClick={onEdit}
+              className="rounded-xl bg-btn-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]"
+            >
+              Edit
+            </button>
+          ) : null}
+          {onDelete ? (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="rounded-xl bg-[#EF4444] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#DC2626]"
+            >
+              Delete
+            </button>
+          ) : null}
+        </div>
+      ) : onBuyTokens ? (
         <button
           type="button"
           onClick={onBuyTokens}

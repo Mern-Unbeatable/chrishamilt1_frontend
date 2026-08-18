@@ -1,39 +1,10 @@
 import { Link } from 'react-router'
-import {
-  Box,
-  Building2,
-  Droplets,
-  Flame,
-  Grid2x2,
-  Grid3x3,
-  Hammer,
-  Home,
-  Leaf,
-  Paintbrush,
-  Sparkles,
-  Sun,
-  Wrench,
-  Zap,
-} from 'lucide-react'
-
-const TRADES = [
-  { icon: Droplets, name: 'Plumbing', jobs: 234 },
-  { icon: Zap, name: 'Electrical', jobs: 189 },
-  { icon: Home, name: 'Roofing', jobs: 156 },
-  { icon: Hammer, name: 'Carpentry', jobs: 143 },
-  { icon: Paintbrush, name: 'Painting', jobs: 211 },
-  { icon: Sparkles, name: 'Cleaning', jobs: 178 },
-  { icon: Leaf, name: 'Gardening', jobs: 165 },
-  { icon: Wrench, name: 'Handyman', jobs: 298 },
-  { icon: Grid2x2, name: 'Flooring', jobs: 127 },
-  { icon: Flame, name: 'Heating', jobs: 193 },
-  { icon: Building2, name: 'Building', jobs: 89 },
-  { icon: Sun, name: 'Renovation', jobs: 76 },
-  { icon: Grid3x3, name: 'Tiling', jobs: 134 },
-  { icon: Box, name: 'Flat Pack', jobs: 203 },
-]
+import TradeIcon from '@/components/common/TradeIcon'
+import { useTradeCategories } from '@/context/TradeCategoriesProvider'
 
 export default function BrowseByTrade() {
+  const { categories } = useTradeCategories()
+
   return (
     <section
       id="categories"
@@ -51,26 +22,24 @@ export default function BrowseByTrade() {
         </div>
 
         <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
-          {TRADES.map((trade) => {
-            const Icon = trade.icon
-
-            return (
-              <Link
-                key={trade.name}
-                data-scroll-item
-                to="/jobs"
-                className="flex flex-col items-center rounded-xl bg-primary px-4 py-6 text-center transition-colors hover:bg-[#DCE9FD]"
-              >
-                <span className="flex size-10 items-center justify-center rounded-full bg-btn-primary text-white">
-                  <Icon className="size-5" strokeWidth={2} />
-                </span>
-                <span className="mt-4 text-sm font-semibold text-[#111827]">
-                  {trade.name}
-                </span>
-                <span className="mt-1 text-xs text-[#64748B]">{trade.jobs} jobs</span>
-              </Link>
-            )
-          })}
+          {categories.map((trade) => (
+            <Link
+              key={trade.id}
+              data-scroll-item
+              to="/jobs"
+              className="flex flex-col items-center rounded-xl bg-primary px-4 py-6 text-center transition-colors hover:bg-[#DCE9FD]"
+            >
+              <span className="flex size-10 items-center justify-center rounded-full bg-btn-primary text-white">
+                <TradeIcon name={trade.icon} className="size-5" strokeWidth={2} />
+              </span>
+              <span className="mt-4 text-sm font-semibold text-[#111827]">
+                {trade.name}
+              </span>
+              <span className="mt-1 text-xs text-[#64748B]">
+                {trade.jobs} {trade.jobs === 1 ? 'job' : 'jobs'}
+              </span>
+            </Link>
+          ))}
         </div>
       </div>
     </section>

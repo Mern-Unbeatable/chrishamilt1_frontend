@@ -266,31 +266,33 @@ export default function QuoteDetailsModal({
           {activeTab === 'reviews' ? <ReviewsTab reviews={quote.reviews} /> : null}
         </div>
 
-        <div className="border-t border-[#E5E7EB] px-4 py-4 sm:px-6">
-          <div className="flex flex-col gap-3 sm:flex-row">
-            {onMessage ? (
-              <button
-                type="button"
-                onClick={onMessage}
-                className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full border border-btn-primary bg-white text-sm font-semibold text-btn-primary transition-colors hover:bg-[#EFF6FF]"
-              >
-                <MessageCircle className="size-4 shrink-0" strokeWidth={1.75} />
-                {messageLabel}
-              </button>
-            ) : null}
+        {(onMessage || onHireTradesman) ? (
+          <div className="border-t border-[#E5E7EB] px-4 py-4 sm:px-6">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              {onMessage ? (
+                <button
+                  type="button"
+                  onClick={onMessage}
+                  className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full border border-btn-primary bg-white text-sm font-semibold text-btn-primary transition-colors hover:bg-[#EFF6FF]"
+                >
+                  <MessageCircle className="size-4 shrink-0" strokeWidth={1.75} />
+                  {messageLabel}
+                </button>
+              ) : null}
 
-            {onHireTradesman ? (
-              <button
-                type="button"
-                onClick={onHireTradesman}
-                className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-btn-primary text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]"
-              >
-                <Check className="size-4 shrink-0" strokeWidth={2.25} />
-                {hireTradesmanLabel}
-              </button>
-            ) : null}
+              {onHireTradesman ? (
+                <button
+                  type="button"
+                  onClick={onHireTradesman}
+                  className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-btn-primary text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]"
+                >
+                  <Check className="size-4 shrink-0" strokeWidth={2.25} />
+                  {hireTradesmanLabel}
+                </button>
+              ) : null}
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </div>,
     document.body,

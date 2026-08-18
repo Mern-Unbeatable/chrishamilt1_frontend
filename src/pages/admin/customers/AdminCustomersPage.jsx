@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router'
 import DataTable, { StatusBadge } from '@/components/data-display/DataTable/DataTable'
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
-import { DEMO_ADMIN_TRADESMEN } from '@/data/demoData'
+import { DEMO_ADMIN_CUSTOMERS } from '@/data/demoData'
 
 const PAGE_SIZE = 7
 
-const TRADESMAN_COLUMNS = [
-  { key: 'tradesmanName', header: 'Tradesman Name' },
+const CUSTOMER_COLUMNS = [
+  { key: 'userName', header: 'User Name' },
   { key: 'email', header: 'Email' },
   { key: 'phoneNumber', header: 'Phone Number' },
   {
@@ -19,21 +18,17 @@ const TRADESMAN_COLUMNS = [
       <span className="whitespace-pre-line text-sm leading-5">{value}</span>
     ),
   },
+  { key: 'jobsPosted', header: 'Jobs Posted' },
   {
     key: 'status',
     header: 'Status',
     render: (value) => <StatusBadge status={value} />,
   },
+  { key: 'joinedDate', header: 'Joined Date' },
 ]
 
-function buildTradesmanActions({ onSeeDetails, onSetActive, onSetSuspend, onDelete }) {
+function buildCustomerActions({ onSetActive, onSetSuspend, onDelete }) {
   return [
-    {
-      id: 'details',
-      label: 'See Details',
-      variant: 'header',
-      onClick: onSeeDetails,
-    },
     {
       id: 'active',
       label: 'Active',
@@ -53,88 +48,79 @@ function buildTradesmanActions({ onSeeDetails, onSetActive, onSetSuspend, onDele
   ]
 }
 
-export default function AdminTradesmenPage() {
-  const navigate = useNavigate()
-  const [tradesmen, setTradesmen] = useState(DEMO_ADMIN_TRADESMEN)
+export default function AdminCustomersPage() {
+  const [customers, setCustomers] = useState(DEMO_ADMIN_CUSTOMERS)
   const [page, setPage] = useState(1)
 
-  const totalPages = Math.max(1, Math.ceil(tradesmen.length / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil(customers.length / PAGE_SIZE))
 
-  const paginatedTradesmen = useMemo(() => {
+  const paginatedCustomers = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE
-    return tradesmen.slice(start, start + PAGE_SIZE)
-  }, [tradesmen, page])
+    return customers.slice(start, start + PAGE_SIZE)
+  }, [customers, page])
 
   useEffect(() => {
     if (page > totalPages) setPage(totalPages)
   }, [page, totalPages])
 
-  const handleSeeDetails = useCallback(
-    (row) => {
-      navigate(`/admin/tradesmen/${row.id}`)
-    },
-    [navigate],
-  )
-
   const handleSetActive = useCallback((row) => {
-    setTradesmen((current) =>
-      current.map((tradesman) =>
-        tradesman.id === row.id ? { ...tradesman, status: 'Active' } : tradesman,
+    setCustomers((current) =>
+      current.map((customer) =>
+        customer.id === row.id ? { ...customer, status: 'Active' } : customer,
       ),
     )
   }, [])
 
   const handleSetSuspend = useCallback((row) => {
-    setTradesmen((current) =>
-      current.map((tradesman) =>
-        tradesman.id === row.id ? { ...tradesman, status: 'Suspend' } : tradesman,
+    setCustomers((current) =>
+      current.map((customer) =>
+        customer.id === row.id ? { ...customer, status: 'Suspend' } : customer,
       ),
     )
   }, [])
 
   const handleDelete = useCallback((row) => {
-    setTradesmen((current) => current.filter((tradesman) => tradesman.id !== row.id))
+    setCustomers((current) => current.filter((customer) => customer.id !== row.id))
   }, [])
 
   const actions = useMemo(
     () =>
-      buildTradesmanActions({
-        onSeeDetails: handleSeeDetails,
+      buildCustomerActions({
         onSetActive: handleSetActive,
         onSetSuspend: handleSetSuspend,
         onDelete: handleDelete,
       }),
-    [handleSeeDetails, handleSetActive, handleSetSuspend, handleDelete],
+    [handleSetActive, handleSetSuspend, handleDelete],
   )
 
-  const from = tradesmen.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
-  const to = Math.min(page * PAGE_SIZE, tradesmen.length)
+  const from = customers.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
+  const to = Math.min(page * PAGE_SIZE, customers.length)
 
   return (
     <div className="space-y-6">
       <DashboardPageHeader
-        title="Tradesmen"
-        description="Monitor every tradesman on the platform — their token balance, quote activity, and account standing."
+        title="Customers"
+        description="Manage all registered customers, review their job history, and control account access."
       />
 
       <DataTable
-        columns={TRADESMAN_COLUMNS}
-        data={paginatedTradesmen}
+        columns={CUSTOMER_COLUMNS}
+        data={paginatedCustomers}
         showActions
         actions={actions}
         showPagination
         pagination={{
           page,
           pageSize: PAGE_SIZE,
-          total: tradesmen.length,
+          total: customers.length,
           from,
           to,
           hasPrevious: page > 1,
           hasNext: page < totalPages,
           onPageChange: setPage,
         }}
-        emptyMessage="No tradesmen found."
-        tableMinWidth="960px"
+        emptyMessage="No customers found."
+        tableMinWidth="1100px"
       />
     </div>
   )
