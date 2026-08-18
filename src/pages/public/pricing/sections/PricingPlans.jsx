@@ -28,8 +28,7 @@ export default function PricingPlans({ onSelectPlan }) {
             Choose Your Token Package
           </h2>
           <p className="mt-4 text-base leading-7 text-[#64748B]">
-            Purchase tokens to unlock customer job leads. The more tokens you buy, the
-            better the value.
+          Choose the package that fits your business and get more value with larger token bundles.
           </p>
         </div>
 
