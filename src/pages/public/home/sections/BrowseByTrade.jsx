@@ -1,9 +1,10 @@
 import { Link } from 'react-router'
 import TradeIcon from '@/components/common/TradeIcon'
-import { useTradeCategories } from '@/context/TradeCategoriesProvider'
+import { DEFAULT_TRADE_CATEGORIES } from '@/data/categoriesData'
+
+const BROWSE_BY_TRADE_CATEGORIES = DEFAULT_TRADE_CATEGORIES.slice(0, 14)
 
 export default function BrowseByTrade() {
-  const { categories } = useTradeCategories()
 
   return (
     <section
@@ -22,7 +23,7 @@ export default function BrowseByTrade() {
         </div>
 
         <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
-          {categories.map((trade) => (
+          {BROWSE_BY_TRADE_CATEGORIES.map((trade) => (
             <Link
               key={trade.id}
               data-scroll-item
