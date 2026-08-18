@@ -6,6 +6,7 @@ import AuthHeroImage from '@/components/auth/AuthHeroImage'
 import { useAuth } from '@/auth/AuthProvider'
 import { getRememberMePreference } from '@/auth/authStorage'
 import { getDashboardHome } from '@/auth/authService'
+import { getTradesmanHomePath, hasTradesmanSubscription } from '@/auth/tradesmanSubscription'
 import { DEMO_CREDENTIALS } from '@/auth/demoAuth'
 
 export default function LoginPage() {
@@ -36,6 +37,20 @@ export default function LoginPage() {
     if (user.role === 'user') {
       const redirectTo = location.state?.from || '/'
       navigate(redirectTo, { replace: true })
+      return
+    }
+
+    if (user.role === 'tradesman') {
+      if (!hasTradesmanSubscription(user.email)) {
+        navigate('/tradesman/choose-plan', { replace: true })
+        return
+      }
+
+      const fallback = getTradesmanHomePath(user.email)
+      const redirectTo = location.state?.from || fallback
+      navigate(redirectTo.startsWith('/tradesman') ? redirectTo : fallback, {
+        replace: true,
+      })
       return
     }
 
