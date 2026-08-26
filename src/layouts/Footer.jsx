@@ -20,10 +20,9 @@ const TRADESMAN_LINKS = [
 ]
 
 const LEGAL_LINKS = [
-  { label: 'Privacy Policy', to: '/about' },
-  { label: 'Terms of Service', to: '/about' },
-  { label: 'Cookie Policy', to: '/about' },
-  { label: 'Help Centre', to: '/contact' },
+  { label: 'Privacy Policy', to: '/privacy-policy' },
+  { label: 'Terms of Service', to: '/terms-of-service' },
+  { label: 'Cookie Policy', to: '/cookie-policy' },
 ]
 
 const CONTACT_ITEMS = [
