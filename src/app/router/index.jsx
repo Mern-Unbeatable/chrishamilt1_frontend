@@ -14,6 +14,9 @@ import JobDetailsPage from '@/pages/public/jobs/JobDetailsPage'
 import CategoriesPage from '@/pages/public/categories/CategoriesPage'
 import HowItWorksPage from '@/pages/public/how-it-works/HowItWorksPage'
 import PricingPage from '@/pages/public/pricing/PricingPage'
+import PrivacyPolicyPage from '@/pages/public/legal/PrivacyPolicyPage'
+import TermsOfServicePage from '@/pages/public/legal/TermsOfServicePage'
+import CookiePolicyPage from '@/pages/public/legal/CookiePolicyPage'
 import DeveloperPage from '@/pages/public_page/DeveloperPage'
 import UserGuard from '@/app/router/UserGuard'
 import LoginPage from '@/pages/auth/login/LoginPage'
@@ -72,6 +75,9 @@ export const router = createBrowserRouter([
       { path: 'categories', element: <CategoriesPage /> },
       { path: 'how-it-works', element: <HowItWorksPage /> },
       { path: 'pricing', element: <PricingPage /> },
+      { path: 'privacy-policy', element: <PrivacyPolicyPage /> },
+      { path: 'terms-of-service', element: <TermsOfServicePage /> },
+      { path: 'cookie-policy', element: <CookiePolicyPage /> },
       { path: 'jobs/:jobId', element: <JobDetailsPage /> },
       {
         element: <UserGuard />,
