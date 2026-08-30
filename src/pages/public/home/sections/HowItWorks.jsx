@@ -23,7 +23,7 @@ const AUDIENCES = {
         imageAlt: 'Register for a free account',
         title: 'Register Free',
         description:
-          'Sign up in 30 seconds with your email or Google account. No credit card required.',
+          'Sign up in 30 seconds with your email. No credit card required.',
       },
       {
         image: postsIllustration,
@@ -80,7 +80,7 @@ function StepColumn({ step, index, total }) {
         <img
           src={step.image}
           alt={step.imageAlt ?? step.title}
-          className="h-36 w-full max-w-[220px] object-contain sm:h-40"
+          className="h-36 w-full max-w-55 object-contain sm:h-40"
         />
       </div>
 
@@ -90,7 +90,7 @@ function StepColumn({ step, index, total }) {
       {index < total - 1 ? (
         <span
           aria-hidden="true"
-          className="absolute left-[calc(50%+1.75rem)] top-[1.375rem] hidden h-px w-[calc(100%-3.5rem)] bg-[#CBD5E1] lg:block"
+          className="absolute left-[calc(50%+1.75rem)] top-5.5 hidden h-px w-[calc(100%-3.5rem)] bg-[#CBD5E1] lg:block"
         />
       ) : null}
     </article>
@@ -114,7 +114,7 @@ function StepRowMobile({ step, index, total }) {
           <img
             src={step.image}
             alt={step.imageAlt ?? step.title}
-            className="h-32 w-full max-w-[200px] object-contain"
+            className="h-32 w-full max-w-50 object-contain"
           />
         </div>
         <h3 className="mt-5 text-lg font-bold text-[#111827]">{step.title}</h3>
@@ -133,7 +133,7 @@ export default function HowItWorks() {
       <div className="container mx-auto px-6 lg:px-8">
         <div data-scroll-header className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#111827] sm:text-4xl">
-            How TradeTrust UK Works
+            How Traders In Loop Works
           </h2>
           <p className="mt-4 text-base text-[#64748B] sm:text-lg">
             Three simple steps — whether you&apos;re posting a job or winning new work

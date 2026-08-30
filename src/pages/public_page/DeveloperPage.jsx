@@ -206,7 +206,7 @@ export default function DeveloperPage() {
         <div className="container mx-auto flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--active)]">
-              TradeTrust UI
+              Traders In Loop UI
             </p>
             <h1 className="text-xl font-bold text-[var(--primary-text)] sm:text-2xl">
               Developer — Shared Components
