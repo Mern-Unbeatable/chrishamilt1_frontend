@@ -23,7 +23,7 @@ const AUDIENCES = {
         imageAlt: 'Register for a free account',
         title: 'Register Free',
         description:
-          'Sign up in 30 seconds with your email or Google account. No credit card required.',
+          'Sign up in 30 seconds with your email. No credit card required.',
       },
       {
         image: postsIllustration,
@@ -133,7 +133,7 @@ export default function HowItWorks() {
       <div className="container mx-auto px-6 lg:px-8">
         <div data-scroll-header className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#111827] sm:text-4xl">
-            How TradeTrust UK Works
+            How Traders In Loop Works
           </h2>
           <p className="mt-4 text-base text-[#64748B] sm:text-lg">
             Three simple steps — whether you&apos;re posting a job or winning new work

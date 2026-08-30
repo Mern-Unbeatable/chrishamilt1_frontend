@@ -7,7 +7,7 @@ const FAQ_ITEMS = [
     id: '1',
     question: 'How much does it cost for customers to post a job?',
     answer:
-      'Posting a job on TradeTrust UK is completely free for homeowners. You can describe your project, upload photos, and receive quotes from verified tradesmen without any upfront fees.',
+      'Posting a job on Traders In Loop is completely free for homeowners. You can describe your project, upload photos, and receive quotes from verified tradesmen without any upfront fees.',
   },
   {
     id: '2',
@@ -35,9 +35,9 @@ const FAQ_ITEMS = [
   },
   {
     id: '6',
-    question: 'What areas does TradesMarket cover?',
+    question: 'What areas does Traders In Loop cover?',
     answer:
-      'TradeTrust UK covers over 250 cities across the United Kingdom, from London and Manchester to Edinburgh and Cardiff, with new areas added regularly.',
+      'Traders In Loop covers over 250 cities across the United Kingdom, from London and Manchester to Edinburgh and Cardiff, with new areas added regularly.',
   },
 ]
 
@@ -52,7 +52,7 @@ export default function Faq() {
             Frequently Asked Questions
           </h2>
           <p className="mt-4 text-base text-[#64748B] sm:text-lg">
-            Everything you need to know about TradesMarket
+            Everything you need to know about Traders In Loop
           </p>
         </div>
 

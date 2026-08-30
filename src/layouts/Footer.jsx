@@ -108,7 +108,7 @@ export default function Footer() {
         <div className="mt-12 border-t border-[#D1D5DB]/70">
           <div className="flex flex-col items-start justify-between gap-4 pt-8 md:flex-row md:items-center">
             <p className="text-sm text-[#4B5563]">
-              © {currentYear} TradesMarket Ltd. All rights reserved. Registered in
+              © {currentYear} TradersIn loop. All rights reserved. Registered in
               England &amp; Wales.
             </p>
             <ul className="flex flex-wrap items-center gap-x-6 gap-y-2">

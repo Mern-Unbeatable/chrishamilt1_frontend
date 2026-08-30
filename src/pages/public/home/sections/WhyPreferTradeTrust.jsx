@@ -30,7 +30,7 @@ const FEATURES = [
     icon: Star,
     title: '100% Transparent Reviews',
     description:
-      'Only homeowners who hired through TradeTrust can leave feedback. No fake reviews, ensuring honest ratings you can rely on.',
+      'Only homeowners who hired through Traders In Loop can leave feedback. No fake reviews, ensuring honest ratings you can rely on.',
   },
   {
     icon: BadgeCheck,
@@ -52,7 +52,7 @@ export default function WhyPreferTradeTrust() {
       <div className="container mx-auto px-6 lg:px-8">
         <div data-scroll-header className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#111827] sm:text-4xl">
-            Why Homeowners & Tradesmen Prefer TradeTrust
+            Why Homeowners & Tradesmen Prefer Traders In Loop
           </h2>
           <p className="mt-4 text-base leading-7 text-[#64748B] sm:text-lg">
             A premium alternative to traditional directories. We prioritize verified
