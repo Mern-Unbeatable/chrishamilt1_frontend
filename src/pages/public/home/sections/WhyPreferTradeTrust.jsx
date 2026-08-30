@@ -18,7 +18,7 @@ const FEATURES = [
     icon: Target,
     title: 'Quality Job Leads',
     description:
-      'Job leads are strictly capped at 3–4 tradesmen maximum. No lead flooding, ensuring higher conversion rates for quality tradespeople.',
+      'Job leads are strictly capped at 2 tradesmen maximum. No lead flooding, ensuring higher conversion rates for quality tradespeople.',
   },
   {
     icon: MessageSquare,
