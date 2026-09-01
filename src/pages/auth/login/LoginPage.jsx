@@ -4,6 +4,7 @@ import { ArrowRight, ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { loginImage } from '@/assets/authImages'
 import AuthHeroImage from '@/components/auth/AuthHeroImage'
 import { useAuth } from '@/auth/AuthProvider'
+import { AUTH_CONFIG } from '@/auth/authConfig'
 import { getRememberMePreference } from '@/auth/authStorage'
 import { getDashboardHome } from '@/auth/authService'
 import { getTradesmanHomePath, hasTradesmanSubscription } from '@/auth/tradesmanSubscription'
@@ -13,8 +14,12 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { login } = useAuth()
-  const [email, setEmail] = useState(DEMO_CREDENTIALS.user.email)
-  const [password, setPassword] = useState(DEMO_CREDENTIALS.user.password)
+  const [email, setEmail] = useState(() =>
+    AUTH_CONFIG.useDemoAuth ? DEMO_CREDENTIALS.user.email : '',
+  )
+  const [password, setPassword] = useState(() =>
+    AUTH_CONFIG.useDemoAuth ? DEMO_CREDENTIALS.user.password : '',
+  )
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(() => getRememberMePreference())
   const [error, setError] = useState('')
@@ -22,43 +27,46 @@ export default function LoginPage() {
 
   const loginAs = async (nextEmail, nextPassword) => {
     setIsSubmitting(true)
-
-    const user = await login(nextEmail, nextPassword, { rememberMe })
-
-    setIsSubmitting(false)
-
-    if (!user) {
-      setError('Invalid email or password. Use the demo credentials below.')
-      return
-    }
-
     setError('')
 
-    if (user.role === 'user') {
-      const redirectTo = location.state?.from || '/'
-      navigate(redirectTo, { replace: true })
-      return
-    }
+    try {
+      const user = await login(nextEmail, nextPassword, { rememberMe })
 
-    if (user.role === 'tradesman') {
-      if (!hasTradesmanSubscription(user.email)) {
-        navigate('/tradesman/choose-plan', { replace: true })
+      if (user.role === 'user') {
+        const redirectTo = location.state?.from || '/'
+        navigate(redirectTo, { replace: true })
         return
       }
 
-      const fallback = getTradesmanHomePath(user.email)
+      if (user.role === 'tradesman') {
+        if (!hasTradesmanSubscription(user.email)) {
+          navigate('/tradesman/choose-plan', { replace: true })
+          return
+        }
+
+        const fallback = getTradesmanHomePath(user.email)
+        const redirectTo = location.state?.from || fallback
+        navigate(redirectTo.startsWith('/tradesman') ? redirectTo : fallback, {
+          replace: true,
+        })
+        return
+      }
+
+      const fallback = getDashboardHome(user.role)
       const redirectTo = location.state?.from || fallback
-      navigate(redirectTo.startsWith('/tradesman') ? redirectTo : fallback, {
+      navigate(redirectTo.startsWith(`/${user.role}`) ? redirectTo : fallback, {
         replace: true,
       })
-      return
+    } catch (err) {
+      setError(
+        err?.message ||
+          (AUTH_CONFIG.useDemoAuth
+            ? 'Invalid email or password. Use the demo credentials below.'
+            : 'Invalid email or password.'),
+      )
+    } finally {
+      setIsSubmitting(false)
     }
-
-    const fallback = getDashboardHome(user.role)
-    const redirectTo = location.state?.from || fallback
-    navigate(redirectTo.startsWith(`/${user.role}`) ? redirectTo : fallback, {
-      replace: true,
-    })
   }
 
   const handleSubmit = async (event) => {
@@ -108,7 +116,7 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   autoComplete="email"
-                  // value={email}
+                  value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="name@example.com"
                   className="h-12 w-full rounded-lg border border-[#E2E8F0] bg-white pr-4 pl-11 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#94A3B8] focus:border-btn-primary focus:ring-2 focus:ring-btn-primary/15"
@@ -137,7 +145,7 @@ export default function LoginPage() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  // value={password}
+                  value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="••••••••"
                   className="h-12 w-full rounded-lg border border-[#E2E8F0] bg-white pr-11 pl-11 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#94A3B8] focus:border-btn-primary focus:ring-2 focus:ring-btn-primary/15"

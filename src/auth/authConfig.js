@@ -1,14 +1,20 @@
+function readBackendUrl() {
+  const value = import.meta.env.VITE_BACKEND_URL?.trim()
+  return value ? value.replace(/\/$/, '') : ''
+}
+
+const apiBaseUrl = readBackendUrl()
+const forceDemoAuth = import.meta.env.VITE_USE_DEMO_AUTH === 'true'
 
 export const AUTH_CONFIG = {
-  useDemoAuth: true,
-
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '',
+  apiBaseUrl,
+  useDemoAuth: forceDemoAuth || !apiBaseUrl,
 
   endpoints: {
-    login: '/auth/login',
-    logout: '/auth/logout',
-    refresh: '/auth/refresh',
-    me: '/auth/me',
+    login: '/api/auth/login',
+    logout: '/api/auth/logout',
+    refresh: '/api/auth/refresh',
+    me: '/api/auth/me',
   },
 
   storageKeys: {

@@ -75,11 +75,13 @@ export function clearStoredSession() {
   sessionStorage.removeItem(storageKeys.legacySession)
 }
 
-export function buildSession(user, rememberMe) {
+export function buildSession(user, rememberMe, tokens = {}) {
   return {
     ...user,
-    accessToken: `demo-${user.role}-token`,
-    refreshToken: null,
-    expiresAt: rememberMe ? Date.now() + REMEMBER_MS : null,
+    accessToken: tokens.accessToken ?? (AUTH_CONFIG.useDemoAuth ? `demo-${user.role}-token` : null),
+    refreshToken: tokens.refreshToken ?? null,
+    expiresAt:
+      tokens.expiresAt ??
+      (rememberMe ? Date.now() + REMEMBER_MS : null),
   }
 }

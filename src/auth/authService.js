@@ -1,4 +1,5 @@
 import { AUTH_CONFIG } from '@/auth/authConfig'
+import { apiRequest, ApiError, getErrorMessage } from '@/auth/apiClient'
 import {
   buildSession,
   clearStoredSession,
@@ -8,39 +9,75 @@ import {
 } from '@/auth/authStorage'
 import { authenticateDemoUser, getDashboardHome } from '@/auth/demoAuth'
 
-export function mapApiResponseToSession(data) {
-  const user = data.user ?? data
+const ROLE_LABELS = {
+  user: 'Customer',
+  tradesman: 'Tradesman',
+  admin: 'Admin',
+}
+
+function normalizeRole(value = '') {
+  const role = String(value).trim().toLowerCase()
+
+  if (role === 'customer') return 'user'
+  if (role === 'user' || role === 'tradesman' || role === 'admin') return role
+
+  return null
+}
+
+function unwrapPayload(data) {
+  if (!data || typeof data !== 'object') return data
+  return data.data ?? data.result ?? data
+}
+
+export function mapApiResponseToSession(data, rememberMe) {
+  const payload = unwrapPayload(data)
+  const user = payload?.user ?? payload
+
+  const role = normalizeRole(user?.role ?? user?.userType ?? user?.type)
+  if (!role) {
+    throw new ApiError('Login succeeded but the account role is missing or unsupported.')
+  }
+
+  const email = user?.email?.trim()
+  if (!email) {
+    throw new ApiError('Login succeeded but no email was returned for this account.')
+  }
 
   const session = buildSession(
     {
-      name: user.name,
-      role: user.role,
-      roleLabel: user.roleLabel ?? user.role,
-      email: user.email,
+      id: user?.id ?? user?._id ?? null,
+      name: user?.name ?? user?.fullName ?? email.split('@')[0],
+      role,
+      roleLabel: user?.roleLabel ?? ROLE_LABELS[role] ?? role,
+      email,
     },
-    Boolean(data.rememberMe),
+    rememberMe,
+    {
+      accessToken:
+        payload?.accessToken ??
+        payload?.token ??
+        payload?.access_token ??
+        data?.accessToken ??
+        data?.token ??
+        null,
+      refreshToken: payload?.refreshToken ?? payload?.refresh_token ?? null,
+      expiresAt: payload?.expiresAt ?? payload?.expires_at ?? null,
+    },
   )
 
-  return {
-    ...session,
-    accessToken: data.accessToken ?? data.token ?? session.accessToken,
-    refreshToken: data.refreshToken ?? null,
-    expiresAt: data.expiresAt ?? session.expiresAt,
-  }
+  return session
 }
 
 async function loginWithApi(email, password, rememberMe) {
-  const response = await fetch(`${AUTH_CONFIG.apiBaseUrl}${AUTH_CONFIG.endpoints.login}`, {
+  const data = await apiRequest(AUTH_CONFIG.endpoints.login, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ email, password, rememberMe }),
+    body: {
+      email: email.trim(),
+      password,
+    },
   })
 
-  if (!response.ok) return null
-
-  const data = await response.json()
-  const session = mapApiResponseToSession({ ...data, rememberMe })
+  const session = mapApiResponseToSession(data, rememberMe)
 
   persistSession(session, rememberMe)
   setRememberMePreference(rememberMe)
@@ -50,7 +87,9 @@ async function loginWithApi(email, password, rememberMe) {
 
 function loginWithDemo(email, password, rememberMe) {
   const user = authenticateDemoUser(email, password)
-  if (!user) return null
+  if (!user) {
+    throw new ApiError('Invalid email or password.')
+  }
 
   const session = buildSession(user, rememberMe)
   persistSession(session, rememberMe)
@@ -70,14 +109,12 @@ export async function login({ email, password, rememberMe = false }) {
 export async function logout() {
   if (!AUTH_CONFIG.useDemoAuth) {
     try {
-      await fetch(`${AUTH_CONFIG.apiBaseUrl}${AUTH_CONFIG.endpoints.logout}`, {
+      await apiRequest(AUTH_CONFIG.endpoints.logout, {
         method: 'POST',
-        credentials: 'include',
-        headers: {
-          Authorization: `Bearer ${getAccessToken() ?? ''}`,
-        },
+        token: getAccessToken(),
       })
     } catch {
+      // Always clear local session even if the API logout fails.
     }
   }
 
@@ -92,4 +129,4 @@ export function getAccessToken() {
   return getStoredSession()?.accessToken ?? null
 }
 
-export { getDashboardHome }
+export { ApiError, getDashboardHome, getErrorMessage }
