@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import { getRememberMePreference } from '@/auth/authStorage'
-import { getSession, login as loginRequest, logout as logoutRequest } from '@/auth/authService'
+import { getSession, login as loginRequest, logout as logoutRequest, register as registerRequest } from '@/auth/authService'
 
 const AuthContext = createContext(null)
 
@@ -17,6 +17,16 @@ export function AuthProvider({ children }) {
     return user
   }, [])
 
+  const register = useCallback(async (payload) => {
+    const result = await registerRequest(payload)
+
+    if (result.session) {
+      setSession(result.session)
+    }
+
+    return result
+  }, [])
+
   const logout = useCallback(async () => {
     await logoutRequest()
     setSession(null)
@@ -30,9 +40,10 @@ export function AuthProvider({ children }) {
       isTradesman: session?.role === 'tradesman',
       isAdmin: session?.role === 'admin',
       login,
+      register,
       logout,
     }),
-    [session, login, logout],
+    [session, login, register, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
