@@ -6,23 +6,26 @@ import AuthHeroImage from '@/components/auth/AuthHeroImage'
 import { useAuth } from '@/auth/AuthProvider'
 import { AUTH_CONFIG } from '@/auth/authConfig'
 import { getRememberMePreference } from '@/auth/authStorage'
-import { getDashboardHome } from '@/auth/authService'
-import { getTradesmanHomePath, hasTradesmanSubscription } from '@/auth/tradesmanSubscription'
+import { resolvePostAuthPath } from '@/auth/postAuthRedirect'
 import { DEMO_CREDENTIALS } from '@/auth/demoAuth'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { login } = useAuth()
-  const [email, setEmail] = useState(() =>
-    AUTH_CONFIG.useDemoAuth ? DEMO_CREDENTIALS.user.email : '',
-  )
+  const [email, setEmail] = useState(() => {
+    if (location.state?.email) return location.state.email
+    return AUTH_CONFIG.useDemoAuth ? DEMO_CREDENTIALS.user.email : ''
+  })
   const [password, setPassword] = useState(() =>
     AUTH_CONFIG.useDemoAuth ? DEMO_CREDENTIALS.user.password : '',
   )
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(() => getRememberMePreference())
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(
+    () => location.state?.registered === true,
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const loginAs = async (nextEmail, nextPassword) => {
@@ -31,32 +34,7 @@ export default function LoginPage() {
 
     try {
       const user = await login(nextEmail, nextPassword, { rememberMe })
-
-      if (user.role === 'user') {
-        const redirectTo = location.state?.from || '/'
-        navigate(redirectTo, { replace: true })
-        return
-      }
-
-      if (user.role === 'tradesman') {
-        if (!hasTradesmanSubscription(user.email)) {
-          navigate('/tradesman/choose-plan', { replace: true })
-          return
-        }
-
-        const fallback = getTradesmanHomePath(user.email)
-        const redirectTo = location.state?.from || fallback
-        navigate(redirectTo.startsWith('/tradesman') ? redirectTo : fallback, {
-          replace: true,
-        })
-        return
-      }
-
-      const fallback = getDashboardHome(user.role)
-      const redirectTo = location.state?.from || fallback
-      navigate(redirectTo.startsWith(`/${user.role}`) ? redirectTo : fallback, {
-        replace: true,
-      })
+      navigate(resolvePostAuthPath(user, location.state?.from), { replace: true })
     } catch (err) {
       setError(
         err?.message ||
@@ -97,6 +75,12 @@ export default function LoginPage() {
           </div>
 
           <form className="mt-10 space-y-5" onSubmit={handleSubmit}>
+            {success ? (
+              <p className="rounded-lg border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3 text-sm text-[#166534]">
+                Account created successfully. Sign in with your email and password.
+              </p>
+            ) : null}
+
             {error ? (
               <p className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
                 {error}

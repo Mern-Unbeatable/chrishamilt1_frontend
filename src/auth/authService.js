@@ -8,6 +8,7 @@ import {
   setRememberMePreference,
 } from '@/auth/authStorage'
 import { authenticateDemoUser, getDashboardHome } from '@/auth/demoAuth'
+import { toApiRole } from '@/auth/postAuthRedirect'
 
 const ROLE_LABELS = {
   user: 'Customer',
@@ -104,6 +105,54 @@ export async function login({ email, password, rememberMe = false }) {
   }
 
   return loginWithApi(email, password, rememberMe)
+}
+
+async function registerWithApi({
+  fullName,
+  email,
+  phoneNumber,
+  address,
+  password,
+  role,
+}) {
+  const data = await apiRequest(AUTH_CONFIG.endpoints.register, {
+    method: 'POST',
+    body: {
+      fullName: fullName.trim(),
+      email: email.trim(),
+      phoneNumber: phoneNumber.trim(),
+      address: address.trim(),
+      password,
+      role: toApiRole(role),
+    },
+  })
+
+  const payload = unwrapPayload(data)
+  const hasAuth =
+    payload?.accessToken ||
+    payload?.token ||
+    payload?.access_token ||
+    payload?.user
+
+  if (!hasAuth) {
+    return { session: null, autoLogin: false }
+  }
+
+  const session = mapApiResponseToSession(data, true)
+  persistSession(session, true)
+  setRememberMePreference(true)
+
+  return { session, autoLogin: true }
+}
+
+export async function register(payload) {
+  if (AUTH_CONFIG.useDemoAuth) {
+    throw new ApiError(
+      'Registration is disabled in demo mode. Use an existing demo account to sign in.',
+    )
+  }
+
+  return registerWithApi(payload)
 }
 
 export async function logout() {

@@ -12,6 +12,7 @@ export const AUTH_CONFIG = {
 
   endpoints: {
     login: '/api/auth/login',
+    register: '/api/auth/register',
     logout: '/api/auth/logout',
     refresh: '/api/auth/refresh',
     me: '/api/auth/me',
