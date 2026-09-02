@@ -10,7 +10,7 @@ export default function ComingSoon({
   showTitle = true,
 }) {
   return (
-    <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white p-6 sm:min-h-[420px] sm:p-8 lg:min-h-[520px]">
+    <div className="flex min-h-80 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white p-6 sm:min-h-105 sm:p-8 lg:min-h-130">
       <div className="max-w-md px-2 text-center sm:px-0">
         <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[#EAF2FE] text-btn-primary sm:size-14">
           <Construction className="size-6 sm:size-7" strokeWidth={2} />

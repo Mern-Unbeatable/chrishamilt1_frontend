@@ -40,7 +40,7 @@ function PaginationButton({
         'inline-flex size-9 items-center justify-center rounded-lg text-sm font-medium transition-colors sm:size-10',
         active
           ? 'bg-btn-primary text-white'
-          : 'border border-[#E5E7EB] bg-white text-[var(--primary-text)] hover:bg-[#F8FAFC]',
+          : 'border border-[#E5E7EB] bg-white text-(--primary-text) hover:bg-[#F8FAFC]',
         disabled ? 'cursor-default opacity-50' : '',
       ].join(' ')}
     >

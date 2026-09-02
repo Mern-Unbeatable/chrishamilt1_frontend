@@ -1,6 +1,6 @@
 export default function AuthHeroImage({ src, alt = '' }) {
   return (
-    <div className="relative hidden min-h-[280px] bg-[#E2E8F0] lg:block">
+    <div className="relative hidden min-h-70 bg-[#E2E8F0] lg:block">
       <img
         src={src}
         alt={alt}

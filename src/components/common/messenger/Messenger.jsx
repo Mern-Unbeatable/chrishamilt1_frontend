@@ -30,7 +30,7 @@ export default function Messenger({
     >
       <div
         className={cn(
-          'flex h-full min-h-0 w-full shrink-0 flex-col md:w-[300px] lg:w-[340px]',
+          'flex h-full min-h-0 w-full shrink-0 flex-col md:w-75 lg:w-85',
           showInbox ? 'flex' : 'hidden md:flex',
         )}
       >
