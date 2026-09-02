@@ -8,7 +8,6 @@ export default function TokenPricingCard({
   planName,
   price,
   tokens,
-  rateLabel,
   description,
   featured = false,
   badgeLabel = 'Most popular',
@@ -35,13 +34,13 @@ export default function TokenPricingCard({
       <p
         className={cn(
           'text-xs font-bold uppercase tracking-wide',
-          featured ? 'text-btn-primary' : 'text-[var(--secondary-text)]',
+          featured ? 'text-btn-primary' : 'text-(--secondary-text)',
         )}
       >
         {planName}
       </p>
 
-      <p className="mt-4 text-4xl lg:text-5xl font-extrabold text-[var(--primary-text)]">{price}</p>
+      <p className="mt-4 text-4xl lg:text-5xl font-extrabold text-(--primary-text)">{price}</p>
 
       <p className="mt-3 inline-flex items-center gap-2 text-base font-semibold text-btn-primary sm:text-lg lg:text-2xl">
         <span className="flex size-6 items-center justify-center rounded-full border border-btn-primary text-xs font-bold">
@@ -50,8 +49,7 @@ export default function TokenPricingCard({
         {tokens} Tokens
       </p>
 
-      <p className="mt-5 text-sm text-[var(--secondary-text)] lg:text-base">{rateLabel}</p>
-      <p className="mt-4 flex-1 text-sm leading-6 text-[var(--secondary-text)] lg:text-base">
+      <p className="mt-5 flex-1 text-sm leading-6 text-(--secondary-text) lg:text-base">
         {description}
       </p>
 
