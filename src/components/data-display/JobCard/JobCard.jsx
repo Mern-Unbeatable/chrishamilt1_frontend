@@ -122,7 +122,7 @@ export default function JobCard({
             <button
               type="button"
               onClick={onViewQuote}
-              className="inline-flex h-10 items-center justify-center rounded-lg bg-btn-primary px-5 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] sm:min-w-[132px]"
+              className="inline-flex h-10 items-center justify-center rounded-lg bg-btn-primary px-5 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] sm:min-w-33"
             >
               {viewQuoteLabel}
             </button>
@@ -147,7 +147,7 @@ export default function JobCard({
             <button
               type="button"
               onClick={onOpen}
-              className="text-left text-base font-semibold text-[var(--primary-text)] transition-colors hover:text-btn-primary sm:text-lg"
+              className="text-left text-base font-semibold text-(--primary-text) transition-colors hover:text-btn-primary sm:text-lg"
             >
               {title}
             </button>
@@ -155,12 +155,12 @@ export default function JobCard({
             <button
               type="button"
               onClick={onViewLead}
-              className="text-left text-base font-semibold text-[var(--primary-text)] transition-colors hover:text-btn-primary sm:text-lg"
+              className="text-left text-base font-semibold text-(--primary-text) transition-colors hover:text-btn-primary sm:text-lg"
             >
               {title}
             </button>
           ) : (
-            <h3 className="text-base font-semibold text-[var(--primary-text)] sm:text-lg">{title}</h3>
+            <h3 className="text-base font-semibold text-(--primary-text) sm:text-lg">{title}</h3>
           )}
 
           {variant === 'booking' && date ? (
@@ -171,7 +171,7 @@ export default function JobCard({
 
           <div
             className={cn(
-              'flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[var(--secondary-text)]',
+              'flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-(--secondary-text)',
               variant === 'booking' ? 'mt-2' : 'mt-3',
             )}
           >
@@ -204,7 +204,7 @@ export default function JobCard({
       {variant === 'browse' ? (
         <div className="flex w-full shrink-0 flex-col items-stretch gap-3 sm:w-auto sm:items-end sm:gap-4">
           {category ? (
-            <span className="self-start rounded-md border border-[#E5E7EB] px-3 py-1 text-xs font-medium text-[var(--secondary-text)]">
+            <span className="self-start rounded-md border border-[#E5E7EB] px-3 py-1 text-xs font-medium text-(--secondary-text)">
               {category}
             </span>
           ) : null}

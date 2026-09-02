@@ -51,7 +51,7 @@ export default function ChatArea({
 
   if (!activeChat) {
     return (
-      <div className="flex h-full min-h-[320px] flex-col items-center justify-center gap-2 bg-white px-6 py-10 text-center">
+      <div className="flex h-full min-h-80 flex-col items-center justify-center gap-2 bg-white px-6 py-10 text-center">
         <h3 className="text-lg font-semibold text-[#111827]">Your Messages</h3>
         <p className="max-w-sm text-sm leading-6 text-[#64748B]">
           Select a conversation from the sidebar to start chatting.
@@ -120,7 +120,7 @@ export default function ChatArea({
                     : 'border border-[#E5E7EB] bg-white text-[#111827] shadow-[0_1px_2px_rgba(15,23,42,0.03)]',
                 )}
               >
-                <p className="whitespace-pre-wrap break-words">{message.text}</p>
+                <p className="whitespace-pre-wrap wrap-break-word">{message.text}</p>
                 <div
                   className={cn(
                     'mt-1.5 flex items-center justify-end gap-1 text-[10px] leading-none',
@@ -151,7 +151,7 @@ export default function ChatArea({
                 className="flex size-8 items-center justify-center rounded-md text-[#94A3B8] transition-colors hover:bg-[#F8FAFC] hover:text-[#64748B] sm:size-9"
                 aria-label={label}
               >
-                <Icon className="size-[17px] sm:size-[18px]" strokeWidth={1.75} />
+                <Icon className="size-4.25 sm:size-4.5" strokeWidth={1.75} />
               </button>
             ))}
           </div>
@@ -172,7 +172,7 @@ export default function ChatArea({
             className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-btn-primary text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-45 sm:size-11"
             aria-label="Send message"
           >
-            <Send className="size-[17px] sm:size-[18px]" strokeWidth={2} />
+            <Send className="size-4.25 sm:size-4.5" strokeWidth={2} />
           </button>
         </div>
       </form>
