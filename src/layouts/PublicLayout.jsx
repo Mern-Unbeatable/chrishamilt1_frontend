@@ -11,7 +11,7 @@ export default function PublicLayout() {
       <header className="fixed inset-x-0 top-0 z-50">
         <PublicNavbar />
       </header>
-      <main className="flex-1 pt-[72px]">
+      <main className="flex-1 pt-18">
         <ScrollAnimationProvider>
           <Outlet />
         </ScrollAnimationProvider>

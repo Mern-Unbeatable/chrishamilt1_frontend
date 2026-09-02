@@ -58,7 +58,7 @@ function QuoteCardPreview() {
   return (
     <PreviewFrame className="space-y-8">
       <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--secondary-text)]">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-(--secondary-text)">
           Tradesman dashboard
         </p>
         <QuoteCard
@@ -70,7 +70,7 @@ function QuoteCardPreview() {
         />
       </div>
       <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--secondary-text)]">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-(--secondary-text)">
           Customer dashboard
         </p>
         <QuoteCard
@@ -117,7 +117,7 @@ function ProfileSettingsPreview() {
   return (
     <PreviewFrame className="space-y-10">
       <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--secondary-text)]">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-(--secondary-text)">
           User dashboard
         </p>
         <ProfileSettings
@@ -129,7 +129,7 @@ function ProfileSettingsPreview() {
         />
       </div>
       <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--secondary-text)]">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-(--secondary-text)">
           Tradesman dashboard
         </p>
         <ProfileSettings
@@ -141,7 +141,7 @@ function ProfileSettingsPreview() {
         />
       </div>
       <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--secondary-text)]">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-(--secondary-text)">
           Admin dashboard
         </p>
         <ProfileSettings
@@ -159,7 +159,7 @@ function MessengerPreview() {
   const state = useMessages()
 
   return (
-    <PreviewFrame className="h-[min(680px,calc(100dvh-8rem))] min-h-[520px] p-4 sm:p-6">
+    <PreviewFrame className="h-[min(680px,calc(100dvh-8rem))] min-h-130 p-4 sm:p-6">
       <Messenger {...state} placeholder="Write a message..." className="h-full min-h-0" />
     </PreviewFrame>
   )
@@ -237,7 +237,7 @@ function DataTablePreview() {
   return (
     <PreviewFrame className="space-y-10">
       <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--secondary-text)]">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-(--secondary-text)">
           Tradesman — My jobs
         </p>
         <DataTable
@@ -265,7 +265,7 @@ function DataTablePreview() {
       </div>
 
       <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--secondary-text)]">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-(--secondary-text)">
           Admin — Customers
         </p>
         <DataTable
@@ -292,7 +292,7 @@ function PaginationPreview() {
 
   return (
     <PreviewFrame className="space-y-4">
-      <p className="text-sm text-[var(--secondary-text)]">
+      <p className="text-sm text-(--secondary-text)">
         Standalone numbered pagination for card grids and non-table layouts.
       </p>
       <Pagination page={page} totalPages={8} onPageChange={setPage} />
@@ -322,7 +322,7 @@ export default function ComponentPreview({ previewId }) {
       return <MessengerPreview />
     default:
       return (
-        <p className="text-sm text-[var(--secondary-text)]">
+        <p className="text-sm text-(--secondary-text)">
           No preview registered for &quot;{previewId}&quot;.
         </p>
       )

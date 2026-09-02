@@ -77,7 +77,7 @@ export default function PublicNavbar() {
       >
         <div
           className={cn(
-            'container mx-auto grid h-[72px] items-center gap-4 px-5 lg:px-8',
+            'container mx-auto grid h-18 items-center gap-4 px-5 lg:px-8',
             showAuthActions
               ? 'grid-cols-[1fr_auto] lg:grid-cols-[200px_1fr_auto]'
               : 'grid-cols-[1fr_auto] lg:grid-cols-[220px_1fr_220px]',
@@ -162,11 +162,11 @@ export default function PublicNavbar() {
 
       <aside
         className={cn(
-          'fixed top-0 right-0 z-40 flex h-full w-[300px] flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out lg:hidden',
+          'fixed top-0 right-0 z-40 flex h-full w-75 flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out lg:hidden',
           open ? 'translate-x-0' : 'translate-x-full',
         )}
       >
-        <div className="flex h-[72px] items-center justify-between border-b border-[#F1F5F9] px-5">
+        <div className="flex h-18 items-center justify-between border-b border-[#F1F5F9] px-5">
           <Logo />
           <button
             type="button"
