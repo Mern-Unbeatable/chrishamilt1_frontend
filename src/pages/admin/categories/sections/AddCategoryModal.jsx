@@ -48,7 +48,7 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-100 flex items-end justify-center p-0 sm:items-center sm:p-4">
       <button
         type="button"
         aria-label="Close add category dialog"

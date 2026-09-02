@@ -32,7 +32,7 @@ export default function DashboardSidebar({
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex h-screen w-[min(280px,88vw)] flex-col border-r border-[#E5E7EB] bg-white transition-transform duration-300 ease-in-out lg:w-[260px]',
+          'fixed inset-y-0 left-0 z-50 flex h-screen w-[min(280px,88vw)] flex-col border-r border-[#E5E7EB] bg-white transition-transform duration-300 ease-in-out lg:w-65',
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         )}
       >
@@ -76,7 +76,7 @@ export default function DashboardSidebar({
                     )
                   }
                 >
-                  <Icon className="size-[18px] shrink-0" strokeWidth={2} />
+                  <Icon className="size-4.5 shrink-0" strokeWidth={2} />
                   {item.label}
                 </NavLink>
               )
@@ -88,7 +88,7 @@ export default function DashboardSidebar({
             onClick={handleLogout}
             className="mt-auto flex items-center gap-3 rounded px-4 py-2.5 text-sm font-medium text-[#DC2626] transition-colors hover:bg-[#FEF2F2]"
           >
-            <LogOut className="size-[18px] shrink-0" strokeWidth={2} />
+            <LogOut className="size-4.5 shrink-0" strokeWidth={2} />
             Log Out
           </button>
         </div>
