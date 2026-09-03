@@ -5,13 +5,11 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from '@/components/Dropdown'
-import {
-  DEMO_BROWSE_BUDGETS,
-  DEMO_BROWSE_JOB_CATEGORIES,
-} from '@/data/demoData'
+import { BUDGET_FILTER_OPTIONS } from '@/services/publicJobsApi'
 
 export default function BrowseJobsHero({
-  category,
+  categories = [],
+  categoryLabel,
   onCategoryChange,
   location,
   onLocationChange,
@@ -77,13 +75,16 @@ export default function BrowseJobsHero({
               </label>
               <Dropdown className="w-full">
                 <DropdownTrigger className="h-12 w-full justify-between rounded-lg border-[#E5E7EB] px-4 text-[#111827] shadow-none hover:bg-[#F8FAFC]">
-                  <span className="truncate">{category}</span>
+                  <span className="truncate">{categoryLabel}</span>
                   <ChevronDown className="size-4 shrink-0 text-[#94A3B8]" />
                 </DropdownTrigger>
                 <DropdownMenu className="w-full">
-                  {DEMO_BROWSE_JOB_CATEGORIES.map((item) => (
-                    <DropdownItem key={item} onClick={() => onCategoryChange(item)}>
-                      {item}
+                  {categories.map((item) => (
+                    <DropdownItem
+                      key={item.slug || item.label}
+                      onClick={() => onCategoryChange(item.slug)}
+                    >
+                      {item.label}
                     </DropdownItem>
                   ))}
                 </DropdownMenu>
@@ -117,9 +118,9 @@ export default function BrowseJobsHero({
                   <ChevronDown className="size-4 shrink-0 text-[#94A3B8]" />
                 </DropdownTrigger>
                 <DropdownMenu className="w-full">
-                  {DEMO_BROWSE_BUDGETS.map((item) => (
-                    <DropdownItem key={item} onClick={() => onBudgetChange(item)}>
-                      {item}
+                  {BUDGET_FILTER_OPTIONS.map((item) => (
+                    <DropdownItem key={item.label} onClick={() => onBudgetChange(item.label)}>
+                      {item.label}
                     </DropdownItem>
                   ))}
                 </DropdownMenu>

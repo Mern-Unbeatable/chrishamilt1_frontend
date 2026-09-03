@@ -12,6 +12,8 @@ export default function BrowseJobsResults({
   page,
   totalPages,
   onPageChange,
+  loading = false,
+  error = '',
 }) {
   const navigate = useNavigate()
   const resultsRef = useRef(null)
@@ -52,11 +54,21 @@ export default function BrowseJobsResults({
         </div>
 
         <p className="mt-4 text-sm font-medium text-btn-primary">
-          {totalCount} {totalCount === 1 ? 'job' : 'jobs'} found
+          {loading ? 'Loading jobs…' : `${totalCount} ${totalCount === 1 ? 'job' : 'jobs'} found`}
         </p>
 
+        {error ? (
+          <p className="mt-4 rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
+            {error}
+          </p>
+        ) : null}
+
         <div className="mt-6 flex flex-col gap-4">
-          {jobs.length > 0 ? (
+          {loading ? (
+            <div className="rounded-xl border border-[#E5E7EB] bg-white px-6 py-12 text-center">
+              <p className="text-sm text-[#64748B]">Fetching the latest job leads…</p>
+            </div>
+          ) : jobs.length > 0 ? (
             jobs.map((job) => (
               <div key={job.id} data-scroll-item>
                 <JobCard

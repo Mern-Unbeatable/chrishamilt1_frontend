@@ -3,6 +3,7 @@ import { apiRequest, ApiError, getErrorMessage } from '@/auth/apiClient'
 import {
   buildSession,
   clearStoredSession,
+  getRememberMePreference,
   getStoredSession,
   persistSession,
   setRememberMePreference,
@@ -176,6 +177,127 @@ export function getSession() {
 
 export function getAccessToken() {
   return getStoredSession()?.accessToken ?? null
+}
+
+export async function fetchCurrentUser() {
+  const data = await apiRequest(AUTH_CONFIG.endpoints.me, {
+    token: getAccessToken(),
+  })
+
+  const user = unwrapPayload(data)
+  if (!user) {
+    throw new ApiError('Unable to load your profile right now.')
+  }
+
+  return user
+}
+
+export function validateProfileUpdate({ fullName, email }) {
+  if (!fullName?.trim()) {
+    return 'Name is required.'
+  }
+
+  if (!email?.trim()) {
+    return 'Email is required.'
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailPattern.test(email.trim())) {
+    return 'Enter a valid email address.'
+  }
+
+  return null
+}
+
+export async function updateUserProfile({ fullName, email }) {
+  const data = await apiRequest(AUTH_CONFIG.endpoints.profile, {
+    method: 'PUT',
+    body: {
+      fullName: fullName.trim(),
+      email: email.trim(),
+    },
+    token: getAccessToken(),
+  })
+
+  const payload = unwrapPayload(data)
+  return payload?.user ?? payload
+}
+
+export function patchSessionUser(updates = {}) {
+  const session = getSession()
+  if (!session) return null
+
+  const next = { ...session, ...updates }
+  persistSession(next, getRememberMePreference())
+  return next
+}
+
+export function mapApiUserToAdminProfile(user) {
+  const fullName =
+    user.fullName?.trim() ||
+    [user.firstName, user.lastName].filter(Boolean).join(' ').trim()
+
+  return {
+    displayName: fullName,
+    displayEmail: user.email ?? '',
+    name: fullName,
+    email: user.email ?? '',
+    phone: user.phoneNumber ?? '',
+    avatarUrl: user.profileImage ?? null,
+    warehouses: user.warehouses ?? [],
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  }
+}
+
+export function validatePasswordChange({
+  currentPassword,
+  newPassword,
+  confirmPassword,
+  requireCurrent = true,
+}) {
+  if (requireCurrent && !currentPassword?.trim()) {
+    return 'Current password is required.'
+  }
+
+  if (!newPassword?.trim()) {
+    return 'New password is required.'
+  }
+
+  if (!confirmPassword?.trim()) {
+    return 'Please confirm your new password.'
+  }
+
+  if (newPassword.length < 8) {
+    return 'New password must be at least 8 characters.'
+  }
+
+  if (newPassword !== confirmPassword) {
+    return 'New password and confirmation do not match.'
+  }
+
+  if (requireCurrent && newPassword === currentPassword) {
+    return 'New password must be different from your current password.'
+  }
+
+  return null
+}
+
+export async function changeUserPassword({
+  currentPassword,
+  newPassword,
+  confirmPassword,
+}) {
+  return apiRequest(AUTH_CONFIG.endpoints.changePassword, {
+    method: 'PUT',
+    body: {
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    },
+    token: getAccessToken(),
+  })
 }
 
 export { ApiError, getDashboardHome, getErrorMessage }

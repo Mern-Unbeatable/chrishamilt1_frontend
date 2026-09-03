@@ -14,10 +14,12 @@ export const DEMO_POST_JOB_URGENCY = [
 ]
 
 export const DEMO_POST_JOB_DEFAULT = {
-  category: 'Roofing & Guttering',
+  categoryId: '',
   urgency: 'Within 2 weeks',
   location: '',
-  priceRange: '',
+  city: '',
+  budgetMin: '',
+  budgetMax: '',
   customerName: '',
   customerPhone: '',
   customerEmail: '',

@@ -83,6 +83,7 @@ export const router = createBrowserRouter([
         element: <UserGuard />,
         children: [
           { path: 'post-job', element: <PostJobPage /> },
+          { path: 'post-job/:jobId', element: <PostJobPage /> },
           { path: 'my-jobs', element: <MyJobsPage /> },
           { path: 'my-jobs/:jobId/quotes', element: <JobQuotesPage /> },
           { path: 'my-bookings', element: <UserBookingsPage /> },

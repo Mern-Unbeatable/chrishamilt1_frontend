@@ -23,3 +23,36 @@ body {
 button {
   cursor: pointer;
 }
+
+.app-swal-popup {
+  border-radius: 1rem;
+  padding: 1.5rem 1.25rem 1.25rem;
+}
+
+.app-swal-title {
+  color: var(--primary-text);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.app-swal-html {
+  color: var(--secondary-text);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.app-swal-confirm {
+  border-radius: 0.625rem !important;
+  font-weight: 600 !important;
+  padding: 0.65rem 1.25rem !important;
+}
+
+.app-swal-confirm:hover {
+  background-color: #0150CC !important;
+}
+
+.app-swal-cancel {
+  border-radius: 0.625rem !important;
+  font-weight: 600 !important;
+  padding: 0.65rem 1.25rem !important;
+}

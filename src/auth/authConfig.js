@@ -16,6 +16,8 @@ export const AUTH_CONFIG = {
     logout: '/api/auth/logout',
     refresh: '/api/auth/refresh',
     me: '/api/auth/me',
+    profile: '/api/users/profile',
+    changePassword: '/api/users/change-password',
   },
 
   storageKeys: {
