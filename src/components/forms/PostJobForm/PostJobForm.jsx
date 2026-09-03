@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Briefcase, ChevronDown, Upload, X } from 'lucide-react'
 import {
   Dropdown,
@@ -7,6 +7,12 @@ import {
   DropdownTrigger,
 } from '@/components/Dropdown'
 import { cn } from '@/helpers/cn'
+import { showApiErrorFromError, showErrorAlert } from '@/helpers/showAppAlert'
+import {
+  getCompletionMinDate,
+  getTodayInputValue,
+  validateJobDates,
+} from '@/helpers/validateJobDates'
 import {
   DEMO_POST_JOB_CATEGORIES,
   DEMO_POST_JOB_URGENCY,
@@ -23,7 +29,17 @@ function FieldLabel({ children }) {
   )
 }
 
-function TextField({ label, value, onChange, placeholder, type = 'text' }) {
+function TextField({
+  label,
+  value,
+  onChange,
+  onBlur,
+  placeholder,
+  type = 'text',
+  min,
+  max,
+  error = '',
+}) {
   return (
     <label className="flex flex-col gap-2">
       <FieldLabel>{label}</FieldLabel>
@@ -31,9 +47,17 @@ function TextField({ label, value, onChange, placeholder, type = 'text' }) {
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        onBlur={onBlur}
         placeholder={placeholder}
-        className={controlClassName}
+        min={min}
+        max={max}
+        className={cn(
+          controlClassName,
+          error && 'border-[#FCA5A5] focus:border-[#DC2626] focus:ring-[#DC2626]/10',
+        )}
+        aria-invalid={Boolean(error)}
       />
+      {error ? <span className="text-xs text-[#DC2626]">{error}</span> : null}
     </label>
   )
 }
@@ -53,37 +77,51 @@ function TextAreaField({ label, value, onChange, placeholder, rows = 4 }) {
   )
 }
 
-function SelectField({ label, value, options, onChange }) {
+function SelectField({
+  label,
+  value,
+  options,
+  onChange,
+  getOptionLabel = (option) => option,
+  getOptionValue = (option) => option,
+}) {
+  const selectedValue = getOptionValue(value)
+
   return (
     <div className="flex flex-col gap-2">
       <FieldLabel>{label}</FieldLabel>
       <Dropdown className="w-full">
         <DropdownTrigger className="h-11 w-full justify-between gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 py-0 font-normal text-[#111827] shadow-none hover:bg-white">
-          <span className="truncate text-left text-sm">{value}</span>
+          <span className="truncate text-left text-sm">{getOptionLabel(value)}</span>
           <ChevronDown className="size-4 shrink-0 text-[#94A3B8]" />
         </DropdownTrigger>
         <DropdownMenu className="w-full min-w-0">
-          {options.map((option) => (
-            <DropdownItem
-              key={option}
-              className={cn(
-                'text-sm',
-                value === option
-                  ? 'bg-btn-primary text-white hover:bg-btn-primary'
-                  : 'text-[#111827]',
-              )}
-              onClick={() => onChange(option)}
-            >
-              {option}
-            </DropdownItem>
-          ))}
+          {options.map((option) => {
+            const optionLabel = getOptionLabel(option)
+            const optionKey = getOptionValue(option) ?? optionLabel
+
+            return (
+              <DropdownItem
+                key={optionKey}
+                className={cn(
+                  'text-sm',
+                  getOptionValue(option) === selectedValue
+                    ? 'bg-btn-primary text-white hover:bg-btn-primary'
+                    : 'text-[#111827]',
+                )}
+                onClick={() => onChange(option)}
+              >
+                {optionLabel}
+              </DropdownItem>
+            )
+          })}
         </DropdownMenu>
       </Dropdown>
     </div>
   )
 }
 
-function UploadField({ files, onFilesChange }) {
+function UploadField({ files, onFilesChange, existingImages = [] }) {
   const inputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
 
@@ -95,6 +133,25 @@ function UploadField({ files, onFilesChange }) {
   return (
     <div className="flex flex-col gap-2">
       <FieldLabel>Upload photos / docs</FieldLabel>
+
+      {existingImages.length > 0 ? (
+        <div className="rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#64748B]">
+            Current photos
+          </p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            {existingImages.map((image) => (
+              <div
+                key={image.id || image.url}
+                className="size-16 overflow-hidden rounded-lg border border-[#E5E7EB] bg-white sm:size-20"
+              >
+                <img src={image.url} alt="" className="size-full object-cover" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <div
         role="button"
         tabIndex={0}
@@ -172,15 +229,28 @@ function SectionTitle({ children }) {
 
 export default function PostJobForm({
   defaultValues = {},
+  categories = DEMO_POST_JOB_CATEGORIES.map((name) => ({ id: name, name })),
+  categoriesLoading = false,
+  mode = 'create',
+  pageTitle,
+  pageDescription,
+  submitLabel,
   onSubmit,
   onClose,
   className = '',
 }) {
+  const initialCategory =
+    categories.find((category) => category.id === defaultValues.categoryId) ??
+    categories.find((category) => category.name === defaultValues.category) ??
+    categories[0]
+
   const [form, setForm] = useState({
-    category: defaultValues.category || DEMO_POST_JOB_CATEGORIES[2],
+    category: initialCategory ?? null,
     urgency: defaultValues.urgency || DEMO_POST_JOB_URGENCY[1],
     location: defaultValues.location || '',
-    priceRange: defaultValues.priceRange || '',
+    city: defaultValues.city || '',
+    budgetMin: defaultValues.budgetMin || '',
+    budgetMax: defaultValues.budgetMax || '',
     customerName: defaultValues.customerName || '',
     customerPhone: defaultValues.customerPhone || '',
     customerEmail: defaultValues.customerEmail || '',
@@ -192,15 +262,163 @@ export default function PostJobForm({
     completionBy: defaultValues.completionBy || '',
   })
   const [files, setFiles] = useState([])
+  const [existingImages] = useState(defaultValues.existingImages ?? [])
   const [submitting, setSubmitting] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState({})
 
-  const setField = (key) => (value) => setForm((current) => ({ ...current, [key]: value }))
+  const isEditMode = mode === 'edit'
+  const heading = pageTitle ?? (isEditMode ? 'Edit Job Post' : 'Post a Job (100% Free)')
+  const description =
+    pageDescription ??
+    (isEditMode
+      ? 'Update your job details and keep tradesmen informed'
+      : 'Get quotes from verified UK tradesmen within minutes')
+  const actionLabel =
+    submitLabel ??
+    (isEditMode ? 'Save Job Changes' : 'Post Job & Request Verified Quotes')
+  const submitErrorTitle = isEditMode ? 'Unable to update job' : 'Unable to post job'
+  const todayInputValue = getTodayInputValue()
+  const completionMinDate = getCompletionMinDate(form.preferredStart)
+
+  useEffect(() => {
+    if (!categories.length || !defaultValues.categoryId) return
+
+    const matchedCategory = categories.find(
+      (category) => category.id === defaultValues.categoryId,
+    )
+
+    if (!matchedCategory) return
+
+    setForm((current) =>
+      current.category?.id === matchedCategory.id
+        ? current
+        : { ...current, category: matchedCategory },
+    )
+  }, [categories, defaultValues.categoryId])
+
+  useEffect(() => {
+    if (!categories.length) return
+
+    setForm((current) => {
+      if (current.category?.id) {
+        const hasValidCategory = categories.some((category) => category.id === current.category.id)
+        if (hasValidCategory) return current
+      }
+
+      return { ...current, category: categories[0] }
+    })
+  }, [categories])
+
+  const setField = (key) => (value) => {
+    setForm((current) => ({ ...current, [key]: value }))
+    setFieldErrors((current) => {
+      if (!current[key] && key !== 'preferredStart') return current
+
+      const next = { ...current }
+      delete next[key]
+      if (key === 'preferredStart') delete next.completionBy
+      return next
+    })
+  }
+
+  const handleDateBlur = () => {
+    if (!form.preferredStart && !form.completionBy) return
+    applyDateValidation(validateDates())
+  }
+
+  const validateDates = () =>
+    validateJobDates({
+      preferredStart: form.preferredStart,
+      completionBy: form.completionBy,
+    })
+
+  const applyDateValidation = (result) => {
+    if (!result.valid) {
+      setFieldErrors((current) => ({
+        ...current,
+        [result.field]: result.message,
+      }))
+      return false
+    }
+
+    setFieldErrors((current) => {
+      const next = { ...current }
+      delete next.preferredStart
+      delete next.completionBy
+      return next
+    })
+
+    return true
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+
+    if (categoriesLoading) {
+      await showErrorAlert({
+        title: 'Categories loading',
+        text: 'Please wait for job categories to finish loading, then try again.',
+      })
+      return
+    }
+
+    if (!form.category?.id) {
+      await showErrorAlert({
+        title: 'Missing category',
+        text: 'Please select a valid job category before posting.',
+      })
+      return
+    }
+
+    if (!form.title.trim() || !form.description.trim() || !form.location.trim()) {
+      await showErrorAlert({
+        title: 'Missing information',
+        text: 'Title, description, and location are required.',
+      })
+      return
+    }
+
+    if (!form.budgetMin || !form.budgetMax) {
+      await showErrorAlert({
+        title: 'Missing budget',
+        text: 'Please enter both minimum and maximum budget.',
+      })
+      return
+    }
+
+    if (Number(form.budgetMin) > Number(form.budgetMax)) {
+      await showErrorAlert({
+        title: 'Invalid budget',
+        text: 'Minimum budget cannot be greater than maximum budget.',
+      })
+      return
+    }
+
+    const dateValidation = validateDates()
+    if (!applyDateValidation(dateValidation)) {
+      await showErrorAlert({
+        title: 'Invalid dates',
+        text: dateValidation.message,
+      })
+      return
+    }
+
     setSubmitting(true)
-    await onSubmit?.({ ...form, files })
-    setSubmitting(false)
+
+    try {
+      await onSubmit?.({
+        ...form,
+        categoryId: form.category.id,
+        specialNotes: form.specialInstruction,
+        preferredStart: dateValidation.preferredStart,
+        completionBy: dateValidation.completionBy,
+        files,
+      })
+    } catch (err) {
+      await showApiErrorFromError(err, submitErrorTitle)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -217,11 +435,9 @@ export default function PostJobForm({
           </span>
           <div className="min-w-0">
             <h1 className="text-xl font-bold tracking-[-0.02em] text-[#111827] sm:text-2xl">
-              Post a Job (100% Free)
+              {heading}
             </h1>
-            <p className="mt-1 text-sm leading-6 text-[#64748B]">
-              Get quotes from verified UK tradesmen within minutes
-            </p>
+            <p className="mt-1 text-sm leading-6 text-[#64748B]">{description}</p>
           </div>
         </div>
         {onClose ? (
@@ -241,8 +457,10 @@ export default function PostJobForm({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SelectField
               label="Job category"
-              value={form.category}
-              options={DEMO_POST_JOB_CATEGORIES}
+              value={form.category ?? { id: '', name: categoriesLoading ? 'Loading categories…' : 'Select a category' }}
+              options={categories.length ? categories : [{ id: '', name: categoriesLoading ? 'Loading categories…' : 'No categories available' }]}
+              getOptionLabel={(option) => option?.name ?? option}
+              getOptionValue={(option) => option?.id ?? option}
               onChange={setField('category')}
             />
             <SelectField
@@ -255,40 +473,58 @@ export default function PostJobForm({
               label="Location"
               value={form.location}
               onChange={setField('location')}
-              placeholder="Enter your address"
+              placeholder="e.g. Kensington, London"
             />
             <TextField
-              label="Price"
-              value={form.priceRange}
-              onChange={setField('priceRange')}
-              placeholder="£100–£200"
+              label="City"
+              value={form.city}
+              onChange={setField('city')}
+              placeholder="e.g. London"
+            />
+            <TextField
+              label="Minimum budget (£)"
+              type="number"
+              min="0"
+              value={form.budgetMin}
+              onChange={setField('budgetMin')}
+              placeholder="240"
+            />
+            <TextField
+              label="Maximum budget (£)"
+              type="number"
+              min="0"
+              value={form.budgetMax}
+              onChange={setField('budgetMax')}
+              placeholder="300"
             />
           </div>
         </section>
 
-        <section className="space-y-4">
-          <SectionTitle>Customer information</SectionTitle>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <TextField
-              label="Name"
-              value={form.customerName}
-              onChange={setField('customerName')}
-              placeholder="Enter your full name"
-            />
-            <TextField
-              label="Number"
-              value={form.customerPhone}
-              onChange={setField('customerPhone')}
-              placeholder="Enter your number"
-            />
-            <TextField
-              label="Email"
-              value={form.customerEmail}
-              onChange={setField('customerEmail')}
-              placeholder="Enter your email address"
-            />
-          </div>
-        </section>
+        {!isEditMode ? (
+          <section className="space-y-4">
+            <SectionTitle>Customer information</SectionTitle>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <TextField
+                label="Name"
+                value={form.customerName}
+                onChange={setField('customerName')}
+                placeholder="Enter your full name"
+              />
+              <TextField
+                label="Number"
+                value={form.customerPhone}
+                onChange={setField('customerPhone')}
+                placeholder="Enter your number"
+              />
+              <TextField
+                label="Email"
+                value={form.customerEmail}
+                onChange={setField('customerEmail')}
+                placeholder="Enter your email address"
+              />
+            </div>
+          </section>
+        ) : null}
 
         <section className="space-y-4">
           <SectionTitle>Job information</SectionTitle>
@@ -324,23 +560,33 @@ export default function PostJobForm({
               type="date"
               value={form.preferredStart}
               onChange={setField('preferredStart')}
+              onBlur={handleDateBlur}
+              min={todayInputValue}
+              error={fieldErrors.preferredStart}
             />
             <TextField
               label="Completion by"
               type="date"
               value={form.completionBy}
               onChange={setField('completionBy')}
+              onBlur={handleDateBlur}
+              min={completionMinDate}
+              error={fieldErrors.completionBy}
             />
           </div>
-          <UploadField files={files} onFilesChange={setFiles} />
+          <UploadField
+            files={files}
+            onFilesChange={setFiles}
+            existingImages={existingImages}
+          />
         </section>
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || categoriesLoading || !categories.length}
           className="inline-flex h-12 w-full items-center justify-center rounded-lg bg-btn-primary text-sm font-semibold text-white shadow-[0_10px_24px_-10px_rgba(1,96,242,0.65)] transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-50 sm:text-base"
         >
-          Post Job &amp; Request Verified Quotes
+          {actionLabel}
         </button>
       </form>
     </div>

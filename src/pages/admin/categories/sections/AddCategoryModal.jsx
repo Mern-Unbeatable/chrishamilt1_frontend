@@ -8,6 +8,7 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
   const [name, setName] = useState('')
   const [icon, setIcon] = useState('Wrench')
   const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!open) return undefined
@@ -15,6 +16,7 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
     setName('')
     setIcon('Wrench')
     setError('')
+    setSaving(false)
 
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -35,16 +37,22 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
 
   const canSave = name.trim().length > 0 && Boolean(icon)
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    const result = onSave?.({ name, icon })
+    setSaving(true)
 
-    if (result?.ok) {
-      onClose?.()
-      return
+    try {
+      const result = await onSave?.({ name, icon })
+
+      if (result?.ok) {
+        onClose?.()
+        return
+      }
+
+      setError(result?.error ?? 'Unable to save category.')
+    } finally {
+      setSaving(false)
     }
-
-    setError(result?.error ?? 'Unable to save category.')
   }
 
   return createPortal(
@@ -122,10 +130,10 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
           <div className="mt-5 border-t border-[#E5E7EB] pt-4">
             <button
               type="submit"
-              disabled={!canSave}
+              disabled={!canSave || saving}
               className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-btn-primary text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Save
+              {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
         </form>

@@ -31,6 +31,20 @@ export function getErrorMessage(payload, fallback = 'Something went wrong. Pleas
 
   if (typeof payload === 'string') return payload
 
+  if (Array.isArray(payload.errors) && payload.errors.length) {
+    const details = payload.errors
+      .map((item) => {
+        if (typeof item === 'string') return item
+        const field = item.field ? `${item.field}: ` : ''
+        return `${field}${item.message || item.msg || 'Invalid value'}`
+      })
+      .join(' ')
+
+    if (details) {
+      return payload.message ? `${payload.message}. ${details}` : details
+    }
+  }
+
   return (
     payload.message ||
     payload.error ||
@@ -53,8 +67,12 @@ export async function apiRequest(path, { method = 'GET', body, token, headers = 
   }
 
   if (body !== undefined) {
-    requestHeaders['Content-Type'] = 'application/json'
-    config.body = JSON.stringify(body)
+    if (body instanceof FormData) {
+      config.body = body
+    } else {
+      requestHeaders['Content-Type'] = 'application/json'
+      config.body = JSON.stringify(body)
+    }
   }
 
   if (token) {

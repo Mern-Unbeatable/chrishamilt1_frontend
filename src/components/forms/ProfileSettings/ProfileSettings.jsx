@@ -290,6 +290,8 @@ export default function ProfileSettings({
   const form = isControlled ? value : internal
   const fileInputId = useId()
   const fileRef = useRef(null)
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [updatingProfile, setUpdatingProfile] = useState(false)
 
   const patch = (partial) => {
     const next = { ...form, ...partial }
@@ -328,39 +330,54 @@ export default function ProfileSettings({
     event.target.value = ''
   }
 
-  const handleUpdateProfile = () => {
-    if (cfg.layout === 'account') {
-      onUpdateProfile?.({
-        firstName: form.firstName,
-        lastName: form.lastName,
-        email: form.email,
-        phone: form.phone,
-        region: form.region,
-        city: form.city,
-        zipCode: form.zipCode,
-        address: form.address,
-      })
-      return
-    }
+  const handleUpdateProfile = async () => {
+    setUpdatingProfile(true)
 
-    onUpdateProfile?.({
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-    })
+    try {
+      const payload =
+        cfg.layout === 'account'
+          ? {
+              firstName: form.firstName,
+              lastName: form.lastName,
+              email: form.email,
+              phone: form.phone,
+              region: form.region,
+              city: form.city,
+              zipCode: form.zipCode,
+              address: form.address,
+            }
+          : {
+              name: form.name,
+              email: form.email,
+              phone: form.phone,
+            }
+
+      await onUpdateProfile?.(payload)
+    } finally {
+      setUpdatingProfile(false)
+    }
   }
 
   const handleSaveWarehouses = () => {
     onSaveWarehouses?.(form.warehouses || [])
   }
 
-  const handleChangePassword = () => {
-    onChangePassword?.({
-      currentPassword: form.currentPassword,
-      newPassword: form.newPassword,
-      confirmPassword: form.confirmPassword,
-    })
-    patch(emptyPassword())
+  const handleChangePassword = async () => {
+    setChangingPassword(true)
+
+    try {
+      const success = await onChangePassword?.({
+        currentPassword: form.currentPassword,
+        newPassword: form.newPassword,
+        confirmPassword: form.confirmPassword,
+      })
+
+      if (success !== false) {
+        patch(emptyPassword())
+      }
+    } finally {
+      setChangingPassword(false)
+    }
   }
 
   const warehouses = form.warehouses || []
@@ -430,7 +447,9 @@ export default function ProfileSettings({
         ) : null}
       </div>
       <div className={cn('mt-5 flex', alignClass(cfg.profileActionsAlign))}>
-        <PrimaryButton onClick={handleUpdateProfile}>Update profile</PrimaryButton>
+        <PrimaryButton onClick={handleUpdateProfile} disabled={updatingProfile}>
+          {updatingProfile ? 'Saving…' : 'Update profile'}
+        </PrimaryButton>
       </div>
     </>
   )
@@ -467,8 +486,8 @@ export default function ProfileSettings({
       <SectionTitle>Change password</SectionTitle>
       <div className="mt-4">{passwordFields}</div>
       <div className={cn('mt-5 flex', alignClass(cfg.passwordActionsAlign))}>
-        <PrimaryButton size="lg" onClick={handleChangePassword}>
-          Change password
+        <PrimaryButton size="lg" onClick={handleChangePassword} disabled={changingPassword}>
+          {changingPassword ? 'Updating…' : 'Change password'}
         </PrimaryButton>
       </div>
     </div>
@@ -548,8 +567,8 @@ export default function ProfileSettings({
             </div>
 
             <div className={cn('mt-6 flex', alignClass(cfg.profileActionsAlign))}>
-              <PrimaryButton size="lg" onClick={handleUpdateProfile}>
-                Save changes
+              <PrimaryButton size="lg" onClick={handleUpdateProfile} disabled={updatingProfile}>
+                {updatingProfile ? 'Saving…' : 'Save changes'}
               </PrimaryButton>
             </div>
           </div>
@@ -564,8 +583,8 @@ export default function ProfileSettings({
       <div className="space-y-4 p-5 sm:p-6">
         {passwordFields}
         <div className={cn('flex pt-2', alignClass(cfg.passwordActionsAlign))}>
-          <PrimaryButton size="lg" onClick={handleChangePassword}>
-            Change password
+          <PrimaryButton size="lg" onClick={handleChangePassword} disabled={changingPassword}>
+            {changingPassword ? 'Updating…' : 'Change password'}
           </PrimaryButton>
         </div>
       </div>

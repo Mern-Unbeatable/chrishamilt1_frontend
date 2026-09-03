@@ -7,7 +7,12 @@ const URGENCY_STYLES = {
   low: 'bg-[#ECFDF5] text-[#059669]',
 }
 
-export default function JobDetailsSummary({ job, onSendQuote, sendQuoteLabel = 'Send Quote' }) {
+export default function JobDetailsSummary({
+  job,
+  onSendQuote,
+  sendQuoteLabel = 'Send Quote',
+  sendQuoteDisabled = false,
+}) {
   const {
     category,
     urgency,
@@ -57,10 +62,12 @@ export default function JobDetailsSummary({ job, onSendQuote, sendQuoteLabel = '
           <Clock className="size-4 shrink-0" />
           {postedAt}
         </span>
-        <span className="inline-flex items-center gap-1.5 font-medium text-btn-primary">
-          <Navigation className="size-4 shrink-0" />
-          {distance}
-        </span>
+        {distance ? (
+          <span className="inline-flex items-center gap-1.5 font-medium text-btn-primary">
+            <Navigation className="size-4 shrink-0" />
+            {distance}
+          </span>
+        ) : null}
       </div>
 
       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -70,7 +77,8 @@ export default function JobDetailsSummary({ job, onSendQuote, sendQuoteLabel = '
           <button
             type="button"
             onClick={onSendQuote}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-btn-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] sm:w-auto"
+            disabled={sendQuoteDisabled}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-btn-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             <Mail className="size-4" />
             {sendQuoteLabel}

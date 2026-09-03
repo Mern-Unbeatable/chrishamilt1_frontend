@@ -1,5 +1,6 @@
 import ProfileSettings from '@/components/forms/ProfileSettings/ProfileSettings'
 import { DEMO_USER_PROFILE } from '@/data/demoData'
+import { submitPasswordChange } from '@/helpers/submitPasswordChange'
 
 export default function UserProfilePage() {
   return (
@@ -12,7 +13,7 @@ export default function UserProfilePage() {
             subtitle="Manage your account details and password."
             defaultValue={DEMO_USER_PROFILE}
             onUpdateProfile={() => {}}
-            onChangePassword={() => {}}
+            onChangePassword={(passwords) => submitPasswordChange(passwords)}
             onUploadAvatar={() => {}}
           />
         </div>
