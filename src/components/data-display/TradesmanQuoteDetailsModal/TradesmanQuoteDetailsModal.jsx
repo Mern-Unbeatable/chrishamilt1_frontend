@@ -8,6 +8,7 @@ const STATUS_STYLES = {
   accepted: 'bg-[#ECFDF5] text-[#059669]',
   rejected: 'bg-[#FEF2F2] text-[#DC2626]',
   withdrawn: 'bg-[#F1F5F9] text-[#64748B]',
+  submitted: 'bg-[#FFFBEB] text-[#D97706]',
 }
 
 function DetailRow({ label, value }) {
@@ -19,7 +20,13 @@ function DetailRow({ label, value }) {
   )
 }
 
-export default function TradesmanQuoteDetailsModal({ open, quote, onClose }) {
+export default function TradesmanQuoteDetailsModal({
+  open,
+  quote,
+  loading = false,
+  error = '',
+  onClose,
+}) {
   useEffect(() => {
     if (!open) return undefined
 
@@ -38,7 +45,7 @@ export default function TradesmanQuoteDetailsModal({ open, quote, onClose }) {
     }
   }, [open, onClose])
 
-  if (!open || !quote) return null
+  if (!open) return null
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-4">
@@ -57,30 +64,43 @@ export default function TradesmanQuoteDetailsModal({ open, quote, onClose }) {
       >
         <div className="flex items-start justify-between gap-4 border-b border-[#E5E7EB] px-5 py-4 sm:px-6">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold',
-                  STATUS_STYLES[quote.statusVariant] ?? STATUS_STYLES.pending,
-                )}
+            {quote ? (
+              <>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold',
+                      STATUS_STYLES[quote.statusVariant] ?? STATUS_STYLES.pending,
+                    )}
+                  >
+                    <span className="size-1.5 rounded-full bg-current" />
+                    {quote.status}
+                  </span>
+                  <span className="text-xs text-[#64748B] sm:text-sm">
+                    {quote.quoteId} · {quote.postedAt}
+                  </span>
+                </div>
+                <h2
+                  id="tradesman-quote-details-title"
+                  className="mt-3 text-xl font-bold text-[#111827] sm:text-2xl"
+                >
+                  {quote.title}
+                </h2>
+              </>
+            ) : (
+              <h2
+                id="tradesman-quote-details-title"
+                className="text-xl font-bold text-[#111827] sm:text-2xl"
               >
-                <span className="size-1.5 rounded-full bg-current" />
-                {quote.status}
-              </span>
-              <span className="text-xs text-[#64748B] sm:text-sm">
-                {quote.quoteId} · {quote.postedAt}
-              </span>
-            </div>
-            <h2
-              id="tradesman-quote-details-title"
-              className="mt-3 text-xl font-bold text-[#111827] sm:text-2xl"
-            >
-              {quote.title}
-            </h2>
+                Quote details
+              </h2>
+            )}
           </div>
 
           <div className="flex shrink-0 items-start gap-3">
-            <p className="text-2xl font-bold text-[#111827]">{quote.amount}</p>
+            {quote ? (
+              <p className="text-2xl font-bold text-[#111827]">{quote.amount}</p>
+            ) : null}
             <button
               type="button"
               onClick={onClose}
@@ -93,28 +113,65 @@ export default function TradesmanQuoteDetailsModal({ open, quote, onClose }) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
-          <dl>
-            <DetailRow label="Customer" value={quote.customerName} />
-            <DetailRow label="Duration" value={quote.duration} />
-            <DetailRow label="Start date" value={quote.startDate} />
-            <DetailRow label="Tokens used" value={String(quote.tokensUsed)} />
-            <DetailRow
-              label="Materials"
-              value={quote.materialsIncluded ? 'Included' : 'Not included'}
-            />
-            {quote.warranty ? <DetailRow label="Warranty" value={quote.warranty} /> : null}
-          </dl>
-
-          <div className="mt-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
-              Full proposal
-            </p>
-            <div className="mt-3 rounded-xl bg-[#F8FAFC] p-4 sm:p-5">
-              <p className="text-sm leading-7 text-[#111827]">
-                {quote.fullProposal ?? quote.description}
-              </p>
+          {loading ? (
+            <div className="py-12 text-center">
+              <p className="text-sm text-[#64748B]">Loading quote details…</p>
             </div>
-          </div>
+          ) : error ? (
+            <div className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-8 text-center">
+              <p className="text-sm font-semibold text-[#B91C1C]">{error}</p>
+            </div>
+          ) : quote ? (
+            <>
+              <dl>
+                <DetailRow label="Customer" value={quote.customerName} />
+                <DetailRow label="Duration" value={quote.duration} />
+                <DetailRow label="Start date" value={quote.startDate} />
+                <DetailRow label="Tokens used" value={String(quote.tokensUsed)} />
+                <DetailRow
+                  label="Materials"
+                  value={quote.materialsIncluded ? 'Included' : 'Not included'}
+                />
+                {quote.warranty ? <DetailRow label="Warranty" value={quote.warranty} /> : null}
+              </dl>
+
+              <div className="mt-6">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+                  Full proposal
+                </p>
+                <div className="mt-3 rounded-xl bg-[#F8FAFC] p-4 sm:p-5">
+                  <p className="text-sm leading-7 text-[#111827]">
+                    {quote.fullProposal ?? quote.description}
+                  </p>
+                </div>
+              </div>
+
+              {quote.images?.length ? (
+                <div className="mt-6">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+                    Attachments
+                  </p>
+                  <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {quote.images.map((image) => (
+                      <a
+                        key={image.id}
+                        href={image.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F8FAFC]"
+                      >
+                        <img
+                          src={image.url}
+                          alt="Quote attachment"
+                          className="aspect-[4/3] w-full object-cover"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </>
+          ) : null}
         </div>
       </div>
     </div>,

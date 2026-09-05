@@ -23,10 +23,10 @@ const STAT_ICONS = {
   message: MessageSquare,
 }
 
-export default function TradesmanStatsGrid() {
+export default function TradesmanStatsGrid({ stats = DEMO_TRADESMAN_DASHBOARD_STATS }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-      {DEMO_TRADESMAN_DASHBOARD_STATS.map((stat) => (
+      {stats.map((stat) => (
         <WalletStatCard
           key={stat.id}
           label={stat.label}

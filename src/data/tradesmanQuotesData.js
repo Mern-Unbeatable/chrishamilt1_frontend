@@ -6,6 +6,7 @@ const TRADESMAN_QUOTE_TEMPLATE = {
   status: 'Pending',
   statusVariant: 'pending',
   amount: '£5,480',
+  amountValue: 5480,
   title: 'Full rewire of 3-bed Victorian terrace',
   customerName: 'Sophie Harper',
   duration: '15 working days',
@@ -19,6 +20,7 @@ const TRADESMAN_QUOTE_TEMPLATE = {
   materialsLabel: 'Included',
   warranty: '12-month labour guarantee',
   startDate: '15 Aug 2026',
+  startDateInput: '2026-08-15',
 }
 
 export const DEMO_TRADESMAN_QUOTES = [

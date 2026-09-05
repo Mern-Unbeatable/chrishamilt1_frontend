@@ -10,6 +10,21 @@ const EMPTY_FORM = {
   description: '',
   featured: false,
   badgeLabel: 'Most popular',
+  stripePriceId: '',
+}
+
+const STRIPE_PRICE_ID_PATTERN = /^price_[A-Za-z0-9]+$/
+
+function sanitizePriceInput(value = '') {
+  const cleaned = String(value).replace(/[^\d.]/g, '')
+  const [whole = '', ...rest] = cleaned.split('.')
+  if (!rest.length) return whole
+
+  return `${whole}.${rest.join('').slice(0, 2)}`
+}
+
+function normalizePriceForForm(value = '') {
+  return sanitizePriceInput(String(value).replace(/£/g, ''))
 }
 
 export default function AddTokenPackageModal({
@@ -20,6 +35,7 @@ export default function AddTokenPackageModal({
 }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
   const isEditing = Boolean(initialPackage)
 
   useEffect(() => {
@@ -29,15 +45,17 @@ export default function AddTokenPackageModal({
       initialPackage
         ? {
             planName: initialPackage.planName,
-            price: initialPackage.price,
+            price: normalizePriceForForm(initialPackage.price),
             tokens: String(initialPackage.tokens),
             description: initialPackage.description,
             featured: Boolean(initialPackage.featured),
             badgeLabel: initialPackage.badgeLabel || 'Most popular',
+            stripePriceId: initialPackage.stripePriceId ?? '',
           }
         : EMPTY_FORM,
     )
     setError('')
+    setSaving(false)
 
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -59,6 +77,7 @@ export default function AddTokenPackageModal({
   const canSave =
     form.planName.trim() &&
     form.price.trim() &&
+    Number(form.price) > 0 &&
     form.tokens.trim() &&
     form.description.trim()
 
@@ -67,7 +86,12 @@ export default function AddTokenPackageModal({
     if (error) setError('')
   }
 
-  const handleSubmit = (event) => {
+  const handlePriceChange = (event) => {
+    setForm((current) => ({ ...current, price: sanitizePriceInput(event.target.value) }))
+    if (error) setError('')
+  }
+
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
     const tokens = Number(form.tokens)
@@ -76,26 +100,43 @@ export default function AddTokenPackageModal({
       return
     }
 
-    const price = form.price.trim().startsWith('£')
-      ? form.price.trim()
-      : `£${form.price.trim()}`
-
-    const result = onSave?.({
-      planName: form.planName.trim(),
-      price,
-      tokens,
-      description: form.description.trim(),
-      featured: form.featured,
-      badgeLabel: form.featured ? form.badgeLabel.trim() || 'Most popular' : undefined,
-      rateLabel: formatTokenRate(price, tokens),
-    })
-
-    if (result?.ok) {
-      onClose?.()
+    const priceValue = Number(form.price)
+    if (!Number.isFinite(priceValue) || priceValue <= 0) {
+      setError('Price must be a positive number.')
       return
     }
 
-    setError(result?.error ?? 'Unable to save package.')
+    const stripePriceId = form.stripePriceId.trim()
+    if (stripePriceId && !STRIPE_PRICE_ID_PATTERN.test(stripePriceId)) {
+      setError('Stripe Price ID must look like price_1UBSnvPc4Do23EYoZc37LZnO.')
+      return
+    }
+
+    const price = `£${priceValue}`
+
+    setSaving(true)
+
+    try {
+      const result = await onSave?.({
+        planName: form.planName.trim(),
+        price,
+        tokens,
+        description: form.description.trim(),
+        featured: form.featured,
+        badgeLabel: form.featured ? form.badgeLabel.trim() || 'Most popular' : undefined,
+        stripePriceId,
+        rateLabel: formatTokenRate(price, tokens),
+      })
+
+      if (result?.ok) {
+        onClose?.()
+        return
+      }
+
+      setError(result?.error ?? 'Unable to save package.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return createPortal(
@@ -156,13 +197,19 @@ export default function AddTokenPackageModal({
               <span className="text-sm font-medium text-[#111827]">
                 Price<span className="text-[#EF4444]">*</span>
               </span>
-              <input
-                type="text"
-                value={form.price}
-                onChange={handleChange('price')}
-                placeholder="£120"
-                className="mt-2 h-11 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#94A3B8] focus:border-btn-primary focus:ring-2 focus:ring-btn-primary/15"
-              />
+              <div className="relative mt-2">
+                <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-medium text-[#64748B]">
+                  £
+                </span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={form.price}
+                  onChange={handlePriceChange}
+                  placeholder="120"
+                  className="h-11 w-full rounded-lg border border-[#E5E7EB] bg-white py-0 pr-4 pl-8 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#94A3B8] focus:border-btn-primary focus:ring-2 focus:ring-btn-primary/15"
+                />
+              </div>
             </label>
           </div>
 
@@ -191,6 +238,21 @@ export default function AddTokenPackageModal({
               placeholder="Best choice for growing businesses purchasing leads regularly."
               className="mt-2 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#94A3B8] focus:border-btn-primary focus:ring-2 focus:ring-btn-primary/15"
             />
+          </label>
+
+          <label className="mt-4 block">
+            <span className="text-sm font-medium text-[#111827]">Stripe Price ID</span>
+            <input
+              type="text"
+              value={form.stripePriceId}
+              onChange={handleChange('stripePriceId')}
+              placeholder="price_1UBSnvPc4Do23EYoZc37LZnO"
+              pattern="price_[A-Za-z0-9]+"
+              className="mt-2 h-11 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#94A3B8] focus:border-btn-primary focus:ring-2 focus:ring-btn-primary/15"
+            />
+            <span className="mt-1 block text-xs text-[#64748B]">
+              Optional. Must start with <code className="text-[#111827]">price_</code> when provided.
+            </span>
           </label>
 
           <div className="mt-4 rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] p-4">
@@ -240,10 +302,10 @@ export default function AddTokenPackageModal({
             </button>
             <button
               type="submit"
-              disabled={!canSave}
+              disabled={!canSave || saving}
               className="inline-flex h-11 items-center justify-center rounded-lg bg-btn-primary px-5 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Save changes
+              {saving ? 'Saving…' : 'Save changes'}
             </button>
           </div>
         </form>
