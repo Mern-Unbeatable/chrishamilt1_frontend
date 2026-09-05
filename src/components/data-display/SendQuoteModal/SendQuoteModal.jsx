@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   ArrowLeft,
@@ -371,6 +371,7 @@ export default function SendQuoteModal({
   const [step, setStep] = useState(1)
   const [form, setForm] = useState(createInitialForm)
   const [submitting, setSubmitting] = useState(false)
+  const wasOpenRef = useRef(false)
   const isEditMode = mode === 'edit'
 
   useEffect(() => {
@@ -393,17 +394,37 @@ export default function SendQuoteModal({
 
   useEffect(() => {
     if (!open) {
+      wasOpenRef.current = false
       setStep(1)
       setForm(createInitialForm())
       setSubmitting(false)
       return
     }
 
-    if (initialValues) {
+    if (!initialValues) return
+
+    const justOpened = !wasOpenRef.current
+    wasOpenRef.current = true
+
+    if (justOpened || !isEditMode) {
       setForm({ ...createInitialForm(), ...initialValues })
       setStep(1)
+      return
     }
-  }, [open, initialValues])
+
+    setForm((current) => ({
+      ...current,
+      quoteAmount: initialValues.quoteAmount ?? current.quoteAmount,
+      duration: initialValues.duration ?? current.duration,
+      startDate: initialValues.startDate ?? current.startDate,
+      materialsIncluded: initialValues.materialsIncluded ?? current.materialsIncluded,
+      warranty: initialValues.warranty ?? current.warranty,
+      proposal:
+        (initialValues.proposal?.length ?? 0) > (current.proposal?.length ?? 0)
+          ? initialValues.proposal
+          : current.proposal,
+    }))
+  }, [open, initialValues, isEditMode])
 
   if (!open) return null
 

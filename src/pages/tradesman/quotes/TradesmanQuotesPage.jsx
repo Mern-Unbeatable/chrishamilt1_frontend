@@ -39,7 +39,6 @@ export default function TradesmanQuotesPage() {
   const [detailLoading, setDetailLoading] = useState(false)
   const [detailError, setDetailError] = useState('')
   const [editingQuoteDetails, setEditingQuoteDetails] = useState(null)
-  const [editingDetailsLoading, setEditingDetailsLoading] = useState(false)
 
   const demoResult = useMemo(() => {
     const base = getDemoTradesmanQuotesPage(page, PAGE_SIZE)
@@ -135,15 +134,12 @@ export default function TradesmanQuotesPage() {
   useEffect(() => {
     if (!editingQuoteId) {
       setEditingQuoteDetails(null)
-      setEditingDetailsLoading(false)
       return undefined
     }
 
     let cancelled = false
 
     async function loadEditingQuote() {
-      setEditingDetailsLoading(true)
-
       try {
         const quote = useApi
           ? await fetchQuoteDetails(editingQuoteId)
@@ -151,16 +147,10 @@ export default function TradesmanQuotesPage() {
             getDemoTradesmanQuoteDetails(editingQuoteId)
 
         if (cancelled) return
-        setEditingQuoteDetails(quote)
+        if (quote) setEditingQuoteDetails(quote)
       } catch {
         if (cancelled) return
-
-        const fallback = (useApi ? quotes : demoResult.quotes).find(
-          (item) => item.id === editingQuoteId,
-        )
-        setEditingQuoteDetails(fallback ?? null)
-      } finally {
-        if (!cancelled) setEditingDetailsLoading(false)
+        // Keep the list-card seed data if the detail request fails.
       }
     }
 
@@ -169,7 +159,7 @@ export default function TradesmanQuotesPage() {
     return () => {
       cancelled = true
     }
-  }, [editingQuoteId, useApi, quotes, demoResult.quotes, demoQuoteOverrides])
+  }, [editingQuoteId, useApi])
 
   const displayQuotes = useApi ? quotes : demoResult.quotes
   const displayTotalCount = useApi ? totalCount : demoResult.pagination.total
@@ -212,6 +202,11 @@ export default function TradesmanQuotesPage() {
     } finally {
       setWithdrawingId('')
     }
+  }
+
+  const handleEditQuote = (quote) => {
+    setEditingQuoteDetails(quote)
+    setEditingQuoteId(quote.id)
   }
 
   const handlePageChange = (nextPage) => {
@@ -282,7 +277,7 @@ export default function TradesmanQuotesPage() {
                       : undefined
                   }
                   onViewDetails={() => setSelectedQuoteId(quote.id)}
-                  onEditQuote={isWithdrawn ? undefined : () => setEditingQuoteId(quote.id)}
+                  onEditQuote={isWithdrawn ? undefined : () => handleEditQuote(quote)}
                   onWithdraw={
                     isWithdrawn || withdrawingId === quote.id
                       ? undefined
@@ -326,7 +321,8 @@ export default function TradesmanQuotesPage() {
       />
 
       <SendQuoteModal
-        open={Boolean(editingQuoteId) && !editingDetailsLoading}
+        key={editingQuoteId ?? 'quote-edit-closed'}
+        open={Boolean(editingQuoteId)}
         mode="edit"
         initialValues={editingInitialValues}
         onClose={() => setEditingQuoteId(null)}
