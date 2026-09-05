@@ -21,6 +21,19 @@ function formatCurrency(value) {
   return `£${value}`
 }
 
+function getYAxisMax(data) {
+  const max = Math.max(...data.map((item) => item.earnings ?? 0), 0)
+  if (max === 0) return 100
+
+  const step = max <= 1000 ? 100 : max <= 5000 ? 500 : 1000
+  return Math.ceil(max / step) * step
+}
+
+function buildTicks(max) {
+  const step = max / 4
+  return [0, step, step * 2, step * 3, max].map((value) => Math.round(value))
+}
+
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
 
@@ -34,24 +47,29 @@ function ChartTooltip({ active, payload, label }) {
   )
 }
 
-export default function TradesmanEarningsChart() {
+export default function TradesmanEarningsChart({
+  data = DEMO_TRADESMAN_MONTHLY_EARNINGS,
+  earningsChange = DEMO_TRADESMAN_DASHBOARD_PROFILE.earningsChange,
+}) {
+  const yMax = getYAxisMax(data)
+  const ticks = buildTicks(yMax)
+
   return (
     <DashboardChartCard
       title="Monthly earnings"
       subtitle="Paid invoices, last 12 months"
       badge={
-        <span className="inline-flex shrink-0 rounded-full bg-[#ECFDF5] px-2.5 py-1 text-xs font-semibold text-[#059669]">
-          {DEMO_TRADESMAN_DASHBOARD_PROFILE.earningsChange}
-        </span>
+        earningsChange ? (
+          <span className="inline-flex shrink-0 rounded-full bg-[#ECFDF5] px-2.5 py-1 text-xs font-semibold text-[#059669]">
+            {earningsChange}
+          </span>
+        ) : null
       }
       className="h-full"
     >
       <div className="h-[280px] w-full sm:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={DEMO_TRADESMAN_MONTHLY_EARNINGS}
-            margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
-          >
+          <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="tradesmanEarningsFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.35} />
@@ -72,6 +90,8 @@ export default function TradesmanEarningsChart() {
               tick={{ fill: '#94A3B8', fontSize: 12 }}
               tickFormatter={formatCurrency}
               width={52}
+              domain={[0, yMax]}
+              ticks={ticks}
             />
             <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#CBD5E1', strokeDasharray: '4 4' }} />
             <Area

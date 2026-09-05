@@ -192,30 +192,75 @@ export async function fetchCurrentUser() {
   return user
 }
 
-export function validateProfileUpdate({ fullName, email }) {
-  if (!fullName?.trim()) {
+export function validateProfileUpdatePayload(payload, role = 'admin') {
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+  if (role === 'user') {
+    if (!payload.firstName?.trim() && !payload.lastName?.trim()) {
+      return 'First or last name is required.'
+    }
+
+    if (!payload.email?.trim()) {
+      return 'Email is required.'
+    }
+
+    if (!emailPattern.test(payload.email.trim())) {
+      return 'Enter a valid email address.'
+    }
+
+    return null
+  }
+
+  if (!payload.name?.trim()) {
     return 'Name is required.'
   }
 
-  if (!email?.trim()) {
+  if (!payload.email?.trim()) {
     return 'Email is required.'
   }
 
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailPattern.test(email.trim())) {
+  if (!emailPattern.test(payload.email.trim())) {
     return 'Enter a valid email address.'
   }
 
   return null
 }
 
-export async function updateUserProfile({ fullName, email }) {
+export function buildProfileUpdateBody(payload, role = 'admin') {
+  if (role === 'user') {
+    const firstName = payload.firstName?.trim() ?? ''
+    const lastName = payload.lastName?.trim() ?? ''
+    const fullName = [firstName, lastName].filter(Boolean).join(' ').trim()
+
+    return {
+      firstName,
+      lastName,
+      fullName,
+      email: payload.email.trim(),
+      phoneNumber: payload.phone?.trim() ?? '',
+      address: payload.address?.trim() ?? '',
+      region: payload.region?.trim() || null,
+      city: payload.city?.trim() || null,
+      zipCode: payload.zipCode?.trim() ?? '',
+    }
+  }
+
+  const body = {
+    fullName: payload.name.trim(),
+    email: payload.email.trim(),
+  }
+
+  if (role === 'tradesman' && payload.phone !== undefined) {
+    body.phoneNumber = payload.phone?.trim() ?? ''
+  }
+
+  return body
+}
+
+export async function updateUserProfile(body) {
   const data = await apiRequest(AUTH_CONFIG.endpoints.profile, {
     method: 'PUT',
-    body: {
-      fullName: fullName.trim(),
-      email: email.trim(),
-    },
+    body,
     token: getAccessToken(),
   })
 
@@ -250,6 +295,48 @@ export function mapApiUserToAdminProfile(user) {
     confirmPassword: '',
   }
 }
+
+export function mapApiUserToUserProfile(user) {
+  return {
+    firstName: user.firstName ?? '',
+    lastName: user.lastName ?? '',
+    email: user.email ?? '',
+    phone: user.phoneNumber ?? '',
+    region: user.region ?? '',
+    city: user.city ?? '',
+    zipCode: user.zipCode ?? '',
+    address: user.address ?? '',
+    avatarUrl: user.profileImage ?? null,
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  }
+}
+
+export function mapApiUserToTradesmanProfile(user) {
+  return mapApiUserToAdminProfile(user)
+}
+
+const PROFILE_MAPPERS = {
+  admin: mapApiUserToAdminProfile,
+  user: mapApiUserToUserProfile,
+  tradesman: mapApiUserToTradesmanProfile,
+}
+
+export function mapApiUserToProfile(user, role = 'admin') {
+  const mapper = PROFILE_MAPPERS[role] ?? mapApiUserToAdminProfile
+  return mapper(user)
+}
+
+function getSessionNameFromProfile(profile, role = 'admin') {
+  if (role === 'user') {
+    return [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim()
+  }
+
+  return profile.name ?? profile.displayName ?? profile.email ?? ''
+}
+
+export { getSessionNameFromProfile }
 
 export function validatePasswordChange({
   currentPassword,

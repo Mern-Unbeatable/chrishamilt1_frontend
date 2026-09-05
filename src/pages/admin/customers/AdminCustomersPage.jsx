@@ -2,8 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import DataTable, { StatusBadge } from '@/components/data-display/DataTable/DataTable'
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
 import { DEMO_ADMIN_CUSTOMERS } from '@/data/demoData'
+import { submitAdminUserStatus } from '@/helpers/submitAdminUserStatus'
+import {
+  ADMIN_CUSTOMERS_PAGE_SIZE,
+  fetchAdminCustomers,
+  isAdminCustomersApiEnabled,
+} from '@/services/adminCustomersApi'
+import { ADMIN_USER_STATUS } from '@/services/adminUsersApi'
 
-const PAGE_SIZE = 7
+const DEMO_PAGE_SIZE = 7
 
 const CUSTOMER_COLUMNS = [
   { key: 'userName', header: 'User Name' },
@@ -27,7 +34,7 @@ const CUSTOMER_COLUMNS = [
   { key: 'joinedDate', header: 'Joined Date' },
 ]
 
-function buildCustomerActions({ onSetActive, onSetSuspend, onDelete }) {
+function buildCustomerActions({ onSetActive, onSetSuspend }) {
   return [
     {
       id: 'active',
@@ -39,62 +46,163 @@ function buildCustomerActions({ onSetActive, onSetSuspend, onDelete }) {
       label: 'Suspend',
       onClick: onSetSuspend,
     },
-    {
-      id: 'delete',
-      label: 'Delete',
-      variant: 'danger',
-      onClick: onDelete,
-    },
+    // {
+    //   id: 'delete',
+    //   label: 'Delete',
+    //   variant: 'danger',
+    //   onClick: onDelete,
+    // },
   ]
 }
 
 export default function AdminCustomersPage() {
-  const [customers, setCustomers] = useState(DEMO_ADMIN_CUSTOMERS)
+  const useApi = isAdminCustomersApiEnabled()
+  const pageSize = useApi ? ADMIN_CUSTOMERS_PAGE_SIZE : DEMO_PAGE_SIZE
+
+  const [customers, setCustomers] = useState(useApi ? [] : DEMO_ADMIN_CUSTOMERS)
   const [page, setPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(useApi ? 0 : DEMO_ADMIN_CUSTOMERS.length)
+  const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading] = useState(useApi)
+  const [error, setError] = useState('')
+  const [updatingId, setUpdatingId] = useState('')
 
-  const totalPages = Math.max(1, Math.ceil(customers.length / PAGE_SIZE))
-
-  const paginatedCustomers = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE
-    return customers.slice(start, start + PAGE_SIZE)
-  }, [customers, page])
+  const demoPaginatedCustomers = useMemo(() => {
+    const start = (page - 1) * pageSize
+    return customers.slice(start, start + pageSize)
+  }, [customers, page, pageSize])
 
   useEffect(() => {
-    if (page > totalPages) setPage(totalPages)
-  }, [page, totalPages])
+    if (!useApi) return undefined
 
-  const handleSetActive = useCallback((row) => {
-    setCustomers((current) =>
-      current.map((customer) =>
-        customer.id === row.id ? { ...customer, status: 'Active' } : customer,
-      ),
-    )
-  }, [])
+    let cancelled = false
 
-  const handleSetSuspend = useCallback((row) => {
-    setCustomers((current) =>
-      current.map((customer) =>
-        customer.id === row.id ? { ...customer, status: 'Suspend' } : customer,
-      ),
-    )
-  }, [])
+    async function loadCustomers() {
+      setLoading(true)
+      setError('')
 
-  const handleDelete = useCallback((row) => {
-    setCustomers((current) => current.filter((customer) => customer.id !== row.id))
-  }, [])
+      try {
+        const result = await fetchAdminCustomers({ page, limit: pageSize })
+
+        if (cancelled) return
+
+        setCustomers(result.customers)
+        setTotalCount(result.pagination.total ?? result.customers.length)
+        setTotalPages(Math.max(1, result.pagination.totalPages ?? 1))
+      } catch (err) {
+        if (cancelled) return
+
+        setCustomers([])
+        setTotalCount(0)
+        setTotalPages(1)
+        setError(err?.message || 'Unable to load customers.')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    loadCustomers()
+
+    return () => {
+      cancelled = true
+    }
+  }, [useApi, page, pageSize])
+
+  useEffect(() => {
+    if (useApi) return
+    const nextTotalPages = Math.max(1, Math.ceil(customers.length / pageSize))
+    if (page > nextTotalPages) setPage(nextTotalPages)
+  }, [useApi, customers.length, page, pageSize])
+
+  const displayCustomers = useApi ? customers : demoPaginatedCustomers
+  const displayTotalCount = useApi ? totalCount : customers.length
+  const displayTotalPages = useApi
+    ? totalPages
+    : Math.max(1, Math.ceil(customers.length / pageSize))
+
+  const handleSetActive = useCallback(
+    async (row) => {
+      if (!useApi) {
+        setCustomers((current) =>
+          current.map((customer) =>
+            customer.id === row.id ? { ...customer, status: 'Active' } : customer,
+          ),
+        )
+        return
+      }
+
+      if (updatingId) return
+
+      setUpdatingId(row.id)
+
+      try {
+        const displayStatus = await submitAdminUserStatus(row.id, ADMIN_USER_STATUS.ACTIVE, {
+          successText: 'Customer account is now active.',
+        })
+
+        if (displayStatus) {
+          setCustomers((current) =>
+            current.map((customer) =>
+              customer.id === row.id ? { ...customer, status: displayStatus } : customer,
+            ),
+          )
+        }
+      } finally {
+        setUpdatingId('')
+      }
+    },
+    [useApi, updatingId],
+  )
+
+  const handleSetSuspend = useCallback(
+    async (row) => {
+      if (!useApi) {
+        setCustomers((current) =>
+          current.map((customer) =>
+            customer.id === row.id ? { ...customer, status: 'Suspend' } : customer,
+          ),
+        )
+        return
+      }
+
+      if (updatingId) return
+
+      setUpdatingId(row.id)
+
+      try {
+        const displayStatus = await submitAdminUserStatus(row.id, ADMIN_USER_STATUS.SUSPENDED, {
+          successText: 'Customer account has been suspended.',
+        })
+
+        if (displayStatus) {
+          setCustomers((current) =>
+            current.map((customer) =>
+              customer.id === row.id ? { ...customer, status: displayStatus } : customer,
+            ),
+          )
+        }
+      } finally {
+        setUpdatingId('')
+      }
+    },
+    [useApi, updatingId],
+  )
+
+  // const handleDelete = useCallback((row) => {
+  //   setCustomers((current) => current.filter((customer) => customer.id !== row.id))
+  // }, [])
 
   const actions = useMemo(
     () =>
       buildCustomerActions({
         onSetActive: handleSetActive,
         onSetSuspend: handleSetSuspend,
-        onDelete: handleDelete,
       }),
-    [handleSetActive, handleSetSuspend, handleDelete],
+    [handleSetActive, handleSetSuspend],
   )
 
-  const from = customers.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
-  const to = Math.min(page * PAGE_SIZE, customers.length)
+  const from = displayTotalCount === 0 ? 0 : (page - 1) * pageSize + 1
+  const to = Math.min(page * pageSize, displayTotalCount)
 
   return (
     <div className="space-y-6">
@@ -103,20 +211,27 @@ export default function AdminCustomersPage() {
         description="Manage all registered customers, review their job history, and control account access."
       />
 
+      {error ? (
+        <p className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
+          {error}
+        </p>
+      ) : null}
+
       <DataTable
         columns={CUSTOMER_COLUMNS}
-        data={paginatedCustomers}
+        data={displayCustomers}
+        loading={useApi && loading}
         showActions
         actions={actions}
         showPagination
         pagination={{
           page,
-          pageSize: PAGE_SIZE,
-          total: customers.length,
+          pageSize,
+          total: displayTotalCount,
           from,
           to,
           hasPrevious: page > 1,
-          hasNext: page < totalPages,
+          hasNext: page < displayTotalPages,
           onPageChange: setPage,
         }}
         emptyMessage="No customers found."

@@ -1,17 +1,16 @@
 import { AUTH_CONFIG } from '@/auth/authConfig'
 import {
-  mapApiUserToAdminProfile,
+  buildProfileUpdateBody,
+  getSessionNameFromProfile,
+  mapApiUserToProfile,
   patchSessionUser,
   updateUserProfile,
-  validateProfileUpdate,
+  validateProfileUpdatePayload,
 } from '@/auth/authService'
 import { showApiErrorFromError, showErrorAlert, showSuccessAlert } from '@/helpers/showAppAlert'
 
-export async function submitProfileUpdate({ name, email }) {
-  const validationError = validateProfileUpdate({
-    fullName: name,
-    email,
-  })
+export async function submitProfileUpdate(payload, { role = 'admin' } = {}) {
+  const validationError = validateProfileUpdatePayload(payload, role)
 
   if (validationError) {
     await showErrorAlert({
@@ -27,22 +26,35 @@ export async function submitProfileUpdate({ name, email }) {
       text: 'Profile update is simulated in demo mode.',
     })
 
-    return mapApiUserToAdminProfile({
-      fullName: name.trim(),
-      email: email.trim(),
-    })
+    const demoUser =
+      role === 'user'
+        ? {
+            firstName: payload.firstName?.trim() ?? '',
+            lastName: payload.lastName?.trim() ?? '',
+            email: payload.email?.trim() ?? '',
+            phoneNumber: payload.phone?.trim() ?? '',
+            region: payload.region ?? '',
+            city: payload.city ?? '',
+            zipCode: payload.zipCode?.trim() ?? '',
+            address: payload.address?.trim() ?? '',
+          }
+        : {
+            fullName: payload.name?.trim() ?? '',
+            email: payload.email?.trim() ?? '',
+            phoneNumber: payload.phone?.trim() ?? '',
+            warehouses: payload.warehouses ?? [],
+          }
+
+    return mapApiUserToProfile(demoUser, role)
   }
 
   try {
-    const user = await updateUserProfile({
-      fullName: name,
-      email,
-    })
-
-    const profile = mapApiUserToAdminProfile(user)
+    const body = buildProfileUpdateBody(payload, role)
+    const user = await updateUserProfile(body)
+    const profile = mapApiUserToProfile(user, role)
 
     patchSessionUser({
-      name: profile.name,
+      name: getSessionNameFromProfile(profile, role),
       email: profile.email,
     })
 

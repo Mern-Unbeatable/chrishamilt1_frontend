@@ -6,13 +6,21 @@ import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
 import {
   createPackageId,
   createRuleId,
-  DEMO_ADMIN_TOKEN_PACKAGES,
   DEMO_ADMIN_TOKEN_PURCHASES,
   DEMO_ADMIN_TOKEN_RULES,
 } from '@/data/adminTokenData'
 import AddTokenPackageModal from '@/pages/admin/tokens/sections/AddTokenPackageModal'
 import AddTokenRuleModal from '@/pages/admin/tokens/sections/AddTokenRuleModal'
 import AdminTokenRulesPanel from '@/pages/admin/tokens/sections/AdminTokenRulesPanel'
+import {
+  fetchAdminPackages,
+  getDemoAdminPackages,
+  isAdminPackagesApiEnabled,
+} from '@/services/adminPackagesApi'
+import {
+  submitAdminPackageDelete,
+  submitAdminPackageSave,
+} from '@/helpers/submitAdminPackage'
 
 const PAGE_SIZE = 5
 
@@ -54,8 +62,11 @@ const PURCHASE_COLUMNS = [
 ]
 
 export default function AdminTokenManagementPage() {
+  const useApi = isAdminPackagesApiEnabled()
   const [activeTab, setActiveTab] = useState('packages')
-  const [packages, setPackages] = useState(DEMO_ADMIN_TOKEN_PACKAGES)
+  const [packages, setPackages] = useState(() => getDemoAdminPackages())
+  const [packagesLoading, setPackagesLoading] = useState(useApi)
+  const [packagesError, setPackagesError] = useState('')
   const [rules, setRules] = useState(DEMO_ADMIN_TOKEN_RULES)
   const [page, setPage] = useState(1)
   const [packageModalOpen, setPackageModalOpen] = useState(false)
@@ -73,6 +84,40 @@ export default function AdminTokenManagementPage() {
   useEffect(() => {
     if (page > totalPages) setPage(totalPages)
   }, [page, totalPages])
+
+  useEffect(() => {
+    if (!useApi) {
+      setPackages(getDemoAdminPackages())
+      setPackagesLoading(false)
+      setPackagesError('')
+      return undefined
+    }
+
+    let cancelled = false
+
+    async function loadPackages() {
+      setPackagesLoading(true)
+      setPackagesError('')
+
+      try {
+        const result = await fetchAdminPackages()
+        if (!cancelled) setPackages(result.packages)
+      } catch (err) {
+        if (!cancelled) {
+          setPackages([])
+          setPackagesError(err?.message || 'Unable to load token packages.')
+        }
+      } finally {
+        if (!cancelled) setPackagesLoading(false)
+      }
+    }
+
+    loadPackages()
+
+    return () => {
+      cancelled = true
+    }
+  }, [useApi])
 
   const openCreatePackageModal = useCallback(() => {
     setEditingPackage(null)
@@ -94,16 +139,39 @@ export default function AdminTokenManagementPage() {
     setRuleModalOpen(true)
   }, [])
 
-  const handleDeletePackage = useCallback((pkg) => {
-    setPackages((current) => current.filter((item) => item.id !== pkg.id))
-  }, [])
+  const handleDeletePackage = useCallback(
+    async (pkg) => {
+      if (!useApi) {
+        setPackages((current) => current.filter((item) => item.id !== pkg.id))
+        return
+      }
+
+      const result = await submitAdminPackageDelete(pkg.id, pkg.planName)
+      if (result.ok && result.packages) {
+        setPackages(result.packages)
+      }
+    },
+    [useApi],
+  )
 
   const handleDeleteRule = useCallback((rule) => {
     setRules((current) => current.filter((item) => item.id !== rule.id))
   }, [])
 
   const handleSavePackage = useCallback(
-    (values) => {
+    async (values) => {
+      if (useApi) {
+        const result = await submitAdminPackageSave(values, {
+          packageId: editingPackage?.id,
+        })
+
+        if (result.ok && result.packages) {
+          setPackages(result.packages)
+        }
+
+        return result
+      }
+
       const normalizePackages = (current, savedId) =>
         current.map((item) => {
           if (item.id === savedId) {
@@ -157,7 +225,7 @@ export default function AdminTokenManagementPage() {
       })
       return { ok: true }
     },
-    [editingPackage, packages],
+    [editingPackage, packages, useApi],
   )
 
   const handleSaveRule = useCallback(
@@ -249,16 +317,28 @@ export default function AdminTokenManagementPage() {
 
         {activeTab === 'packages' ? (
           <>
-            <div className="grid grid-cols-1 gap-4 pt-2 md:grid-cols-2 xl:grid-cols-3">
-              {packages.map((plan) => (
-                <TokenPricingCard
-                  key={plan.id}
-                  {...plan}
-                  onEdit={() => openEditPackageModal(plan)}
-                  onDelete={() => handleDeletePackage(plan)}
-                />
-              ))}
-            </div>
+            {packagesError ? (
+              <p className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
+                {packagesError}
+              </p>
+            ) : null}
+
+            {packagesLoading ? (
+              <div className="rounded-2xl border border-[#E5E7EB] bg-white px-6 py-16 text-center">
+                <p className="text-sm text-[#64748B]">Loading token packages…</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 pt-2 md:grid-cols-2 xl:grid-cols-3">
+                {packages.map((plan) => (
+                  <TokenPricingCard
+                    key={plan.id}
+                    {...plan}
+                    onEdit={() => openEditPackageModal(plan)}
+                    onDelete={() => handleDeletePackage(plan)}
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="space-y-4 pt-2">
               <h2 className="text-lg font-semibold text-[#111827]">Purchase History</h2>

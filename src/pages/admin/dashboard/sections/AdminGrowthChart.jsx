@@ -11,6 +11,22 @@ import {
 import DashboardChartCard from '@/components/dashboard/DashboardChartCard'
 import { DEMO_ADMIN_GROWTH } from '@/data/adminDashboardData'
 
+function getYAxisMax(data) {
+  const max = Math.max(
+    ...data.flatMap((item) => [item.customers ?? 0, item.tradesmen ?? 0]),
+    0,
+  )
+  if (max === 0) return 10
+
+  const step = max <= 10 ? 2 : max <= 50 ? 10 : max <= 200 ? 50 : 100
+  return Math.ceil(max / step) * step
+}
+
+function buildTicks(max) {
+  const step = max / 4
+  return [0, step, step * 2, step * 3, max].map((value) => Math.round(value))
+}
+
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
 
@@ -26,7 +42,10 @@ function ChartTooltip({ active, payload, label }) {
   )
 }
 
-export default function AdminGrowthChart() {
+export default function AdminGrowthChart({ data = DEMO_ADMIN_GROWTH }) {
+  const yMax = getYAxisMax(data)
+  const ticks = buildTicks(yMax)
+
   return (
     <DashboardChartCard
       title="Customer & Tradesman Growth"
@@ -35,10 +54,7 @@ export default function AdminGrowthChart() {
     >
       <div className="h-[280px] w-full sm:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={DEMO_ADMIN_GROWTH}
-            margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
-          >
+          <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid stroke="#F1F5F9" vertical={false} />
             <XAxis
               dataKey="month"
@@ -52,8 +68,8 @@ export default function AdminGrowthChart() {
               tickLine={false}
               tick={{ fill: '#94A3B8', fontSize: 12 }}
               width={40}
-              domain={[0, 600]}
-              ticks={[0, 150, 300, 450, 600]}
+              domain={[0, yMax]}
+              ticks={ticks}
             />
             <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#CBD5E1', strokeDasharray: '4 4' }} />
             <Legend

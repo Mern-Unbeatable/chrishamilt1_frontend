@@ -29,10 +29,10 @@ const STAT_ICONS = {
   coinsUsed: Coins,
 }
 
-export default function AdminStatsGrid() {
+export default function AdminStatsGrid({ stats = DEMO_ADMIN_DASHBOARD_STATS }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {DEMO_ADMIN_DASHBOARD_STATS.map((stat) => (
+      {stats.map((stat) => (
         <WalletStatCard
           key={stat.id}
           label={stat.label}

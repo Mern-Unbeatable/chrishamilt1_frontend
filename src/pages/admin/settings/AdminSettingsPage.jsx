@@ -51,8 +51,8 @@ export default function AdminSettingsPage() {
   }, [useApi])
 
   const handleUpdateProfile = useCallback(
-    async ({ name, email }) => {
-      const updatedProfile = await submitProfileUpdate({ name, email })
+    async (payload) => {
+      const updatedProfile = await submitProfileUpdate(payload, { role: 'admin' })
 
       if (updatedProfile) {
         setProfile(updatedProfile)

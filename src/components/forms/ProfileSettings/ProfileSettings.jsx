@@ -7,7 +7,7 @@ const ROLE_CONFIG = {
   user: {
     layout: 'account',
     showPageHeader: true,
-    showAvatarUpload: true,
+    showAvatarUpload: false,
     showAccountPhone: true,
     showAddressFields: true,
     showWarehouses: false,
@@ -19,7 +19,7 @@ const ROLE_CONFIG = {
   tradesman: {
     layout: 'dashboard',
     showPageHeader: true,
-    showAvatarUpload: true,
+    showAvatarUpload: false,
     showAccountPhone: true,
     showAddressFields: false,
     showWarehouses: true,
@@ -497,13 +497,15 @@ export default function ProfileSettings({
     <Card>
       <CardHeader>Account setting</CardHeader>
       <div className="p-5 sm:p-6">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-          <AvatarUpload
-            form={form}
-            fileRef={fileRef}
-            fileInputId={fileInputId}
-            onPick={handleAvatarPick}
-          />
+        <div className={cn('flex flex-col gap-6', cfg.showAvatarUpload && 'lg:flex-row lg:items-start lg:gap-8')}>
+          {cfg.showAvatarUpload ? (
+            <AvatarUpload
+              form={form}
+              fileRef={fileRef}
+              fileInputId={fileInputId}
+              onPick={handleAvatarPick}
+            />
+          ) : null}
 
           <div className="min-w-0 flex-1">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -536,7 +538,7 @@ export default function ProfileSettings({
                   placeholder="+44 7700 900000"
                 />
               </Field>
-              <Field label="Region / state">
+              <Field label="County / region">
                 <SelectInput
                   value={form.region}
                   onChange={setField('region')}
@@ -550,7 +552,7 @@ export default function ProfileSettings({
                   options={cityOptions}
                 />
               </Field>
-              <Field label="Zip code">
+              <Field label="Postcode">
                 <TextInput
                   value={form.zipCode}
                   onChange={setField('zipCode')}

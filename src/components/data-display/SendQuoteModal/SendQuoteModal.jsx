@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   ArrowLeft,
@@ -319,15 +319,19 @@ function ReviewStep({ form, customerBudget }) {
   )
 }
 
-function SuccessStep({ onViewQuotes }) {
+function SuccessStep({ onViewQuotes, mode = 'create' }) {
   return (
     <div className="py-6 text-center">
       <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#ECFDF5] text-[#059669]">
         <Check className="size-8" strokeWidth={2.25} />
       </span>
-      <h3 className="mt-5 text-xl font-bold text-[#111827]">Quote submitted successfully</h3>
+      <h3 className="mt-5 text-xl font-bold text-[#111827]">
+        {mode === 'edit' ? 'Quote updated successfully' : 'Quote submitted successfully'}
+      </h3>
       <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#64748B]">
-        Your quote has been sent to the customer. You can track its status from My Quotes.
+        {mode === 'edit'
+          ? 'Your changes have been saved. The customer will see your updated quote.'
+          : 'Your quote has been sent to the customer. You can track its status from My Quotes.'}
       </p>
       {onViewQuotes ? (
         <button
@@ -361,9 +365,14 @@ export default function SendQuoteModal({
   customerBudget,
   onSubmit,
   onViewQuotes,
+  mode = 'create',
+  initialValues = null,
 }) {
   const [step, setStep] = useState(1)
   const [form, setForm] = useState(createInitialForm)
+  const [submitting, setSubmitting] = useState(false)
+  const wasOpenRef = useRef(false)
+  const isEditMode = mode === 'edit'
 
   useEffect(() => {
     if (!open) return undefined
@@ -385,10 +394,37 @@ export default function SendQuoteModal({
 
   useEffect(() => {
     if (!open) {
+      wasOpenRef.current = false
       setStep(1)
       setForm(createInitialForm())
+      setSubmitting(false)
+      return
     }
-  }, [open])
+
+    if (!initialValues) return
+
+    const justOpened = !wasOpenRef.current
+    wasOpenRef.current = true
+
+    if (justOpened || !isEditMode) {
+      setForm({ ...createInitialForm(), ...initialValues })
+      setStep(1)
+      return
+    }
+
+    setForm((current) => ({
+      ...current,
+      quoteAmount: initialValues.quoteAmount ?? current.quoteAmount,
+      duration: initialValues.duration ?? current.duration,
+      startDate: initialValues.startDate ?? current.startDate,
+      materialsIncluded: initialValues.materialsIncluded ?? current.materialsIncluded,
+      warranty: initialValues.warranty ?? current.warranty,
+      proposal:
+        (initialValues.proposal?.length ?? 0) > (current.proposal?.length ?? 0)
+          ? initialValues.proposal
+          : current.proposal,
+    }))
+  }, [open, initialValues, isEditMode])
 
   if (!open) return null
 
@@ -410,10 +446,18 @@ export default function SendQuoteModal({
 
   const canContinueStep2 = form.proposal.trim().length >= 100
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (step === 4) {
-      onSubmit?.(form)
-      setStep(5)
+      setSubmitting(true)
+
+      try {
+        const result = await onSubmit?.(form)
+        if (result === false || result === null) return
+        setStep(5)
+      } finally {
+        setSubmitting(false)
+      }
+
       return
     }
 
@@ -431,9 +475,18 @@ export default function SendQuoteModal({
   const isSuccessStep = step === 5
   const showBackButton = step > 1 && step < 5
   const primaryLabel =
-    step === 1 ? 'Continue' : step === 3 ? 'Submit' : step === 4 ? 'Submit Quote' : null
+    step === 1
+      ? 'Continue'
+      : step === 3
+        ? 'Continue'
+        : step === 4
+          ? isEditMode
+            ? 'Update Quote'
+            : 'Submit Quote'
+          : null
 
   const primaryDisabled =
+    submitting ||
     (step === 1 && !canContinueStep1) ||
     (step === 2 && !canContinueStep2)
 
@@ -459,7 +512,7 @@ export default function SendQuoteModal({
                 <p className="text-xs font-medium text-[#64748B]">Step {step} of {TOTAL_STEPS}</p>
               ) : null}
               <h2 id="send-quote-title" className="mt-1 text-xl font-bold text-[#111827] sm:text-2xl">
-                {STEP_TITLES[step]}
+                {isEditMode && step < 5 ? 'Edit Quote' : STEP_TITLES[step]}
               </h2>
               {jobTitle && step < 5 ? (
                 <p className="mt-1 truncate text-sm text-[#64748B]">{jobTitle}</p>
@@ -496,7 +549,7 @@ export default function SendQuoteModal({
             />
           ) : null}
           {step === 4 ? <ReviewStep form={form} customerBudget={customerBudget} /> : null}
-          {step === 5 ? <SuccessStep onViewQuotes={onViewQuotes} /> : null}
+          {step === 5 ? <SuccessStep onViewQuotes={onViewQuotes} mode={mode} /> : null}
         </div>
 
         {!isSuccessStep ? (
@@ -522,7 +575,11 @@ export default function SendQuoteModal({
                   showBackButton ? 'flex-1' : 'w-full',
                 )}
               >
-                {primaryLabel}
+                {submitting
+                  ? isEditMode
+                    ? 'Updating…'
+                    : 'Submitting…'
+                  : primaryLabel}
                 <ArrowRight className="size-4 shrink-0" />
               </button>
             </div>

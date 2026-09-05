@@ -191,6 +191,24 @@ export async function fetchJobCategories() {
   }
 }
 
+function normalizePagination(payload, { page, limit, rowsLength }) {
+  const raw = payload?.pagination ?? payload?.meta ?? {}
+  const total = raw.total ?? raw.totalCount ?? raw.totalItems ?? rowsLength
+  const pageLimit = raw.limit ?? raw.pageSize ?? limit
+  const currentPage = raw.page ?? raw.currentPage ?? page
+  const totalPages =
+    raw.totalPages ??
+    raw.pageCount ??
+    Math.max(1, Math.ceil(Number(total) / Number(pageLimit)))
+
+  return {
+    page: Number(currentPage),
+    limit: Number(pageLimit),
+    total: Number(total),
+    totalPages: Number(totalPages),
+  }
+}
+
 export async function fetchPublicJobs({
   categorySlug = '',
   location = '',
@@ -198,6 +216,7 @@ export async function fetchPublicJobs({
   budgetLabel = DEMO_BROWSE_BUDGETS[0],
   page = 1,
   limit = PUBLIC_JOBS_PAGE_SIZE,
+  token,
 } = {}) {
   const query = buildJobsQuery({
     categorySlug,
@@ -208,14 +227,9 @@ export async function fetchPublicJobs({
     limit,
   })
 
-  const payload = await apiRequest(`/api/jobs?${query}`)
+  const payload = await apiRequest(`/api/jobs?${query}`, { token })
   const rows = payload?.data ?? []
-  const pagination = payload?.pagination ?? {
-    page,
-    limit,
-    total: rows.length,
-    totalPages: Math.max(1, Math.ceil(rows.length / limit)),
-  }
+  const pagination = normalizePagination(payload, { page, limit, rowsLength: rows.length })
 
   return {
     jobs: rows.map(mapApiJobToCard),
@@ -223,12 +237,12 @@ export async function fetchPublicJobs({
   }
 }
 
-export async function fetchPublicJobDetails(jobId) {
+export async function fetchPublicJobDetails(jobId, { token } = {}) {
   if (!jobId) {
     throw new Error('Job not found.')
   }
 
-  const payload = await apiRequest(`/api/jobs/${encodeURIComponent(jobId)}`)
+  const payload = await apiRequest(`/api/jobs/${encodeURIComponent(jobId)}`, { token })
   const job = payload?.data
 
   if (!job) {
