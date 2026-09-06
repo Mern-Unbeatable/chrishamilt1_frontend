@@ -119,3 +119,66 @@ export async function deleteAdminPackage(packageId) {
     token: getAccessToken(),
   })
 }
+
+export function mapApiPurchaseToRow(purchase = {}) {
+  const tradesman = purchase.tradesman ?? {}
+  const pkg = purchase.package ?? {}
+
+  const rawDate = purchase.date || purchase.createdAt
+  const dateStr = rawDate ? String(rawDate).slice(0, 10) : '—'
+
+  const amountNum = Number(purchase.amount ?? pkg.price ?? 0)
+  const formattedAmount = `£${amountNum.toLocaleString('en-GB')}`
+
+  const tradesmanName =
+    tradesman.fullName ||
+    purchase.tradesmanName?.replace(/\s*\(.*?\)\s*$/, '') ||
+    'Tradesman'
+
+  const company =
+    tradesman.businessName ||
+    purchase.company ||
+    tradesman.email ||
+    ''
+
+  const statusLabel =
+    purchase.statusLabel ||
+    (purchase.status === 'COMPLETED' ? 'Paid' : purchase.status || 'Paid')
+
+  return {
+    id: purchase.id,
+    tradesmanName,
+    company,
+    packageName: purchase.packageName || pkg.name || '—',
+    tokens: Number(purchase.tokens ?? pkg.tokenQuantity ?? 0),
+    amount: formattedAmount,
+    status: statusLabel,
+    date: dateStr,
+    raw: purchase,
+  }
+}
+
+export async function fetchAdminPurchases({ page = 1, limit = 10 } = {}) {
+  const params = new URLSearchParams()
+  params.set('page', String(page))
+  params.set('limit', String(limit))
+
+  const payload = await apiRequest(`/api/admin/purchases?${params.toString()}`, {
+    token: getAccessToken(),
+  })
+
+  const rows = payload?.data ?? []
+  const total = Number(payload?.total ?? payload?.pagination?.total ?? rows.length)
+  const totalPages = Number(
+    payload?.pagination?.totalPages ?? Math.max(1, Math.ceil(total / limit)),
+  )
+
+  return {
+    purchases: rows.map(mapApiPurchaseToRow),
+    total,
+    totalPages,
+    page: Number(payload?.pagination?.page ?? page),
+    limit: Number(payload?.pagination?.limit ?? limit),
+  }
+}
+

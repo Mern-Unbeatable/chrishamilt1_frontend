@@ -14,6 +14,7 @@ import AddTokenRuleModal from '@/pages/admin/tokens/sections/AddTokenRuleModal'
 import AdminTokenRulesPanel from '@/pages/admin/tokens/sections/AdminTokenRulesPanel'
 import {
   fetchAdminPackages,
+  fetchAdminPurchases,
   getDemoAdminPackages,
   isAdminPackagesApiEnabled,
 } from '@/services/adminPackagesApi'
@@ -22,7 +23,7 @@ import {
   submitAdminPackageSave,
 } from '@/helpers/submitAdminPackage'
 
-const PAGE_SIZE = 5
+const PURCHASE_PAGE_SIZE = 10
 
 const TABS = [
   { id: 'packages', label: 'Token Packages' },
@@ -69,21 +70,69 @@ export default function AdminTokenManagementPage() {
   const [packagesError, setPackagesError] = useState('')
   const [rules, setRules] = useState(DEMO_ADMIN_TOKEN_RULES)
   const [page, setPage] = useState(1)
+  const [purchases, setPurchases] = useState([])
+  const [purchasesLoading, setPurchasesLoading] = useState(useApi)
+  const [purchasesError, setPurchasesError] = useState('')
+  const [purchaseTotal, setPurchaseTotal] = useState(0)
+  const [purchaseTotalPages, setPurchaseTotalPages] = useState(1)
+
   const [packageModalOpen, setPackageModalOpen] = useState(false)
   const [ruleModalOpen, setRuleModalOpen] = useState(false)
   const [editingPackage, setEditingPackage] = useState(null)
   const [editingRule, setEditingRule] = useState(null)
 
-  const totalPages = Math.max(1, Math.ceil(DEMO_ADMIN_TOKEN_PURCHASES.length / PAGE_SIZE))
+  useEffect(() => {
+    if (!useApi) {
+      const start = (page - 1) * PURCHASE_PAGE_SIZE
+      setPurchases(DEMO_ADMIN_TOKEN_PURCHASES.slice(start, start + PURCHASE_PAGE_SIZE))
+      setPurchaseTotal(DEMO_ADMIN_TOKEN_PURCHASES.length)
+      setPurchaseTotalPages(
+        Math.max(1, Math.ceil(DEMO_ADMIN_TOKEN_PURCHASES.length / PURCHASE_PAGE_SIZE)),
+      )
+      setPurchasesLoading(false)
+      setPurchasesError('')
+      return undefined
+    }
 
-  const paginatedPurchases = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE
-    return DEMO_ADMIN_TOKEN_PURCHASES.slice(start, start + PAGE_SIZE)
-  }, [page])
+    let cancelled = false
+
+    async function loadPurchases() {
+      setPurchasesLoading(true)
+      setPurchasesError('')
+
+      try {
+        const result = await fetchAdminPurchases({
+          page,
+          limit: PURCHASE_PAGE_SIZE,
+        })
+
+        if (!cancelled) {
+          setPurchases(result.purchases)
+          setPurchaseTotal(result.total)
+          setPurchaseTotalPages(result.totalPages)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setPurchases([])
+          setPurchaseTotal(0)
+          setPurchaseTotalPages(1)
+          setPurchasesError(err?.message || 'Unable to load purchase history.')
+        }
+      } finally {
+        if (!cancelled) setPurchasesLoading(false)
+      }
+    }
+
+    loadPurchases()
+
+    return () => {
+      cancelled = true
+    }
+  }, [useApi, page])
 
   useEffect(() => {
-    if (page > totalPages) setPage(totalPages)
-  }, [page, totalPages])
+    if (page > purchaseTotalPages) setPage(purchaseTotalPages)
+  }, [page, purchaseTotalPages])
 
   useEffect(() => {
     if (!useApi) {
@@ -262,8 +311,8 @@ export default function AdminTokenManagementPage() {
   )
 
   const from =
-    DEMO_ADMIN_TOKEN_PURCHASES.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
-  const to = Math.min(page * PAGE_SIZE, DEMO_ADMIN_TOKEN_PURCHASES.length)
+    purchaseTotal === 0 ? 0 : (page - 1) * PURCHASE_PAGE_SIZE + 1
+  const to = Math.min(page * PURCHASE_PAGE_SIZE, purchaseTotal)
 
   return (
     <>
@@ -343,18 +392,25 @@ export default function AdminTokenManagementPage() {
             <div className="space-y-4 pt-2">
               <h2 className="text-lg font-semibold text-[#111827]">Purchase History</h2>
 
+              {purchasesError ? (
+                <p className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
+                  {purchasesError}
+                </p>
+              ) : null}
+
               <DataTable
                 columns={PURCHASE_COLUMNS}
-                data={paginatedPurchases}
+                data={purchases}
+                loading={purchasesLoading}
                 showPagination
                 pagination={{
                   page,
-                  pageSize: PAGE_SIZE,
-                  total: DEMO_ADMIN_TOKEN_PURCHASES.length,
+                  pageSize: PURCHASE_PAGE_SIZE,
+                  total: purchaseTotal,
                   from,
                   to,
                   hasPrevious: page > 1,
-                  hasNext: page < totalPages,
+                  hasNext: page < purchaseTotalPages,
                   onPageChange: setPage,
                 }}
                 emptyMessage="No purchases found."
