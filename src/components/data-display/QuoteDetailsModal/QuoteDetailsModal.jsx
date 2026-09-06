@@ -69,7 +69,7 @@ function OverviewTab({ quote }) {
             Warranty / guarantee
           </p>
           <span className="text-sm font-semibold text-[#DC2626]">
-            {quote.warrantyDays ?? 0} days
+            {quote.warranty || (quote.warrantyDays ? `${quote.warrantyDays} days` : 'None')}
           </span>
         </div>
       </div>
@@ -96,6 +96,8 @@ function OverviewTab({ quote }) {
 }
 
 function ProposalTab({ quote }) {
+  const images = quote.images || []
+
   return (
     <div className="space-y-4">
       <div>
@@ -107,10 +109,35 @@ function ProposalTab({ quote }) {
         </div>
       </div>
 
-      <div
-        aria-hidden
-        className="aspect-[16/9] w-full rounded-xl border border-[#E5E7EB] bg-[#EEF2F6]"
-      />
+      {images.length > 0 ? (
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--secondary-text)] sm:text-xs">
+            Attachments / Images
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {images.map((img, idx) => (
+              <a
+                key={img.id || idx}
+                href={img.url}
+                target="_blank"
+                rel="noreferrer"
+                className="group relative block aspect-[16/9] overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#EEF2F6]"
+              >
+                <img
+                  src={img.url}
+                  alt={`Quote image ${idx + 1}`}
+                  className="size-full object-cover transition-transform group-hover:scale-105"
+                />
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div
+          aria-hidden
+          className="aspect-[16/9] w-full rounded-xl border border-[#E5E7EB] bg-[#EEF2F6]"
+        />
+      )}
     </div>
   )
 }

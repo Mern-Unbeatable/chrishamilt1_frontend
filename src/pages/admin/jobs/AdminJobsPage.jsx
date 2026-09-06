@@ -196,6 +196,8 @@ export default function AdminJobsPage() {
                     key={job.id}
                     {...job}
                     onViewLead={() => navigate(`/admin/jobs/${job.id}`)}
+                    onViewQuote={() => navigate(`/admin/jobs/${job.id}/quotes`)}
+                    viewQuoteLabel="View Quotes"
                   />
                 ))
               ) : (

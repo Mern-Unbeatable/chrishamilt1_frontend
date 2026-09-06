@@ -209,15 +209,27 @@ export default function JobCard({
             </span>
           ) : null}
 
-          {onViewLead ? (
-            <button
-              type="button"
-              onClick={onViewLead}
-              className="w-full rounded-lg bg-btn-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] sm:w-auto"
-            >
-              {viewLeadLabel}
-            </button>
-          ) : null}
+          <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+            {onViewQuote ? (
+              <button
+                type="button"
+                onClick={onViewQuote}
+                className="w-full rounded-lg border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#F8FAFC] sm:w-auto"
+              >
+                {viewQuoteLabel}
+              </button>
+            ) : null}
+
+            {onViewLead ? (
+              <button
+                type="button"
+                onClick={onViewLead}
+                className="w-full rounded-lg bg-btn-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] sm:w-auto"
+              >
+                {viewLeadLabel}
+              </button>
+            ) : null}
+          </div>
         </div>
       ) : (
         <div className="flex w-full shrink-0 items-center justify-between gap-3 sm:w-auto sm:justify-end">
