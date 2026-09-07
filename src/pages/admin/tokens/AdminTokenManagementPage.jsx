@@ -7,7 +7,6 @@ import {
   createPackageId,
   createRuleId,
   DEMO_ADMIN_TOKEN_PURCHASES,
-  DEMO_ADMIN_TOKEN_RULES,
 } from '@/data/adminTokenData'
 import AddTokenPackageModal from '@/pages/admin/tokens/sections/AddTokenPackageModal'
 import AddTokenRuleModal from '@/pages/admin/tokens/sections/AddTokenRuleModal'
@@ -19,9 +18,17 @@ import {
   isAdminPackagesApiEnabled,
 } from '@/services/adminPackagesApi'
 import {
+  fetchAdminTokenRules,
+  getDemoAdminTokenRules,
+} from '@/services/adminTokenRulesApi'
+import {
   submitAdminPackageDelete,
   submitAdminPackageSave,
 } from '@/helpers/submitAdminPackage'
+import {
+  submitAdminTokenRuleDelete,
+  submitAdminTokenRuleSave,
+} from '@/helpers/submitAdminTokenRule'
 
 const PURCHASE_PAGE_SIZE = 10
 
@@ -68,7 +75,9 @@ export default function AdminTokenManagementPage() {
   const [packages, setPackages] = useState(() => getDemoAdminPackages())
   const [packagesLoading, setPackagesLoading] = useState(useApi)
   const [packagesError, setPackagesError] = useState('')
-  const [rules, setRules] = useState(DEMO_ADMIN_TOKEN_RULES)
+  const [rules, setRules] = useState(() => getDemoAdminTokenRules())
+  const [rulesLoading, setRulesLoading] = useState(useApi)
+  const [rulesError, setRulesError] = useState('')
   const [page, setPage] = useState(1)
   const [purchases, setPurchases] = useState([])
   const [purchasesLoading, setPurchasesLoading] = useState(useApi)
@@ -168,6 +177,40 @@ export default function AdminTokenManagementPage() {
     }
   }, [useApi])
 
+  useEffect(() => {
+    if (!useApi) {
+      setRules(getDemoAdminTokenRules())
+      setRulesLoading(false)
+      setRulesError('')
+      return undefined
+    }
+
+    let cancelled = false
+
+    async function loadRules() {
+      setRulesLoading(true)
+      setRulesError('')
+
+      try {
+        const result = await fetchAdminTokenRules()
+        if (!cancelled) setRules(result.rules)
+      } catch (err) {
+        if (!cancelled) {
+          setRules([])
+          setRulesError(err?.message || 'Unable to load token rules.')
+        }
+      } finally {
+        if (!cancelled) setRulesLoading(false)
+      }
+    }
+
+    loadRules()
+
+    return () => {
+      cancelled = true
+    }
+  }, [useApi])
+
   const openCreatePackageModal = useCallback(() => {
     setEditingPackage(null)
     setPackageModalOpen(true)
@@ -203,9 +246,20 @@ export default function AdminTokenManagementPage() {
     [useApi],
   )
 
-  const handleDeleteRule = useCallback((rule) => {
-    setRules((current) => current.filter((item) => item.id !== rule.id))
-  }, [])
+  const handleDeleteRule = useCallback(
+    async (rule) => {
+      if (!useApi) {
+        setRules((current) => current.filter((item) => item.id !== rule.id))
+        return
+      }
+
+      const result = await submitAdminTokenRuleDelete(rule.id, rule.label)
+      if (result.ok && result.rules) {
+        setRules(result.rules)
+      }
+    },
+    [useApi],
+  )
 
   const handleSavePackage = useCallback(
     async (values) => {
@@ -278,7 +332,19 @@ export default function AdminTokenManagementPage() {
   )
 
   const handleSaveRule = useCallback(
-    (values) => {
+    async (values) => {
+      if (useApi) {
+        const result = await submitAdminTokenRuleSave(values, {
+          ruleId: editingRule?.id,
+        })
+
+        if (result.ok && result.rules) {
+          setRules(result.rules)
+        }
+
+        return result
+      }
+
       if (editingRule) {
         setRules((current) =>
           current.map((item) =>
@@ -307,7 +373,7 @@ export default function AdminTokenManagementPage() {
       setRules((current) => [...current, nextRule])
       return { ok: true }
     },
-    [editingRule, rules],
+    [editingRule, rules, useApi],
   )
 
   const from =
@@ -421,6 +487,8 @@ export default function AdminTokenManagementPage() {
         ) : (
           <AdminTokenRulesPanel
             rules={rules}
+            loading={rulesLoading}
+            error={rulesError}
             onEdit={openEditRuleModal}
             onDelete={handleDeleteRule}
           />
