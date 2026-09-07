@@ -49,25 +49,29 @@ export default function AdminTradesmanTokenCard({ tokens }) {
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">
           Purchase History
         </p>
-        <ul className="mt-2.5 space-y-2.5">
-          {tokens.history.map((entry) => (
-            <li
-              key={entry.id}
-              className="flex items-start justify-between gap-4 border-b border-[#F1F5F9] pb-2.5 last:border-b-0 last:pb-0"
-            >
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-[#111827]">{entry.name}</p>
-                <p className="mt-0.5 text-xs text-[#64748B]">{entry.date}</p>
-              </div>
-              <div className="shrink-0 text-right">
-                <p className="text-sm font-semibold text-[#111827]">{entry.price}</p>
-                <p className="mt-0.5 text-xs text-[#64748B]">
-                  {entry.tokens.toLocaleString()} tokens
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
+        {!tokens.history || tokens.history.length === 0 ? (
+          <p className="mt-2.5 text-xs text-[#64748B]">No purchase history recorded.</p>
+        ) : (
+          <ul className="mt-2.5 space-y-2.5">
+            {tokens.history.map((entry) => (
+              <li
+                key={entry.id}
+                className="flex items-start justify-between gap-4 border-b border-[#F1F5F9] pb-2.5 last:border-b-0 last:pb-0"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-[#111827]">{entry.name}</p>
+                  <p className="mt-0.5 text-xs text-[#64748B]">{entry.date}</p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-sm font-semibold text-[#111827]">{entry.price}</p>
+                  <p className="mt-0.5 text-xs text-[#64748B]">
+                    {entry.tokens.toLocaleString()} tokens
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <p className="mt-4 border-t border-[#F1F5F9] pt-3 text-sm text-[#64748B]">
