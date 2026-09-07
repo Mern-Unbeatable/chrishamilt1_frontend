@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
 import { getAdminTradesmanDetail } from '@/data/adminTradesmanDetailData'
+import { submitAdminUserStatus } from '@/helpers/submitAdminUserStatus'
 import AdminTradesmanCompletedJobsCard from '@/pages/admin/tradesmen/sections/AdminTradesmanCompletedJobsCard'
 import AdminTradesmanPerformanceCard from '@/pages/admin/tradesmen/sections/AdminTradesmanPerformanceCard'
 import AdminTradesmanProfileHeader, {
@@ -8,16 +10,100 @@ import AdminTradesmanProfileHeader, {
 } from '@/pages/admin/tradesmen/sections/AdminTradesmanProfileHeader'
 import AdminTradesmanReviewsPanel from '@/pages/admin/tradesmen/sections/AdminTradesmanReviewsPanel'
 import AdminTradesmanTokenCard from '@/pages/admin/tradesmen/sections/AdminTradesmanTokenCard'
+import {
+  fetchAdminTradesmanDetail,
+  isAdminTradesmenApiEnabled,
+} from '@/services/adminTradesmenApi'
+import { ADMIN_USER_STATUS } from '@/services/adminUsersApi'
 
 export default function AdminTradesmanDetailsPage() {
   const { tradesmanId } = useParams()
-  const tradesman = getAdminTradesmanDetail(tradesmanId)
+  const useApi = isAdminTradesmenApiEnabled()
 
-  if (!tradesman) {
+  const [tradesman, setTradesman] = useState(
+    useApi ? null : getAdminTradesmanDetail(tradesmanId),
+  )
+  const [loading, setLoading] = useState(useApi)
+  const [error, setError] = useState('')
+  const [updating, setUpdating] = useState(false)
+
+  useEffect(() => {
+    if (!useApi) {
+      setTradesman(getAdminTradesmanDetail(tradesmanId))
+      setLoading(false)
+      return undefined
+    }
+
+    let cancelled = false
+
+    async function loadDetail() {
+      setLoading(true)
+      setError('')
+
+      try {
+        const data = await fetchAdminTradesmanDetail(tradesmanId)
+        if (cancelled) return
+        setTradesman(data)
+      } catch (err) {
+        if (cancelled) return
+        // If API fails, attempt fallback to demo data if available
+        const fallback = getAdminTradesmanDetail(tradesmanId)
+        if (fallback) {
+          setTradesman(fallback)
+        } else {
+          setError(err?.message || 'Failed to load tradesman details.')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    loadDetail()
+
+    return () => {
+      cancelled = true
+    }
+  }, [useApi, tradesmanId])
+
+  const handleSuspend = async () => {
+    if (!tradesman || updating) return
+
+    if (!useApi) {
+      setTradesman((current) => (current ? { ...current, status: 'Suspend' } : current))
+      return
+    }
+
+    setUpdating(true)
+    try {
+      const displayStatus = await submitAdminUserStatus(tradesman.id, ADMIN_USER_STATUS.SUSPENDED, {
+        successText: 'Tradesman account has been suspended.',
+      })
+      if (displayStatus) {
+        setTradesman((current) => (current ? { ...current, status: displayStatus } : current))
+      }
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  if (loading) {
     return (
       <div className="space-y-6">
         <AdminTradesmanBackLink />
-        <p className="text-sm text-[#64748B]">Tradesman not found.</p>
+        <div className="flex items-center justify-center py-16">
+          <div className="size-8 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !tradesman) {
+    return (
+      <div className="space-y-6">
+        <AdminTradesmanBackLink />
+        <p className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
+          {error || 'Tradesman not found.'}
+        </p>
       </div>
     )
   }
@@ -34,7 +120,7 @@ export default function AdminTradesmanDetailsPage() {
 
         <AdminTradesmanProfileHeader
           tradesman={tradesman}
-          onSuspend={() => {}}
+          onSuspend={handleSuspend}
           onDelete={() => {}}
         />
       </div>
@@ -54,3 +140,4 @@ export default function AdminTradesmanDetailsPage() {
     </div>
   )
 }
+

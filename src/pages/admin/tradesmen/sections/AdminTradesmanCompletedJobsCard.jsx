@@ -12,32 +12,38 @@ export default function AdminTradesmanCompletedJobsCard({ completedJobs }) {
         </p>
       </div>
 
-      <ul className="mt-3 space-y-2.5">
-        {jobs.map((job, index) => (
-          <li
-            key={job.id}
-            className="flex gap-3 rounded-xl border border-[#F1F5F9] bg-[#FAFCFF] p-3.5"
-          >
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#ECFDF5] text-sm font-bold text-[#059669]">
-              {index + 1}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[#111827]">{job.title}</p>
-                  <p className="mt-1 text-xs text-[#64748B]">
-                    {job.client} • {job.date}
-                  </p>
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-2">
-                  <p className="text-sm font-semibold text-[#111827]">{job.price}</p>
-                  <StatusBadge status={job.status} />
+      {jobs.length === 0 ? (
+        <p className="mt-3 rounded-xl border border-dashed border-[#E5E7EB] py-6 text-center text-sm text-[#64748B]">
+          No completed jobs yet.
+        </p>
+      ) : (
+        <ul className="mt-3 space-y-2.5">
+          {jobs.map((job, index) => (
+            <li
+              key={job.id}
+              className="flex gap-3 rounded-xl border border-[#F1F5F9] bg-[#FAFCFF] p-3.5"
+            >
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#ECFDF5] text-sm font-bold text-[#059669]">
+                {index + 1}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[#111827]">{job.title}</p>
+                    <p className="mt-1 text-xs text-[#64748B]">
+                      {job.client} • {job.date}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-2">
+                    <p className="text-sm font-semibold text-[#111827]">{job.price}</p>
+                    <StatusBadge status={job.status} />
+                  </div>
                 </div>
               </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <div className="mt-4 grid grid-cols-3 gap-3 border-t border-[#F1F5F9] pt-3">
         <div className="text-center">

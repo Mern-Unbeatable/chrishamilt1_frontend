@@ -96,16 +96,22 @@ export default function AdminTradesmanReviewsPanel({ reviews }) {
       </section>
 
       <div className="space-y-3">
-        {reviews.items.map((review) => (
-          <AdminReviewCard
-            key={review.id}
-            name={review.name}
-            initials={review.initials}
-            rating={review.rating}
-            date={review.date}
-            text={review.text}
-          />
-        ))}
+        {!reviews.items || reviews.items.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-white p-6 text-center text-sm text-[#64748B]">
+            No customer reviews yet.
+          </div>
+        ) : (
+          reviews.items.map((review) => (
+            <AdminReviewCard
+              key={review.id}
+              name={review.name}
+              initials={review.initials}
+              rating={review.rating}
+              date={review.date}
+              text={review.text}
+            />
+          ))
+        )}
       </div>
     </div>
   )
