@@ -7,10 +7,12 @@ const EMPTY_FORM = {
   minBudget: '',
   maxBudget: '',
   tokenCost: '',
+  isActive: true,
 }
 
 export default function AddTokenRuleModal({ open, onClose, onSave, initialRule = null }) {
   const [form, setForm] = useState(EMPTY_FORM)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const isEditing = Boolean(initialRule)
 
@@ -20,17 +22,19 @@ export default function AddTokenRuleModal({ open, onClose, onSave, initialRule =
     setForm(
       initialRule
         ? {
-            label: initialRule.label,
+            label: initialRule.label || initialRule.name || '',
             minBudget: String(initialRule.minBudget ?? ''),
             maxBudget:
               initialRule.maxBudget === null || initialRule.maxBudget === undefined
                 ? ''
                 : String(initialRule.maxBudget),
             tokenCost: String(initialRule.tokenCost ?? ''),
+            isActive: initialRule.isActive ?? (initialRule.status !== 'Inactive'),
           }
         : EMPTY_FORM,
     )
     setError('')
+    setSaving(false)
 
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -56,7 +60,7 @@ export default function AddTokenRuleModal({ open, onClose, onSave, initialRule =
     if (error) setError('')
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
     const minBudget = Number(form.minBudget)
@@ -78,20 +82,28 @@ export default function AddTokenRuleModal({ open, onClose, onSave, initialRule =
       return
     }
 
-    const result = onSave?.({
-      label: form.label.trim(),
-      minBudget,
-      maxBudget,
-      tokenCost,
-      status: 'Active',
-    })
+    setSaving(true)
 
-    if (result?.ok) {
-      onClose?.()
-      return
+    try {
+      const result = await onSave?.({
+        name: form.label.trim(),
+        label: form.label.trim(),
+        minBudget,
+        maxBudget,
+        tokenCost,
+        isActive: form.isActive,
+        status: form.isActive ? 'Active' : 'Inactive',
+      })
+
+      if (result?.ok) {
+        onClose?.()
+        return
+      }
+
+      setError(result?.error ?? 'Unable to save rule.')
+    } finally {
+      setSaving(false)
     }
-
-    setError(result?.error ?? 'Unable to save rule.')
   }
 
   return createPortal(
@@ -179,6 +191,23 @@ export default function AddTokenRuleModal({ open, onClose, onSave, initialRule =
             />
           </label>
 
+          {isEditing ? (
+            <label className="mt-4 flex items-center justify-between rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] p-3.5">
+              <div>
+                <span className="text-sm font-semibold text-[#111827]">Active Rule</span>
+                <p className="text-xs text-[#64748B]">Enable or disable this token rule</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={form.isActive}
+                onChange={(e) =>
+                  setForm((current) => ({ ...current, isActive: e.target.checked }))
+                }
+                className="size-5 rounded border-[#CBD5E1] text-btn-primary focus:ring-btn-primary/20"
+              />
+            </label>
+          ) : null}
+
           {error ? <p className="mt-4 text-sm text-[#DC2626]">{error}</p> : null}
 
           <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -191,10 +220,10 @@ export default function AddTokenRuleModal({ open, onClose, onSave, initialRule =
             </button>
             <button
               type="submit"
-              disabled={!canSave}
+              disabled={!canSave || saving}
               className="inline-flex h-11 items-center justify-center rounded-lg bg-btn-primary px-5 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Save
+              {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
         </form>

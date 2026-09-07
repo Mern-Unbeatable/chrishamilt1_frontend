@@ -58,6 +58,8 @@ function buildRuleColumns({ onEdit, onDelete }) {
 
 export default function AdminTokenRulesPanel({
   rules,
+  loading = false,
+  error = '',
   onEdit,
   onDelete,
 }) {
@@ -83,22 +85,31 @@ export default function AdminTokenRulesPanel({
   const to = Math.min(page * RULES_PAGE_SIZE, rules.length)
 
   return (
-    <DataTable
-      columns={columns}
-      data={paginatedRules}
-      showPagination
-      pagination={{
-        page,
-        pageSize: RULES_PAGE_SIZE,
-        total: rules.length,
-        from,
-        to,
-        hasPrevious: page > 1,
-        hasNext: page < totalPages,
-        onPageChange: setPage,
-      }}
-      emptyMessage="No token rules configured."
-      tableMinWidth="960px"
-    />
+    <div className="space-y-4">
+      {error ? (
+        <p className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
+          {error}
+        </p>
+      ) : null}
+
+      <DataTable
+        columns={columns}
+        data={paginatedRules}
+        loading={loading}
+        showPagination
+        pagination={{
+          page,
+          pageSize: RULES_PAGE_SIZE,
+          total: rules.length,
+          from,
+          to,
+          hasPrevious: page > 1,
+          hasNext: page < totalPages,
+          onPageChange: setPage,
+        }}
+        emptyMessage="No token rules configured."
+        tableMinWidth="960px"
+      />
+    </div>
   )
 }
