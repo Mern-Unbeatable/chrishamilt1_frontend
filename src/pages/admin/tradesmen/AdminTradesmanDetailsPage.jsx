@@ -86,6 +86,27 @@ export default function AdminTradesmanDetailsPage() {
     }
   }
 
+  const handleSetActive = async () => {
+    if (!tradesman || updating) return
+
+    if (!useApi) {
+      setTradesman((current) => (current ? { ...current, status: 'Active' } : current))
+      return
+    }
+
+    setUpdating(true)
+    try {
+      const displayStatus = await submitAdminUserStatus(tradesman.id, ADMIN_USER_STATUS.ACTIVE, {
+        successText: 'Tradesman account is now active.',
+      })
+      if (displayStatus) {
+        setTradesman((current) => (current ? { ...current, status: displayStatus } : current))
+      }
+    } finally {
+      setUpdating(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -121,7 +142,7 @@ export default function AdminTradesmanDetailsPage() {
         <AdminTradesmanProfileHeader
           tradesman={tradesman}
           onSuspend={handleSuspend}
-          onDelete={() => {}}
+          onSetActive={handleSetActive}
         />
       </div>
 

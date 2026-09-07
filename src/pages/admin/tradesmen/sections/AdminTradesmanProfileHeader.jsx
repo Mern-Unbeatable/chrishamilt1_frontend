@@ -6,7 +6,7 @@ import { cn } from '@/helpers/cn'
 export default function AdminTradesmanProfileHeader({
   tradesman,
   onSuspend,
-  onDelete,
+  onSetActive,
   className = '',
 }) {
   return (
@@ -57,10 +57,10 @@ export default function AdminTradesmanProfileHeader({
           </button>
           <button
             type="button"
-            onClick={onDelete}
-            className="inline-flex h-11 min-w-[160px] items-center justify-center rounded-lg bg-[#FEF2F2] px-5 text-sm font-semibold text-[#DC2626] transition-colors hover:bg-[#FEE2E2]"
+            onClick={onSetActive}
+            className="inline-flex h-11 min-w-[160px] items-center justify-center rounded-lg bg-[#ECFDF5] px-5 text-sm font-semibold text-[#059669] transition-colors hover:bg-[#D1FAE5]"
           >
-            Delete Account
+            Active Account
           </button>
         </div>
       </div>
