@@ -83,6 +83,7 @@ export function mapApiQuoteToCard(quote) {
     amount: formatCurrency(quote.amount),
     title: job.title ?? 'Untitled job',
     customerName: customer.fullName || customer.firstName || 'Customer',
+    customerId: customer.id ?? job.customerId ?? null,
     duration: quote.estimatedDuration ?? '—',
     tokensUsed: job.leadPrice ?? 0,
     description: quote.proposalPreview ?? quote.proposal ?? '',
@@ -110,24 +111,37 @@ export function mapQuoteCardToFormValues(quote = {}) {
     warranty: quote.warranty ?? '',
     proposal: quote.fullProposal ?? quote.description ?? '',
     attachmentTypes: [],
+    images: [],
+    existingImages: Array.isArray(quote.images) ? quote.images : [],
   }
+}
+
+export function buildQuoteFormData(form = {}) {
+  const formData = new FormData()
+  const amount = Number(form.quoteAmount)
+
+  formData.append('amount', String(Number.isFinite(amount) ? amount : 0))
+  formData.append('estimatedDuration', form.duration?.trim() ?? '')
+  formData.append('startDate', form.startDate ?? '')
+  formData.append('materialsIncluded', String(Boolean(form.materialsIncluded)))
+  formData.append('warranty', form.warranty?.trim() ?? '')
+  formData.append('proposal', form.proposal?.trim() ?? '')
+
+  const files = Array.isArray(form.images) ? form.images : []
+  files.forEach((file) => {
+    if (file instanceof File) {
+      formData.append('images', file)
+    }
+  })
+
+  return formData
 }
 
 export function buildQuoteUpdateBody(form = {}) {
-  const amount = Number(form.quoteAmount)
-
-  return {
-    amount: Number.isFinite(amount) ? amount : 0,
-    estimatedDuration: form.duration?.trim() ?? '',
-    startDate: form.startDate ? new Date(form.startDate).toISOString() : null,
-    materialsIncluded: Boolean(form.materialsIncluded),
-    warranty: form.warranty?.trim() ?? '',
-    proposal: form.proposal?.trim() ?? '',
-    proposalPreview: form.proposal?.trim() ?? '',
-  }
+  return buildQuoteFormData(form)
 }
 
-export function validateQuoteUpdateForm(form = {}) {
+export function validateQuoteForm(form = {}) {
   const amount = Number(form.quoteAmount)
 
   if (!Number.isFinite(amount) || amount <= 0) {
@@ -149,6 +163,30 @@ export function validateQuoteUpdateForm(form = {}) {
   return ''
 }
 
+export const validateQuoteUpdateForm = validateQuoteForm
+
+export async function submitJobQuote(jobId, form) {
+  if (!jobId) {
+    throw new Error('Job not found.')
+  }
+
+  const payload = await apiRequest(
+    `/api/jobs/${encodeURIComponent(jobId)}/quotes`,
+    {
+      method: 'POST',
+      body: buildQuoteFormData(form),
+      token: getAccessToken(),
+    },
+  )
+
+  const quote = payload?.data ?? payload
+  if (!quote?.id) {
+    throw new Error('Unable to submit quote.')
+  }
+
+  return mapApiQuoteToCard(quote)
+}
+
 export async function updateQuote(quoteId, form) {
   if (!quoteId) {
     throw new Error('Quote not found.')
@@ -156,7 +194,7 @@ export async function updateQuote(quoteId, form) {
 
   const payload = await apiRequest(`/api/quotes/${encodeURIComponent(quoteId)}`, {
     method: 'PUT',
-    body: buildQuoteUpdateBody(form),
+    body: buildQuoteFormData(form),
     token: getAccessToken(),
   })
 
@@ -193,9 +231,23 @@ export async function withdrawQuote(quoteId) {
   }
 }
 
-export async function fetchQuoteDetails(quoteId) {
+export async function fetchQuoteDetails(quoteId, { jobId } = {}) {
   if (!quoteId) {
     throw new Error('Quote not found.')
+  }
+
+  if (jobId) {
+    const payload = await apiRequest(
+      `/api/jobs/${encodeURIComponent(jobId)}/quotes`,
+      { token: getAccessToken() },
+    )
+
+    const rows = payload?.data ?? []
+    const quote = rows.find((item) => item.id === quoteId)
+
+    if (quote) {
+      return mapApiQuoteToCard(quote)
+    }
   }
 
   const payload = await apiRequest(`/api/quotes/${encodeURIComponent(quoteId)}`, {

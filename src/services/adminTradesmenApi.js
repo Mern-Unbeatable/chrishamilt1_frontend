@@ -216,3 +216,20 @@ export async function fetchAdminTradesmanDetail(tradesmanId) {
   return mapApiTradesmanDetail(user)
 }
 
+export async function grantAdminTradesmanTokens(tradesmanId, amount) {
+  if (!tradesmanId) {
+    throw new Error('Tradesman ID is required.')
+  }
+
+  const payload = await apiRequest(
+    `/api/admin/tradesmen/${encodeURIComponent(tradesmanId)}/tokens`,
+    {
+      method: 'PATCH',
+      token: getAccessToken(),
+      body: { amount: Number(amount) },
+    },
+  )
+
+  return payload?.data ?? payload
+}
+

@@ -27,19 +27,25 @@ function DistributionRow({ stars, count, maxCount }) {
   )
 }
 
-export default function TradesmanReviewsSummary() {
-  const { averageRating, totalReviews } = DEMO_TRADESMAN_REVIEWS_SUMMARY
-  const maxCount = Math.max(...DEMO_TRADESMAN_RATING_DISTRIBUTION.map((item) => item.count))
+export default function TradesmanReviewsSummary({ summary }) {
+  const averageRating = summary?.averageRating ?? DEMO_TRADESMAN_REVIEWS_SUMMARY.averageRating
+  const totalReviews = summary?.totalReviews ?? DEMO_TRADESMAN_REVIEWS_SUMMARY.totalReviews
+  const distribution =
+    summary?.distribution?.length > 0
+      ? summary.distribution
+      : DEMO_TRADESMAN_RATING_DISTRIBUTION
+
+  const maxCount = Math.max(...distribution.map((item) => item.count), 0)
 
   return (
     <div className="space-y-4">
       <section className="rounded-2xl border border-[#E5E7EB] bg-white px-5 py-8 text-center sm:px-6 sm:py-10">
         <p className="text-[3.25rem] font-bold leading-none tracking-tight text-[#111827] sm:text-[3.5rem]">
-          {averageRating.toFixed(1)}
+          {Number(averageRating).toFixed(1)}
         </p>
         <div className="mt-4 flex justify-center">
           <RatingStars
-            rating={5}
+            rating={Math.round(averageRating)}
             size="lg"
             className="[&_svg]:fill-[#F97316] [&_svg]:text-[#F97316]"
           />
@@ -51,7 +57,7 @@ export default function TradesmanReviewsSummary() {
         <h2 className="text-base font-semibold text-[#111827]">Rating distribution</h2>
 
         <div className="mt-5 space-y-3.5">
-          {DEMO_TRADESMAN_RATING_DISTRIBUTION.map((item) => (
+          {distribution.map((item) => (
             <DistributionRow
               key={item.stars}
               stars={item.stars}

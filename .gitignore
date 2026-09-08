@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 luisfernandeslu_frontend
+chrishamilt1_backend
 .env
 # Editor directories and files
 .vscode/*

@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
   Area,
   AreaChart,
@@ -21,6 +22,26 @@ function formatCurrency(value) {
   return `£${value}`
 }
 
+function buildYAxisConfig(values = []) {
+  const maxValue = Math.max(...values.map((value) => Number(value) || 0), 0)
+
+  if (maxValue <= 0) {
+    return {
+      domain: [0, 1000],
+      ticks: [0, 250, 500, 750, 1000],
+    }
+  }
+
+  const paddedMax = Math.ceil((maxValue * 1.15) / 100) * 100
+  const step = Math.max(100, Math.ceil(paddedMax / 4 / 100) * 100)
+  const top = step * 4
+
+  return {
+    domain: [0, top],
+    ticks: [0, step, step * 2, step * 3, top],
+  }
+}
+
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
 
@@ -28,14 +49,21 @@ function ChartTooltip({ active, payload, label }) {
     <div className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 shadow-sm">
       <p className="text-xs font-medium text-[#64748B]">{label}</p>
       <p className="mt-0.5 text-sm font-semibold text-[#111827]">
-        £{payload[0].value.toLocaleString()}
+        £{Number(payload[0].value ?? 0).toLocaleString('en-GB')}
       </p>
     </div>
   )
 }
 
-export default function TradesmanRevenueChart() {
-  const { averageJobValue, completedJobs } = DEMO_TRADESMAN_REVENUE_SUMMARY
+export default function TradesmanRevenueChart({
+  chartData = DEMO_TRADESMAN_REVENUE_CHART,
+  revenueSummary = DEMO_TRADESMAN_REVENUE_SUMMARY,
+}) {
+  const { averageJobValue, completedJobs } = revenueSummary
+  const yAxis = useMemo(
+    () => buildYAxisConfig(chartData.map((item) => item.revenue)),
+    [chartData],
+  )
 
   return (
     <DashboardChartCard
@@ -45,7 +73,7 @@ export default function TradesmanRevenueChart() {
       <div className="h-[300px] w-full sm:h-[340px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={DEMO_TRADESMAN_REVENUE_CHART}
+            data={chartData}
             margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
           >
             <defs>
@@ -68,8 +96,8 @@ export default function TradesmanRevenueChart() {
               tick={{ fill: '#94A3B8', fontSize: 12 }}
               tickFormatter={formatCurrency}
               width={52}
-              domain={[0, 10000]}
-              ticks={[0, 2500, 5000, 7500, 10000]}
+              domain={yAxis.domain}
+              ticks={yAxis.ticks}
             />
             <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#CBD5E1', strokeDasharray: '4 4' }} />
             <Area
