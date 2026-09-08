@@ -10,14 +10,19 @@ import {
 } from '@/components/Dropdown'
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
 import {
-  countActiveTradesmanJobs,
-  DEMO_TRADESMAN_JOBS_LIST,
-  filterTradesmanJobsByStatus,
   TRADESMAN_JOB_STATUS_OPTIONS,
   TRADESMAN_JOB_STATUS_VALUES,
 } from '@/data/tradesmanJobsData'
+import {
+  fetchTradesmanActiveJobsCount,
+  fetchTradesmanJobs,
+  getDemoTradesmanJobsPage,
+  isTradesmanJobsApiEnabled,
+  TRADESMAN_JOBS_PAGE_SIZE,
+  updateTradesmanJobStatus,
+} from '@/services/tradesmanJobsApi'
 
-const PAGE_SIZE = 7
+const PAGE_SIZE = TRADESMAN_JOBS_PAGE_SIZE
 
 const TRADESMAN_JOB_COLUMNS = [
   {
@@ -81,49 +86,87 @@ function buildJobActions({ onSeeDetails, onStatusChange }) {
       variant: 'section',
     },
     {
-      id: 'completed',
-      label: TRADESMAN_JOB_STATUS_VALUES.COMPLETED,
-      onClick: (row) => onStatusChange(row, TRADESMAN_JOB_STATUS_VALUES.COMPLETED),
-    },
-    {
-      id: 'accepted',
-      label: TRADESMAN_JOB_STATUS_VALUES.ACCEPTED,
-      onClick: (row) => onStatusChange(row, TRADESMAN_JOB_STATUS_VALUES.ACCEPTED),
-    },
-    {
       id: 'in-progress',
       label: TRADESMAN_JOB_STATUS_VALUES.IN_PROGRESS,
       onClick: (row) => onStatusChange(row, TRADESMAN_JOB_STATUS_VALUES.IN_PROGRESS),
+    },
+    {
+      id: 'completed',
+      label: TRADESMAN_JOB_STATUS_VALUES.COMPLETED,
+      onClick: (row) => onStatusChange(row, TRADESMAN_JOB_STATUS_VALUES.COMPLETED),
     },
   ]
 }
 
 export default function TradesmanJobsPage() {
   const navigate = useNavigate()
-  const [jobs, setJobs] = useState(DEMO_TRADESMAN_JOBS_LIST)
+  const useApi = isTradesmanJobsApiEnabled()
+
+  const [jobs, setJobs] = useState([])
   const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+  const [activeProjects, setActiveProjects] = useState(0)
+  const [loading, setLoading] = useState(useApi)
+  const [error, setError] = useState('')
 
-  const filteredJobs = useMemo(
-    () => filterTradesmanJobsByStatus(jobs, statusFilter),
-    [jobs, statusFilter],
+  const demoResult = useMemo(
+    () => getDemoTradesmanJobsPage(page, PAGE_SIZE, statusFilter),
+    [page, statusFilter],
   )
 
-  const activeProjects = useMemo(() => countActiveTradesmanJobs(jobs), [jobs])
+  useEffect(() => {
+    if (!useApi) {
+      setJobs(demoResult.jobs)
+      setTotal(demoResult.pagination.total)
+      setTotalPages(demoResult.pagination.totalPages)
+      setActiveProjects(demoResult.activeProjects)
+      setLoading(false)
+      setError('')
+      return undefined
+    }
 
-  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / PAGE_SIZE))
-  const paginatedJobs = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE
-    return filteredJobs.slice(start, start + PAGE_SIZE)
-  }, [filteredJobs, page])
+    let cancelled = false
+
+    async function loadJobs() {
+      setLoading(true)
+      setError('')
+
+      try {
+        const [result, activeCount] = await Promise.all([
+          fetchTradesmanJobs({ page, limit: PAGE_SIZE, statusFilter }),
+          fetchTradesmanActiveJobsCount(),
+        ])
+
+        if (cancelled) return
+
+        setJobs(result.jobs)
+        setTotal(result.pagination.total)
+        setTotalPages(result.pagination.totalPages)
+        setActiveProjects(activeCount)
+      } catch (err) {
+        if (cancelled) return
+
+        setJobs([])
+        setTotal(0)
+        setTotalPages(1)
+        setError(err?.message || 'Unable to load your jobs right now.')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    loadJobs()
+
+    return () => {
+      cancelled = true
+    }
+  }, [page, statusFilter, useApi])
 
   useEffect(() => {
     setPage(1)
   }, [statusFilter])
-
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages)
-  }, [page, totalPages])
 
   const handleOpenJob = useCallback(
     (row) => {
@@ -132,13 +175,30 @@ export default function TradesmanJobsPage() {
     [navigate],
   )
 
-  const handleStatusChange = useCallback((row, nextStatus) => {
-    setJobs((current) =>
-      current.map((job) =>
-        job.id === row.id ? { ...job, status: nextStatus } : job,
-      ),
-    )
-  }, [])
+  const handleStatusChange = useCallback(
+    async (row, nextStatus) => {
+      if (!useApi) {
+        setJobs((current) =>
+          current.map((job) =>
+            job.id === row.id ? { ...job, status: nextStatus } : job,
+          ),
+        )
+        return
+      }
+
+      setError('')
+
+      try {
+        const updated = await updateTradesmanJobStatus(row.id, nextStatus)
+        setJobs((current) =>
+          current.map((job) => (job.id === row.id ? { ...job, ...updated } : job)),
+        )
+      } catch (err) {
+        setError(err?.message || 'Unable to update job status.')
+      }
+    },
+    [useApi],
+  )
 
   const columns = useMemo(() => buildJobColumns(handleOpenJob), [handleOpenJob])
   const actions = useMemo(
@@ -154,14 +214,18 @@ export default function TradesmanJobsPage() {
     TRADESMAN_JOB_STATUS_OPTIONS.find((option) => option.value === statusFilter)?.label ||
     'All Status'
 
-  const from = filteredJobs.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
-  const to = Math.min(page * PAGE_SIZE, filteredJobs.length)
+  const from = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
+  const to = Math.min(page * PAGE_SIZE, total)
 
   return (
     <div className="space-y-6">
       <DashboardPageHeader
         title="My jobs"
-        description={`${activeProjects} active project${activeProjects === 1 ? '' : 's'}`}
+        description={
+          loading
+            ? 'Loading jobs…'
+            : `${activeProjects} active project${activeProjects === 1 ? '' : 's'}`
+        }
         actions={
           <Dropdown className="w-full sm:w-auto sm:min-w-[180px]">
             <DropdownTrigger className="h-10 w-full justify-between gap-2 rounded-lg border border-[#E5E7EB] bg-white px-4 text-sm font-semibold text-[#111827] shadow-none transition-colors hover:bg-[#F8FAFC]">
@@ -182,25 +246,37 @@ export default function TradesmanJobsPage() {
         }
       />
 
-      <DataTable
-        columns={columns}
-        data={paginatedJobs}
-        showActions
-        actions={actions}
-        showPagination
-        pagination={{
-          page,
-          pageSize: PAGE_SIZE,
-          total: filteredJobs.length,
-          from,
-          to,
-          hasPrevious: page > 1,
-          hasNext: page < totalPages,
-          onPageChange: setPage,
-        }}
-        emptyMessage="No jobs match this status filter."
-        tableMinWidth="760px"
-      />
+      {error ? (
+        <div className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-6 py-4">
+          <p className="text-sm font-semibold text-[#B91C1C]">{error}</p>
+        </div>
+      ) : null}
+
+      {loading ? (
+        <div className="rounded-2xl border border-[#E5E7EB] bg-white px-6 py-16 text-center">
+          <p className="text-sm text-[#64748B]">Loading jobs…</p>
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={jobs}
+          showActions
+          actions={actions}
+          showPagination
+          pagination={{
+            page,
+            pageSize: PAGE_SIZE,
+            total,
+            from,
+            to,
+            hasPrevious: page > 1,
+            hasNext: page < totalPages,
+            onPageChange: setPage,
+          }}
+          emptyMessage="No jobs match this status filter."
+          tableMinWidth="760px"
+        />
+      )}
     </div>
   )
 }

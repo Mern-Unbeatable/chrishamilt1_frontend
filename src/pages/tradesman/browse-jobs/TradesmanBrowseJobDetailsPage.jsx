@@ -5,6 +5,7 @@ import JobDetails from '@/components/data-display/JobDetails'
 import SendQuoteModal from '@/components/data-display/SendQuoteModal'
 import { getAccessToken } from '@/auth/authService'
 import { DEMO_BROWSE_JOBS, DEMO_JOB_DETAILS } from '@/data/demoData'
+import { submitQuoteCreate } from '@/helpers/submitQuoteCreate'
 import JobDetailsCustomer from '@/pages/public/jobs/sections/JobDetailsCustomer'
 import JobDetailsSummary from '@/pages/public/jobs/sections/JobDetailsSummary'
 import {
@@ -141,6 +142,7 @@ export default function TradesmanBrowseJobDetailsPage() {
         onClose={() => setQuoteModalOpen(false)}
         jobTitle={job.title}
         customerBudget={job.price}
+        onSubmit={(form) => submitQuoteCreate(jobId, form)}
         onViewQuotes={() => {
           setQuoteModalOpen(false)
           navigate('/tradesman/quotes')

@@ -309,18 +309,18 @@ export default function ProfileSettings({
     })
   }
 
-  const addWarehouse = () => {
-    const list = form.warehouses || []
-    patch({
-      warehouses: [
-        ...list,
-        {
-          id: nextWarehouseId(list),
-          address: '',
-        },
-      ],
-    })
-  }
+  // const addWarehouse = () => {
+  //   const list = form.warehouses || []
+  //   patch({
+  //     warehouses: [
+  //       ...list,
+  //       {
+  //         id: nextWarehouseId(list),
+  //         address: '',
+  //       },
+  //     ],
+  //   })
+  // }
 
   const handleAvatarPick = (event) => {
     const file = event.target.files?.[0]
@@ -454,32 +454,32 @@ export default function ProfileSettings({
     </>
   )
 
-  const warehouseSection = cfg.showWarehouses ? (
-    <div className="mt-8">
-      <SectionTitle>Ware house location</SectionTitle>
-      <div className="mt-4 space-y-4">
-        {warehouses.map((item, index) => (
-          <Field key={item.id} label={`Warehouse ${index + 1}`}>
-            <TextInput
-              value={item.address}
-              onChange={(address) => updateWarehouse(item.id, address)}
-              placeholder="Street address"
-            />
-          </Field>
-        ))}
-      </div>
-      <button
-        type="button"
-        onClick={addWarehouse}
-        className="mt-3 text-sm font-medium text-btn-primary hover:underline"
-      >
-        + Add new warehouse
-      </button>
-      <div className="mt-5 flex justify-end">
-        <PrimaryButton onClick={handleSaveWarehouses}>Save</PrimaryButton>
-      </div>
-    </div>
-  ) : null
+  // const warehouseSection = cfg.showWarehouses ? (
+  //   <div className="mt-8">
+  //     <SectionTitle>Ware house location</SectionTitle>
+  //     <div className="mt-4 space-y-4">
+  //       {warehouses.map((item, index) => (
+  //         <Field key={item.id} label={`Warehouse ${index + 1}`}>
+  //           <TextInput
+  //             value={item.address}
+  //             onChange={(address) => updateWarehouse(item.id, address)}
+  //             placeholder="Street address"
+  //           />
+  //         </Field>
+  //       ))}
+  //     </div>
+  //     <button
+  //       type="button"
+  //       onClick={addWarehouse}
+  //       className="mt-3 text-sm font-medium text-btn-primary hover:underline"
+  //     >
+  //       + Add new warehouse
+  //     </button>
+  //     <div className="mt-5 flex justify-end">
+  //       <PrimaryButton onClick={handleSaveWarehouses}>Save</PrimaryButton>
+  //     </div>
+  //   </div>
+  // ) : null
 
   const passwordSectionInline = (
     <div className="mt-8">
@@ -619,7 +619,7 @@ export default function ProfileSettings({
             onPick={handleAvatarPick}
           />
           <div className="mt-8">{accountFieldsDashboard}</div>
-          {warehouseSection}
+          {/* {warehouseSection} */}
           {passwordSectionInline}
         </Card>
       )}

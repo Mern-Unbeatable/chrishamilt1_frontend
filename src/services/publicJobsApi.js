@@ -113,6 +113,7 @@ export function mapApiJobToDetails(job) {
     quoteCount: job._count?.quotes ?? 0,
     customer: job.customer
       ? {
+          id: job.customer.id ?? job.customerId ?? null,
           name: customerName,
           avatar: job.customer.profileImage ?? null,
           phone: job.customer.phoneNumber ?? job.customer.phone ?? null,

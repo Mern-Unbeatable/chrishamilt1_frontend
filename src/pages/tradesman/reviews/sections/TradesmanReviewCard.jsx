@@ -23,7 +23,14 @@ export function RatingStars({ rating, size = 'md', className = '' }) {
   )
 }
 
-export default function TradesmanReviewCard({ name, initials, rating, jobTitle, date, text }) {
+export default function TradesmanReviewCard({
+  name,
+  initials,
+  rating,
+  jobTitle,
+  date,
+  text,
+}) {
   return (
     <article className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-5">
       <div className="flex items-start gap-3 sm:gap-4">

@@ -12,8 +12,10 @@ import AdminTradesmanReviewsPanel from '@/pages/admin/tradesmen/sections/AdminTr
 import AdminTradesmanTokenCard from '@/pages/admin/tradesmen/sections/AdminTradesmanTokenCard'
 import {
   fetchAdminTradesmanDetail,
+  grantAdminTradesmanTokens,
   isAdminTradesmenApiEnabled,
 } from '@/services/adminTradesmenApi'
+import { showApiErrorFromError, showSuccessAlert } from '@/helpers/showAppAlert'
 import { ADMIN_USER_STATUS } from '@/services/adminUsersApi'
 
 export default function AdminTradesmanDetailsPage() {
@@ -26,6 +28,7 @@ export default function AdminTradesmanDetailsPage() {
   const [loading, setLoading] = useState(useApi)
   const [error, setError] = useState('')
   const [updating, setUpdating] = useState(false)
+  const [grantingTokens, setGrantingTokens] = useState(false)
 
   useEffect(() => {
     if (!useApi) {
@@ -107,6 +110,28 @@ export default function AdminTradesmanDetailsPage() {
     }
   }
 
+  const handleGrantTokens = async (amount) => {
+    if (!useApi) return true
+
+    setGrantingTokens(true)
+
+    try {
+      await grantAdminTradesmanTokens(tradesmanId, amount)
+      const updated = await fetchAdminTradesmanDetail(tradesmanId)
+      setTradesman(updated)
+      await showSuccessAlert({
+        title: 'Tokens granted',
+        text: `${amount} tokens added to the tradesman's wallet.`,
+      })
+      return true
+    } catch (err) {
+      await showApiErrorFromError(err, 'Unable to grant tokens')
+      return false
+    } finally {
+      setGrantingTokens(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -152,7 +177,11 @@ export default function AdminTradesmanDetailsPage() {
             stats={tradesman.stats}
             memberSince={tradesman.memberSince}
           />
-          <AdminTradesmanTokenCard tokens={tradesman.tokens} />
+          <AdminTradesmanTokenCard
+            tokens={tradesman.tokens}
+            onGrantTokens={useApi ? handleGrantTokens : undefined}
+            granting={grantingTokens}
+          />
           <AdminTradesmanCompletedJobsCard completedJobs={tradesman.completedJobs} />
         </div>
 

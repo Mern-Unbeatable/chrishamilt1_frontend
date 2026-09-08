@@ -113,3 +113,21 @@ export function getDemoQuotesForJob(jobId) {
   return getFallbackJobQuotes(jobId)
 }
 
+export async function hireQuote(quoteId) {
+  if (!quoteId) {
+    throw new Error('Quote is required.')
+  }
+
+  const payload = await apiRequest(`/api/quotes/${encodeURIComponent(quoteId)}/hire`, {
+    method: 'POST',
+    token: getAccessToken(),
+  })
+
+  const booking = payload?.data ?? payload
+  if (!booking?.id) {
+    throw new Error('Unable to hire tradesman.')
+  }
+
+  return booking
+}
+

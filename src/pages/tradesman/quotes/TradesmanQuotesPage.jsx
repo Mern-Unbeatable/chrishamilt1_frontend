@@ -93,6 +93,8 @@ export default function TradesmanQuotesPage() {
       return undefined
     }
 
+    const listQuote = quotes.find((item) => item.id === selectedQuoteId)
+
     let cancelled = false
 
     async function loadQuoteDetails() {
@@ -101,7 +103,7 @@ export default function TradesmanQuotesPage() {
 
       try {
         const quote = useApi
-          ? await fetchQuoteDetails(selectedQuoteId)
+          ? await fetchQuoteDetails(selectedQuoteId, { jobId: listQuote?.jobId })
           : demoQuoteOverrides[selectedQuoteId] ??
             getDemoTradesmanQuoteDetails(selectedQuoteId)
 
@@ -129,7 +131,7 @@ export default function TradesmanQuotesPage() {
     return () => {
       cancelled = true
     }
-  }, [selectedQuoteId, useApi, demoQuoteOverrides])
+  }, [selectedQuoteId, useApi, demoQuoteOverrides, quotes])
 
   useEffect(() => {
     if (!editingQuoteId) {
@@ -137,12 +139,14 @@ export default function TradesmanQuotesPage() {
       return undefined
     }
 
+    const listQuote = quotes.find((item) => item.id === editingQuoteId)
+
     let cancelled = false
 
     async function loadEditingQuote() {
       try {
         const quote = useApi
-          ? await fetchQuoteDetails(editingQuoteId)
+          ? await fetchQuoteDetails(editingQuoteId, { jobId: listQuote?.jobId })
           : demoQuoteOverrides[editingQuoteId] ??
             getDemoTradesmanQuoteDetails(editingQuoteId)
 
@@ -159,7 +163,7 @@ export default function TradesmanQuotesPage() {
     return () => {
       cancelled = true
     }
-  }, [editingQuoteId, useApi])
+  }, [editingQuoteId, useApi, quotes, demoQuoteOverrides])
 
   const displayQuotes = useApi ? quotes : demoResult.quotes
   const displayTotalCount = useApi ? totalCount : demoResult.pagination.total
@@ -283,7 +287,14 @@ export default function TradesmanQuotesPage() {
                       ? undefined
                       : () => handleWithdraw(quote.id)
                   }
-                  onMessageCustomer={() => navigate('/tradesman/messages')}
+                  onMessageCustomer={() =>
+                    navigate('/tradesman/messages', {
+                      state: {
+                        customerId: quote.customerId ?? null,
+                        jobId: quote.jobId ?? null,
+                      },
+                    })
+                  }
                 />
               )
             })}

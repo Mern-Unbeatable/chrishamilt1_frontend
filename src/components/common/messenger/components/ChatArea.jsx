@@ -1,22 +1,7 @@
-import {
-  ArrowLeft,
-  CheckCheck,
-  Image,
-  Mic,
-  Paperclip,
-  Send,
-  Smile,
-} from 'lucide-react'
+import { ArrowLeft, CheckCheck, Send } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/helpers/cn'
 import UserAvatar from '@/components/common/messenger/components/UserAvatar'
-
-const COMPOSER_ACTIONS = [
-  { icon: Paperclip, label: 'Attach file' },
-  { icon: Image, label: 'Attach image' },
-  { icon: Mic, label: 'Voice message' },
-  { icon: Smile, label: 'Emoji' },
-]
 
 export default function ChatArea({
   activeChat,
@@ -143,19 +128,6 @@ export default function ChatArea({
         className="shrink-0 border-t border-[#E5E7EB] bg-white px-3 pt-3 pb-4 sm:px-5 sm:pt-4 sm:pb-5"
       >
         <div className="flex items-end gap-2 sm:items-center sm:gap-3">
-          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
-            {COMPOSER_ACTIONS.map(({ icon: Icon, label }) => (
-              <button
-                key={label}
-                type="button"
-                className="flex size-8 items-center justify-center rounded-md text-[#94A3B8] transition-colors hover:bg-[#F8FAFC] hover:text-[#64748B] sm:size-9"
-                aria-label={label}
-              >
-                <Icon className="size-4.25 sm:size-4.5" strokeWidth={1.75} />
-              </button>
-            ))}
-          </div>
-
           <div className="flex min-w-0 flex-1 items-center rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] px-3 py-2.5 sm:px-4">
             <input
               type="text"

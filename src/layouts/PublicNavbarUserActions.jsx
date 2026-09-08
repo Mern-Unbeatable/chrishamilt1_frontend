@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router'
-import { Briefcase, LogOut, MessageSquare, Package, User } from 'lucide-react'
+import { Briefcase, LayoutDashboard, LogOut, MessageSquare, Package, User } from 'lucide-react'
 import {
   Dropdown,
   DropdownItem,
@@ -19,6 +19,7 @@ export default function PublicNavbarUserActions({ compact = false }) {
   const { logout } = useAuth()
 
   const isMyBookingsActive = isPathPrefixActive(pathname, '/my-bookings')
+  const isDashboardActive = isPathPrefixActive(pathname, '/dashboard')
   const isMessagesActive = isPathPrefixActive(pathname, '/messages')
   const isProfileActive = isPathPrefixActive(pathname, '/user/profile')
   const isPostJobActive = pathname === '/post-job'
@@ -43,6 +44,10 @@ export default function PublicNavbarUserActions({ compact = false }) {
   if (compact) {
     return (
       <div className="flex flex-col gap-2">
+        <NavLink to="/dashboard" className={compactLinkClass} end>
+          <LayoutDashboard className="size-4" />
+          Dashboard
+        </NavLink>
         <NavLink to="/user/profile" className={compactLinkClass} end>
           <User className="size-4" />
           Profile
@@ -122,6 +127,15 @@ export default function PublicNavbarUserActions({ compact = false }) {
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
+
+      <Link
+        to="/dashboard"
+        className={iconButtonClass(isDashboardActive)}
+        aria-label="Dashboard"
+        aria-current={isDashboardActive ? 'page' : undefined}
+      >
+        <LayoutDashboard className="size-5" strokeWidth={1.75} />
+      </Link>
 
       <Link
         to="/my-bookings"

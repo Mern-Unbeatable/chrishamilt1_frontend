@@ -5,6 +5,8 @@ const STATUS_STYLES = {
   accepted: 'bg-[#EFF6FF] text-[#2563EB]',
   'in progress': 'bg-[#ECFEFF] text-[#0891B2]',
   'in-progress': 'bg-[#ECFEFF] text-[#0891B2]',
+  open: 'bg-[#EFF6FF] text-[#2563EB]',
+  cancelled: 'bg-[#F1F5F9] text-[#64748B]',
   pending: 'bg-[#FFF7ED] text-[#EA580C]',
   active: 'bg-[#ECFDF5] text-[#059669]',
   suspend: 'bg-[#FFF7ED] text-[#EA580C]',

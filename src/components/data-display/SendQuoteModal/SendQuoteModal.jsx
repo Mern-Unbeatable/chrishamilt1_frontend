@@ -3,12 +3,8 @@ import { createPortal } from 'react-dom'
 import {
   ArrowLeft,
   ArrowRight,
-  Award,
   Check,
   CloudUpload,
-  FileText,
-  Image,
-  Video,
   X,
 } from 'lucide-react'
 import { cn } from '@/helpers/cn'
@@ -30,16 +26,6 @@ const PROPOSAL_SNIPPETS = [
   { label: 'Add guarantee', text: 'I include a 12-month labour guarantee on all work completed.' },
   { label: 'Call to action', text: 'I would be happy to visit for a free assessment — please let me know a convenient time.' },
 ]
-
-const ATTACHMENT_TYPES = [
-  { id: 'portfolio', label: 'Portfolio PDF', description: 'Previous work samples', icon: FileText, tone: 'text-[#2563EB]' },
-  { id: 'photos', label: 'Job Photos', description: 'Similar past projects', icon: Image, tone: 'text-[#059669]' },
-  { id: 'certificates', label: 'Certificates', description: 'Qualifications & accreditation', icon: Award, tone: 'text-[#D97706]' },
-  { id: 'video', label: 'Video', description: 'Intro or previous work', icon: Video, tone: 'text-[#7C3AED]' },
-]
-
-const DEFAULT_PROPOSAL =
-  "Hi Sarah,\n\nMy name is [Your Name] and I'm a qualified plumber with over 8 years of experience in full bathroom renovations. I've reviewed your project brief and I'm confident I can deliver exactly what you're looking for.\n\nMy approach would be to start with a full strip-out and waste rerouting, then install the new suite before tiling all surfaces. I work cleanly and always leave the site tidy at the end of each day.\n\nLooking forward to hearing from you!"
 
 function StepProgress({ step }) {
   return (
@@ -227,43 +213,127 @@ function ProposalStep({ form, onChange }) {
   )
 }
 
-function AttachmentsStep({ selectedTypes, onToggleType }) {
+const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024
+const ACCEPTED_FILE_TYPES =
+  'image/*,application/pdf,video/*,.pdf,.jpg,.jpeg,.png,.webp,.avif,.mp4,.mov'
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function AttachmentsStep({
+  files = [],
+  existingImages = [],
+  onAddFiles,
+  onRemoveFile,
+  fileError = '',
+}) {
+  const inputRef = useRef(null)
+
+  const handleFiles = (fileList) => {
+    const nextFiles = Array.from(fileList ?? [])
+    if (!nextFiles.length) return
+    onAddFiles?.(nextFiles)
+  }
+
   return (
     <div className="space-y-5">
-      <div className="rounded-xl border-2 border-dashed border-[#BFDBFE] bg-[#F8FAFC] px-6 py-10 text-center">
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(event) => {
+          event.preventDefault()
+          event.dataTransfer.dropEffect = 'copy'
+        }}
+        onDrop={(event) => {
+          event.preventDefault()
+          handleFiles(event.dataTransfer.files)
+        }}
+        className="w-full rounded-xl border-2 border-dashed border-[#BFDBFE] bg-[#F8FAFC] px-6 py-10 text-center transition-colors hover:border-btn-primary hover:bg-[#EFF6FF]"
+      >
         <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-[#EFF6FF] text-btn-primary">
           <CloudUpload className="size-6" strokeWidth={1.75} />
         </span>
         <p className="mt-4 text-base font-semibold text-[#111827]">Drag &amp; Drop Files</p>
         <p className="mt-2 text-sm text-[#64748B]">
-          PDF, Images, certificates, portfolios, videos. Max 25MB per file.
+          Images, PDFs, or videos. Max 25MB per file.
         </p>
-      </div>
+        <p className="mt-3 text-sm font-semibold text-btn-primary">Browse files</p>
+      </button>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {ATTACHMENT_TYPES.map((type) => {
-          const Icon = type.icon
-          const isSelected = selectedTypes.includes(type.id)
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        accept={ACCEPTED_FILE_TYPES}
+        className="hidden"
+        onChange={(event) => {
+          handleFiles(event.target.files)
+          event.target.value = ''
+        }}
+      />
 
-          return (
-            <button
-              key={type.id}
-              type="button"
-              onClick={() => onToggleType(type.id)}
-              className={cn(
-                'rounded-xl border p-4 text-left transition-colors',
-                isSelected
-                  ? 'border-btn-primary bg-[#EFF6FF]'
-                  : 'border-[#E5E7EB] bg-white hover:bg-[#F8FAFC]',
-              )}
-            >
-              <Icon className={cn('size-5', type.tone)} strokeWidth={1.75} />
-              <p className="mt-3 text-sm font-semibold text-[#111827]">{type.label}</p>
-              <p className="mt-1 text-xs text-[#64748B]">{type.description}</p>
-            </button>
-          )
-        })}
-      </div>
+      {fileError ? (
+        <p className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-3 py-2 text-sm text-[#B91C1C]">
+          {fileError}
+        </p>
+      ) : null}
+
+      {existingImages.length ? (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+            Current attachments
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {existingImages.map((image) => (
+              <a
+                key={image.id ?? image.url}
+                href={image.url}
+                target="_blank"
+                rel="noreferrer"
+                className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F8FAFC]"
+              >
+                <img
+                  src={image.url}
+                  alt="Existing quote attachment"
+                  className="aspect-[4/3] w-full object-cover"
+                />
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {files.length ? (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+            New uploads
+          </p>
+          <ul className="mt-3 space-y-2">
+            {files.map((file, index) => (
+              <li
+                key={`${file.name}-${file.lastModified}-${index}`}
+                className="flex items-center justify-between gap-3 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2.5"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-[#111827]">{file.name}</p>
+                  <p className="text-xs text-[#64748B]">{formatFileSize(file.size)}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onRemoveFile?.(index)}
+                  className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-[#64748B] transition-colors hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                  aria-label={`Remove ${file.name}`}
+                >
+                  <X className="size-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <p className="text-center text-sm text-[#64748B]">
         Attachments are optional but increase win rate by 40%
@@ -273,6 +343,8 @@ function AttachmentsStep({ selectedTypes, onToggleType }) {
 }
 
 function ReviewStep({ form, customerBudget }) {
+  const attachmentCount = (form.images?.length ?? 0) + (form.existingImages?.length ?? 0)
+
   return (
     <div className="space-y-4">
       <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4">
@@ -306,6 +378,12 @@ function ReviewStep({ form, customerBudget }) {
               <dd className="font-semibold text-[#111827]">{form.warranty}</dd>
             </div>
           ) : null}
+          <div className="flex justify-between gap-4">
+            <dt className="text-[#64748B]">Attachments</dt>
+            <dd className="font-semibold text-[#111827]">
+              {attachmentCount ? `${attachmentCount} file${attachmentCount === 1 ? '' : 's'}` : 'None'}
+            </dd>
+          </div>
         </dl>
       </div>
 
@@ -348,13 +426,14 @@ function SuccessStep({ onViewQuotes, mode = 'create' }) {
 
 function createInitialForm() {
   return {
-    quoteAmount: '2800',
-    duration: '2–3 weeks',
-    startDate: '2026-08-15',
+    quoteAmount: '',
+    duration: '',
+    startDate: '',
     materialsIncluded: true,
     warranty: '',
-    proposal: DEFAULT_PROPOSAL,
-    attachmentTypes: [],
+    proposal: '',
+    images: [],
+    existingImages: [],
   }
 }
 
@@ -371,6 +450,7 @@ export default function SendQuoteModal({
   const [step, setStep] = useState(1)
   const [form, setForm] = useState(createInitialForm)
   const [submitting, setSubmitting] = useState(false)
+  const [fileError, setFileError] = useState('')
   const wasOpenRef = useRef(false)
   const isEditMode = mode === 'edit'
 
@@ -398,6 +478,7 @@ export default function SendQuoteModal({
       setStep(1)
       setForm(createInitialForm())
       setSubmitting(false)
+      setFileError('')
       return
     }
 
@@ -423,6 +504,8 @@ export default function SendQuoteModal({
         (initialValues.proposal?.length ?? 0) > (current.proposal?.length ?? 0)
           ? initialValues.proposal
           : current.proposal,
+      existingImages: initialValues.existingImages ?? current.existingImages ?? [],
+      images: current.images ?? [],
     }))
   }, [open, initialValues, isEditMode])
 
@@ -432,13 +515,33 @@ export default function SendQuoteModal({
     setForm((current) => ({ ...current, [field]: value }))
   }
 
-  const toggleAttachmentType = (typeId) => {
+  const addFiles = (incomingFiles) => {
+    const validFiles = []
+    const errors = []
+
+    incomingFiles.forEach((file) => {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        errors.push(`${file.name} exceeds 25MB.`)
+        return
+      }
+      validFiles.push(file)
+    })
+
+    setFileError(errors[0] ?? '')
+    if (!validFiles.length) return
+
     setForm((current) => ({
       ...current,
-      attachmentTypes: current.attachmentTypes.includes(typeId)
-        ? current.attachmentTypes.filter((id) => id !== typeId)
-        : [...current.attachmentTypes, typeId],
+      images: [...(current.images ?? []), ...validFiles],
     }))
+  }
+
+  const removeFile = (index) => {
+    setForm((current) => ({
+      ...current,
+      images: (current.images ?? []).filter((_, fileIndex) => fileIndex !== index),
+    }))
+    setFileError('')
   }
 
   const canContinueStep1 =
@@ -544,8 +647,11 @@ export default function SendQuoteModal({
           {step === 2 ? <ProposalStep form={form} onChange={updateField} /> : null}
           {step === 3 ? (
             <AttachmentsStep
-              selectedTypes={form.attachmentTypes}
-              onToggleType={toggleAttachmentType}
+              files={form.images}
+              existingImages={form.existingImages}
+              onAddFiles={addFiles}
+              onRemoveFile={removeFile}
+              fileError={fileError}
             />
           ) : null}
           {step === 4 ? <ReviewStep form={form} customerBudget={customerBudget} /> : null}

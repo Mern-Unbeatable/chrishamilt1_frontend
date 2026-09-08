@@ -1,12 +1,24 @@
+import { useState } from 'react'
+
 const TOKEN_SUMMARY = [
   { key: 'purchased', label: 'Purchased', tone: 'bg-[#EFF6FF] text-[#2563EB]' },
   { key: 'used', label: 'Used', tone: 'bg-[#FEFCE8] text-[#CA8A04]' },
   { key: 'remaining', label: 'Remaining', tone: 'bg-[#ECFDF5] text-[#059669]' },
 ]
 
-export default function AdminTradesmanTokenCard({ tokens }) {
+export default function AdminTradesmanTokenCard({ tokens, onGrantTokens, granting = false }) {
+  const [amount, setAmount] = useState('')
+
   const usagePercent =
     tokens.purchased > 0 ? Math.round((tokens.used / tokens.purchased) * 100) : 0
+
+  const handleGrant = async () => {
+    const value = Number(amount)
+    if (!Number.isFinite(value) || value <= 0 || !onGrantTokens) return
+
+    const success = await onGrantTokens(value)
+    if (success) setAmount('')
+  }
 
   return (
     <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-5">
@@ -44,6 +56,34 @@ export default function AdminTradesmanTokenCard({ tokens }) {
           </span>
         </div>
       </div>
+
+      {onGrantTokens ? (
+        <div className="mt-5 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4">
+          <p className="text-sm font-semibold text-[#111827]">Grant tokens</p>
+          <p className="mt-1 text-xs text-[#64748B]">
+            Add tokens directly to this tradesman&apos;s wallet.
+          </p>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              placeholder="Amount"
+              className="h-10 flex-1 rounded-lg border border-[#E5E7EB] bg-white px-3 text-sm text-[#111827] outline-none focus:border-btn-primary"
+            />
+            <button
+              type="button"
+              disabled={granting || !Number(amount) || Number(amount) <= 0}
+              onClick={handleGrant}
+              className="inline-flex h-10 items-center justify-center rounded-lg bg-btn-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] disabled:opacity-60"
+            >
+              {granting ? 'Granting…' : 'Grant tokens'}
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-4">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#94A3B8]">

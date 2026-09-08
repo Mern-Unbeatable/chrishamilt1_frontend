@@ -47,6 +47,7 @@ import AdminDashboardPage from '@/pages/admin/dashboard/AdminDashboardPage'
 import AdminSettingsPage from '@/pages/admin/settings/AdminSettingsPage'
 import MessagesPage from '@/pages/shared/MessagesPage'
 import UserProfilePage from '@/pages/user/profile/UserProfilePage'
+import UserDashboardPage from '@/pages/user/dashboard/UserDashboardPage'
 import PostJobPage from '@/pages/user/jobs/PostJobPage'
 import MyJobsPage from '@/pages/user/jobs/MyJobsPage'
 import JobQuotesPage from '@/pages/user/jobs/JobQuotesPage'
@@ -88,6 +89,7 @@ export const router = createBrowserRouter([
           { path: 'my-jobs/:jobId/quotes', element: <JobQuotesPage /> },
           { path: 'my-bookings', element: <UserBookingsPage /> },
           { path: 'my-bookings/:bookingId', element: <BookingDetailsPage /> },
+          { path: 'dashboard', element: <UserDashboardPage /> },
           { path: 'messages', element: <MessagesPage /> },
           { path: 'user/profile', element: <UserProfilePage /> },
         ],
@@ -134,7 +136,6 @@ export const router = createBrowserRouter([
                   { path: 'earnings', element: <TradesmanEarningsPage /> },
                   { path: 'reviews', element: <TradesmanReviewsPage /> },
                   { path: 'profile', element: <TradesmanProfilePage /> },
-                  { path: 'schedule', element: <Navigate to="/tradesman/dashboard" replace /> },
                 ],
               },
             ],
