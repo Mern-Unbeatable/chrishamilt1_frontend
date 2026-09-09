@@ -301,6 +301,23 @@ export async function fetchMyJobs({
   }
 }
 
+export function canCancelUserJob(status) {
+  return String(status ?? '').trim().toUpperCase() === 'OPEN'
+}
+
+export async function cancelUserJob(jobId) {
+  if (!jobId) {
+    throw new Error('Job not found.')
+  }
+
+  const payload = await apiRequest(`/api/jobs/${encodeURIComponent(jobId)}/cancel`, {
+    method: 'PATCH',
+    token: getAccessToken(),
+  })
+
+  return payload?.data ?? payload
+}
+
 export async function deleteUserJob(jobId) {
   if (!jobId) {
     throw new Error('Job not found.')

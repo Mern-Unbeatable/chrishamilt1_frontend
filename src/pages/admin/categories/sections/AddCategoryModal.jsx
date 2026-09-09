@@ -4,7 +4,8 @@ import { X } from 'lucide-react'
 import TradeIcon from '@/components/common/TradeIcon'
 import CategoryIconPicker from '@/pages/admin/categories/sections/CategoryIconPicker'
 
-export default function AddCategoryModal({ open, onClose, onSave }) {
+export default function AddCategoryModal({ open, onClose, onSave, initialCategory = null }) {
+  const isEdit = Boolean(initialCategory?.id)
   const [name, setName] = useState('')
   const [icon, setIcon] = useState('Wrench')
   const [error, setError] = useState('')
@@ -13,8 +14,8 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
   useEffect(() => {
     if (!open) return undefined
 
-    setName('')
-    setIcon('Wrench')
+    setName(initialCategory?.name ?? '')
+    setIcon(initialCategory?.icon ?? 'Wrench')
     setError('')
     setSaving(false)
 
@@ -31,7 +32,7 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
       document.body.style.overflow = previousOverflow
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [open, onClose])
+  }, [open, onClose, initialCategory])
 
   if (!open) return null
 
@@ -42,7 +43,11 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
     setSaving(true)
 
     try {
-      const result = await onSave?.({ name, icon })
+      const result = await onSave?.({
+        id: initialCategory?.id,
+        name,
+        icon,
+      })
 
       if (result?.ok) {
         onClose?.()
@@ -59,7 +64,7 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
     <div className="fixed inset-0 z-100 flex items-end justify-center p-0 sm:items-center sm:p-4">
       <button
         type="button"
-        aria-label="Close add category dialog"
+        aria-label="Close category dialog"
         className="absolute inset-0 bg-[#111827]/50"
         onClick={onClose}
       />
@@ -67,12 +72,12 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby="add-category-title"
+        aria-labelledby="category-modal-title"
         className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[88vh] sm:rounded-2xl"
       >
         <div className="flex items-center justify-between border-b border-[#E5E7EB] px-5 py-4">
-          <h2 id="add-category-title" className="text-lg font-semibold text-[#111827]">
-            Add Category
+          <h2 id="category-modal-title" className="text-lg font-semibold text-[#111827]">
+            {isEdit ? 'Edit Category' : 'Add Category'}
           </h2>
           <button
             type="button"
@@ -121,7 +126,9 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
               <span className="mt-3 text-sm font-semibold text-[#111827]">
                 {name.trim() || 'Category name'}
               </span>
-              <span className="mt-1 text-xs text-[#64748B]">0 jobs</span>
+              <span className="mt-1 text-xs text-[#64748B]">
+                {initialCategory?.jobs ?? 0} jobs
+              </span>
             </div>
           </div>
 
@@ -133,7 +140,7 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
               disabled={!canSave || saving}
               className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-btn-primary text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {saving ? 'Saving…' : 'Save'}
+              {saving ? 'Saving…' : isEdit ? 'Update category' : 'Save'}
             </button>
           </div>
         </form>

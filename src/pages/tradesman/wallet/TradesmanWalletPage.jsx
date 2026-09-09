@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
+import { useAuth } from '@/auth/AuthProvider'
+import { activateTradesmanSubscription } from '@/auth/tradesmanSubscription'
 import StatusBadge from '@/components/data-display/DataTable/StatusBadge'
 import TokenPricingCard from '@/components/data-display/TokenPricingCard/TokenPricingCard'
 import WalletStatCard from '@/components/data-display/WalletStatCard/WalletStatCard'
@@ -16,6 +18,7 @@ import {
 } from '@/services/tradesmanWalletApi'
 
 export default function TradesmanWalletPage() {
+  const { session } = useAuth()
   const useApi = isTradesmanWalletApiEnabled()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -83,6 +86,7 @@ export default function TradesmanWalletPage() {
             await confirmTokenPackageCheckout(sessionId)
           }
           if (!cancelled) {
+            activateTradesmanSubscription(session?.email, sessionId || 'wallet-checkout')
             setNotice('Payment successful. Your wallet has been updated.')
             await loadWallet()
           }
@@ -103,7 +107,7 @@ export default function TradesmanWalletPage() {
     return () => {
       cancelled = true
     }
-  }, [loadWallet, searchParams, setSearchParams, useApi])
+  }, [loadWallet, searchParams, setSearchParams, session?.email, useApi])
 
   const handleBuyTokens = useCallback(
     async (plan) => {

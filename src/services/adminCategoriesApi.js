@@ -87,6 +87,35 @@ export async function createAdminCategory({ name, icon }) {
   return category ? mapApiCategoryToAdmin(category) : null
 }
 
+export async function updateAdminCategory(categoryId, { name, icon }) {
+  if (!categoryId) {
+    throw new Error('Category not found.')
+  }
+
+  const trimmedName = name?.trim()
+  const trimmedIcon = toApiCategoryIcon(icon)
+
+  if (!trimmedName) {
+    throw new Error('Category name is required.')
+  }
+
+  if (!trimmedIcon) {
+    throw new Error('Category icon is required.')
+  }
+
+  const payload = await apiRequest(`/api/categories/${encodeURIComponent(categoryId)}`, {
+    method: 'PUT',
+    body: {
+      name: trimmedName,
+      icon: trimmedIcon,
+    },
+    token: getAccessToken(),
+  })
+
+  const category = payload?.data ?? payload
+  return category ? mapApiCategoryToAdmin(category) : null
+}
+
 export async function deleteAdminCategory(categoryId) {
   if (!categoryId) {
     throw new Error('Category not found.')

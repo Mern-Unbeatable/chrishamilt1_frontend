@@ -11,7 +11,8 @@ import {
 import { DEMO_MY_JOBS } from '@/data/myJobsData'
 import Cta from '@/pages/public/home/sections/Cta'
 import {
-  deleteUserJob,
+  canCancelUserJob,
+  cancelUserJob,
   fetchMyJobs,
   isUserJobsApiEnabled,
   MY_JOB_STATUS_FILTERS,
@@ -31,7 +32,7 @@ export default function MyJobsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(useApi ? 0 : DEMO_MY_JOBS.length)
   const [loading, setLoading] = useState(useApi)
-  const [deletingId, setDeletingId] = useState('')
+  const [cancellingId, setCancellingId] = useState('')
   const [error, setError] = useState('')
 
   const demoPaginatedJobs = useMemo(() => {
@@ -101,25 +102,29 @@ export default function MyJobsPage() {
     listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const handleDelete = async (job) => {
+  const handleCancel = async (job) => {
     const confirmation = await showConfirmAlert({
-      title: 'Delete job post?',
-      text: `"${job.title}" will be permanently removed.`,
-      confirmButtonText: 'Delete job',
+      title: 'Cancel job post?',
+      text: `"${job.title}" will be cancelled and will no longer receive new quotes.`,
+      confirmButtonText: 'Cancel job',
       cancelButtonText: 'Keep job',
     })
 
     if (!confirmation.isConfirmed) return
 
     if (!useApi) {
-      setJobs((current) => current.filter((item) => item.id !== job.id))
+      setJobs((current) =>
+        current.map((item) =>
+          item.id === job.id ? { ...item, status: 'CANCELLED' } : item,
+        ),
+      )
       return
     }
 
-    setDeletingId(job.id)
+    setCancellingId(job.id)
 
     try {
-      await deleteUserJob(job.id)
+      await cancelUserJob(job.id)
 
       const targetPage = jobs.length === 1 && page > 1 ? page - 1 : page
       const result = await fetchMyJobs({
@@ -137,13 +142,13 @@ export default function MyJobsPage() {
       }
 
       await showSuccessAlert({
-        title: 'Job deleted',
-        text: 'Your job post has been removed.',
+        title: 'Job cancelled',
+        text: 'Your job post has been cancelled.',
       })
     } catch (err) {
-      await showApiErrorFromError(err, 'Unable to delete job')
+      await showApiErrorFromError(err, 'Unable to cancel job')
     } finally {
-      setDeletingId('')
+      setCancellingId('')
     }
   }
 
@@ -197,8 +202,17 @@ export default function MyJobsPage() {
                       key={job.id}
                       {...job}
                       onViewQuote={() => navigate(`/my-jobs/${job.id}/quotes`)}
-                      onEdit={() => navigate(`/post-job/${job.id}`)}
-                      onDelete={deletingId === job.id ? undefined : () => handleDelete(job)}
+                      onEdit={
+                        canCancelUserJob(job.status)
+                          ? () => navigate(`/post-job/${job.id}`)
+                          : undefined
+                      }
+                      onDelete={
+                        canCancelUserJob(job.status) && cancellingId !== job.id
+                          ? () => handleCancel(job)
+                          : undefined
+                      }
+                      deleteAriaLabel="Cancel job"
                     />
                   ))}
                 </div>

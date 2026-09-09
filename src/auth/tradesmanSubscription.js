@@ -44,8 +44,61 @@ export function activateTradesmanSubscription(email, planId) {
   writeSubscriptions(subscriptions)
 }
 
+export function clearTradesmanSubscription(email = '') {
+  const key = email.trim().toLowerCase()
+  if (!key) return
+
+  const subscriptions = readSubscriptions()
+  if (!(key in subscriptions)) return
+
+  delete subscriptions[key]
+  writeSubscriptions(subscriptions)
+}
+
+export function clearAllTradesmanSubscriptions() {
+  if (typeof window === 'undefined') return
+  window.localStorage.removeItem(TRADESMAN_SUBSCRIPTION_STORAGE_KEY)
+}
+
 export function getTradesmanHomePath(email = '') {
   return hasTradesmanSubscription(email)
     ? '/tradesman/dashboard'
     : '/tradesman/choose-plan'
+}
+
+/**
+ * Sync local onboarding gate with live wallet/purchase state.
+ * Returns true when the tradesman should access the dashboard.
+ */
+export async function syncTradesmanAccessFromWallet(email = '') {
+  if (hasTradesmanSubscription(email)) return true
+
+  const { AUTH_CONFIG } = await import('@/auth/authConfig')
+  if (!AUTH_CONFIG.apiBaseUrl || AUTH_CONFIG.useDemoAuth) return false
+
+  try {
+    const { apiRequest } = await import('@/auth/apiClient')
+    const { getAccessToken } = await import('@/auth/authService')
+
+    const [walletPayload, purchasesPayload] = await Promise.all([
+      apiRequest('/api/tradesman/wallet', { token: getAccessToken() }),
+      apiRequest('/api/tradesman/purchases?page=1&limit=1', { token: getAccessToken() }),
+    ])
+
+    const wallet = walletPayload?.data ?? walletPayload ?? {}
+    const purchases = purchasesPayload?.data ?? []
+    const hasTokens =
+      Number(wallet.availableTokens ?? 0) > 0 ||
+      Number(wallet.tokensPurchased ?? 0) > 0 ||
+      (Array.isArray(purchases) && purchases.length > 0)
+
+    if (hasTokens) {
+      activateTradesmanSubscription(email, 'wallet')
+      return true
+    }
+  } catch {
+    return false
+  }
+
+  return false
 }

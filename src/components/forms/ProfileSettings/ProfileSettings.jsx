@@ -22,7 +22,7 @@ const ROLE_CONFIG = {
     showAvatarUpload: false,
     showAccountPhone: true,
     showAddressFields: false,
-    showWarehouses: true,
+    showWarehouses: false,
     passwordMode: 'simple',
     passwordInSeparateCard: false,
     profileActionsAlign: 'end',
