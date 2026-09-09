@@ -36,6 +36,7 @@ import TradesmanProfilePage from '@/pages/tradesman/profile/TradesmanProfilePage
 import TradesmanChoosePlanPage from '@/pages/tradesman/onboarding/TradesmanChoosePlanPage'
 import TradesmanSubscriptionGuard from '@/app/router/TradesmanSubscriptionGuard'
 import AdminCustomersPage from '@/pages/admin/customers/AdminCustomersPage'
+import AdminCustomerDetailsPage from '@/pages/admin/customers/AdminCustomerDetailsPage'
 import AdminTradesmenPage from '@/pages/admin/tradesmen/AdminTradesmenPage'
 import AdminTradesmanDetailsPage from '@/pages/admin/tradesmen/AdminTradesmanDetailsPage'
 import AdminJobsPage from '@/pages/admin/jobs/AdminJobsPage'
@@ -157,6 +158,7 @@ export const router = createBrowserRouter([
               { index: true, element: <Navigate to="dashboard" replace /> },
               { path: 'dashboard', element: <AdminDashboardPage /> },
               { path: 'customers', element: <AdminCustomersPage /> },
+              { path: 'customers/:customerId', element: <AdminCustomerDetailsPage /> },
               { path: 'users', element: <Navigate to="/admin/customers" replace /> },
               { path: 'tradesmen', element: <AdminTradesmenPage /> },
               { path: 'tradesmen/:tradesmanId', element: <AdminTradesmanDetailsPage /> },

@@ -56,9 +56,9 @@ export async function fetchTradesmanWallet() {
   return mapApiWalletToStats(wallet)
 }
 
-export async function fetchTokenPackages() {
+export async function fetchTokenPackages({ requireAuth = false } = {}) {
   const payload = await apiRequest('/api/packages', {
-    token: getAccessToken(),
+    token: requireAuth ? getAccessToken() : getAccessToken() || undefined,
   })
 
   const rows = (payload?.data ?? []).filter((pkg) => pkg.isActive !== false)

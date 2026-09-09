@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router'
 import DataTable, { StatusBadge } from '@/components/data-display/DataTable/DataTable'
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
 import { DEMO_ADMIN_CUSTOMERS } from '@/data/demoData'
@@ -34,8 +35,14 @@ const CUSTOMER_COLUMNS = [
   { key: 'joinedDate', header: 'Joined Date' },
 ]
 
-function buildCustomerActions({ onSetActive, onSetSuspend }) {
+function buildCustomerActions({ onSeeDetails, onSetActive, onSetSuspend }) {
   return [
+    {
+      id: 'details',
+      label: 'See Details',
+      variant: 'header',
+      onClick: onSeeDetails,
+    },
     {
       id: 'active',
       label: 'Active',
@@ -46,16 +53,11 @@ function buildCustomerActions({ onSetActive, onSetSuspend }) {
       label: 'Suspend',
       onClick: onSetSuspend,
     },
-    // {
-    //   id: 'delete',
-    //   label: 'Delete',
-    //   variant: 'danger',
-    //   onClick: onDelete,
-    // },
   ]
 }
 
 export default function AdminCustomersPage() {
+  const navigate = useNavigate()
   const useApi = isAdminCustomersApiEnabled()
   const pageSize = useApi ? ADMIN_CUSTOMERS_PAGE_SIZE : DEMO_PAGE_SIZE
 
@@ -119,6 +121,13 @@ export default function AdminCustomersPage() {
   const displayTotalPages = useApi
     ? totalPages
     : Math.max(1, Math.ceil(customers.length / pageSize))
+
+  const handleSeeDetails = useCallback(
+    (row) => {
+      navigate(`/admin/customers/${row.id}`)
+    },
+    [navigate],
+  )
 
   const handleSetActive = useCallback(
     async (row) => {
@@ -188,17 +197,14 @@ export default function AdminCustomersPage() {
     [useApi, updatingId],
   )
 
-  // const handleDelete = useCallback((row) => {
-  //   setCustomers((current) => current.filter((customer) => customer.id !== row.id))
-  // }, [])
-
   const actions = useMemo(
     () =>
       buildCustomerActions({
+        onSeeDetails: handleSeeDetails,
         onSetActive: handleSetActive,
         onSetSuspend: handleSetSuspend,
       }),
-    [handleSetActive, handleSetSuspend],
+    [handleSeeDetails, handleSetActive, handleSetSuspend],
   )
 
   const from = displayTotalCount === 0 ? 0 : (page - 1) * pageSize + 1

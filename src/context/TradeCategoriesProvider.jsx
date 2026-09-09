@@ -52,6 +52,34 @@ export function TradeCategoriesProvider({ children }) {
     [categories, persist],
   )
 
+  const updateCategory = useCallback(
+    (categoryId, { name, icon }) => {
+      const trimmedName = name.trim()
+      if (!trimmedName || !icon) return { ok: false, error: 'Name and icon are required.' }
+
+      const duplicate = categories.some(
+        (category) =>
+          category.id !== categoryId &&
+          category.name.toLowerCase() === trimmedName.toLowerCase(),
+      )
+
+      if (duplicate) {
+        return { ok: false, error: 'A category with this name already exists.' }
+      }
+
+      persist(
+        categories.map((category) =>
+          category.id === categoryId
+            ? { ...category, name: trimmedName, icon }
+            : category,
+        ),
+      )
+
+      return { ok: true }
+    },
+    [categories, persist],
+  )
+
   const resetCategories = useCallback(() => {
     persist(DEFAULT_TRADE_CATEGORIES)
   }, [persist])
@@ -61,9 +89,10 @@ export function TradeCategoriesProvider({ children }) {
       categories,
       addCategory,
       removeCategory,
+      updateCategory,
       resetCategories,
     }),
-    [categories, addCategory, removeCategory, resetCategories],
+    [categories, addCategory, removeCategory, updateCategory, resetCategories],
   )
 
   return (

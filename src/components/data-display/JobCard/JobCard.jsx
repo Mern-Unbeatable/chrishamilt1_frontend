@@ -46,6 +46,7 @@ export default function JobCard({
   viewQuoteLabel = 'View Quote',
   onEdit,
   onDelete,
+  deleteAriaLabel = 'Delete job',
   className = '',
 }) {
   const amount = price ?? priceRange
@@ -100,7 +101,7 @@ export default function JobCard({
             <button
               type="button"
               onClick={onDelete}
-              aria-label="Delete job"
+              aria-label={deleteAriaLabel}
               className="inline-flex size-10 items-center justify-center rounded-lg bg-[#FEF2F2] text-[#EF4444] transition-colors hover:bg-[#FEE2E2]"
             >
               <Trash2 className="size-4" strokeWidth={1.75} />

@@ -164,11 +164,18 @@ export async function logout() {
         token: getAccessToken(),
       })
     } catch {
-      // Always clear local session even if the API logout fails.
+      // Backend may not expose logout — always clear local session.
     }
   }
 
   clearStoredSession()
+
+  try {
+    const { clearAllTradesmanSubscriptions } = await import('@/auth/tradesmanSubscription')
+    clearAllTradesmanSubscriptions()
+  } catch {
+    // Ignore storage cleanup failures.
+  }
 }
 
 export function getSession() {

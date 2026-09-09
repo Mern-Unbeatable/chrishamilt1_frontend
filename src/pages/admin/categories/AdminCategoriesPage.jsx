@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
 import TradeIcon from '@/components/common/TradeIcon'
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
 import { useTradeCategories } from '@/context/TradeCategoriesProvider'
@@ -10,16 +10,19 @@ import {
   deleteAdminCategory,
   fetchAdminCategories,
   isAdminCategoriesApiEnabled,
+  updateAdminCategory,
 } from '@/services/adminCategoriesApi'
 
 export default function AdminCategoriesPage() {
   const useApi = isAdminCategoriesApiEnabled()
-  const { categories: demoCategories, addCategory, removeCategory } = useTradeCategories()
+  const { categories: demoCategories, addCategory, removeCategory, updateCategory } =
+    useTradeCategories()
 
   const [categories, setCategories] = useState(useApi ? [] : demoCategories)
   const [loading, setLoading] = useState(useApi)
   const [deletingId, setDeletingId] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
+  const [editingCategory, setEditingCategory] = useState(null)
 
   useEffect(() => {
     if (!useApi) {
@@ -52,27 +55,52 @@ export default function AdminCategoriesPage() {
     }
   }, [useApi, demoCategories])
 
-  const handleSaveCategory = async ({ name, icon }) => {
+  const openCreateModal = () => {
+    setEditingCategory(null)
+    setModalOpen(true)
+  }
+
+  const openEditModal = (category) => {
+    setEditingCategory(category)
+    setModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setModalOpen(false)
+    setEditingCategory(null)
+  }
+
+  const handleSaveCategory = async ({ id, name, icon }) => {
     if (!useApi) {
+      if (id && updateCategory) {
+        return updateCategory(id, { name, icon })
+      }
       return addCategory({ name, icon })
     }
 
     try {
-      await createAdminCategory({ name, icon })
+      if (id) {
+        await updateAdminCategory(id, { name, icon })
+      } else {
+        await createAdminCategory({ name, icon })
+      }
+
       const nextCategories = await fetchAdminCategories()
       setCategories(nextCategories)
 
       await showSuccessAlert({
-        title: 'Category added',
-        text: `"${name.trim()}" has been created.`,
+        title: id ? 'Category updated' : 'Category added',
+        text: id
+          ? `"${name.trim()}" has been updated.`
+          : `"${name.trim()}" has been created.`,
       })
 
       return { ok: true }
     } catch (err) {
-      await showApiErrorFromError(err, 'Unable to add category')
+      await showApiErrorFromError(err, id ? 'Unable to update category' : 'Unable to add category')
       return {
         ok: false,
-        error: err?.message || 'Unable to add category.',
+        error: err?.message || (id ? 'Unable to update category.' : 'Unable to add category.'),
       }
     }
   }
@@ -124,7 +152,7 @@ export default function AdminCategoriesPage() {
             <h2 className="text-base font-semibold text-[#111827]">Category</h2>
             <button
               type="button"
-              onClick={() => setModalOpen(true)}
+              onClick={openCreateModal}
               className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-btn-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]"
             >
               <Plus className="size-4" strokeWidth={2.25} />
@@ -145,6 +173,14 @@ export default function AdminCategoriesPage() {
                   <span className="inline-flex items-center gap-2 rounded-lg bg-[#EAF2FE] px-3 py-2 text-sm font-medium text-btn-primary">
                     <TradeIcon name={category.icon} className="size-4" strokeWidth={2} />
                     {category.name}
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(category)}
+                      aria-label={`Edit ${category.name}`}
+                      className="inline-flex size-6 items-center justify-center rounded-md text-btn-primary transition-colors hover:bg-white/70"
+                    >
+                      <Pencil className="size-3.5" strokeWidth={2} />
+                    </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteCategory(category)}
@@ -171,8 +207,9 @@ export default function AdminCategoriesPage() {
 
       <AddCategoryModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={closeModal}
         onSave={handleSaveCategory}
+        initialCategory={editingCategory}
       />
     </>
   )

@@ -85,7 +85,6 @@ export default function TradesmanProfilePage() {
       onChange={setProfile}
       passwordMode={useApi ? 'full' : undefined}
       onUpdateProfile={handleUpdateProfile}
-      onSaveWarehouses={() => {}}
       onChangePassword={(passwords) =>
         submitPasswordChange(passwords, { requireCurrent: useApi })
       }
