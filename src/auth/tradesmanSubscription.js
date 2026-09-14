@@ -60,15 +60,14 @@ export function clearAllTradesmanSubscriptions() {
   window.localStorage.removeItem(TRADESMAN_SUBSCRIPTION_STORAGE_KEY)
 }
 
-export function getTradesmanHomePath(email = '') {
-  return hasTradesmanSubscription(email)
-    ? '/tradesman/dashboard'
-    : '/tradesman/choose-plan'
+/** Tradesmen always land on the dashboard; tokens gate actions, not access. */
+export function getTradesmanHomePath() {
+  return '/tradesman/dashboard'
 }
 
 /**
- * Sync local onboarding gate with live wallet/purchase state.
- * Returns true when the tradesman should access the dashboard.
+ * Optionally mark local purchase history after wallet sync.
+ * Access is no longer gated on this flag.
  */
 export async function syncTradesmanAccessFromWallet(email = '') {
   if (hasTradesmanSubscription(email)) return true

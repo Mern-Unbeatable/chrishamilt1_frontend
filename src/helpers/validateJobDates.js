@@ -52,7 +52,11 @@ export function getCompletionMinDate(preferredStart) {
   return startValue >= today ? startValue : today
 }
 
-export function validateJobDates({ preferredStart, completionBy } = {}) {
+export function validateJobDates({
+  preferredStart,
+  completionBy,
+  allowPastDates = false,
+} = {}) {
   const startDate = parseDateInputValue(preferredStart)
   const completionDate = parseDateInputValue(completionBy)
   const today = startOfDay(new Date())
@@ -89,7 +93,7 @@ export function validateJobDates({ preferredStart, completionBy } = {}) {
     }
   }
 
-  if (startDate < today) {
+  if (!allowPastDates && startDate < today) {
     return {
       valid: false,
       field: 'preferredStart',
@@ -97,7 +101,7 @@ export function validateJobDates({ preferredStart, completionBy } = {}) {
     }
   }
 
-  if (completionDate < today) {
+  if (!allowPastDates && completionDate < today) {
     return {
       valid: false,
       field: 'completionBy',

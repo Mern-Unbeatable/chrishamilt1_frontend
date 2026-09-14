@@ -56,6 +56,74 @@ export async function fetchTradesmanWallet() {
   return mapApiWalletToStats(wallet)
 }
 
+export function getDemoAvailableTokens() {
+  const available = DEMO_WALLET_STATS.find((stat) => stat.id === 'available')
+  return Number(available?.value ?? 0)
+}
+
+/** Raw wallet balance for action gates (quote / unlock lead). */
+export async function fetchTradesmanAvailableTokens() {
+  if (!isTradesmanWalletApiEnabled() || AUTH_CONFIG.useDemoAuth) {
+    return getDemoAvailableTokens()
+  }
+
+  const payload = await apiRequest('/api/tradesman/wallet', {
+    token: getAccessToken(),
+  })
+
+  const wallet = payload?.data ?? payload
+  if (!wallet || typeof wallet !== 'object') {
+    throw new Error('Unable to load wallet.')
+  }
+
+  return Number(wallet.availableTokens ?? 0)
+}
+
+export function resolveQuoteTokenCost(jobOrCost = 1) {
+  if (typeof jobOrCost === 'number') {
+    return Number.isFinite(jobOrCost) && jobOrCost > 0 ? jobOrCost : 1
+  }
+
+  const raw =
+    jobOrCost?.leadPrice ??
+    jobOrCost?.tokenCost ??
+    jobOrCost?.tokensRequired ??
+    1
+  const cost = Number(raw)
+  return Number.isFinite(cost) && cost > 0 ? cost : 1
+}
+
+export function isInsufficientTokensError(err) {
+  const status = err?.status ?? err?.statusCode ?? err?.response?.status
+  const message = String(
+    err?.message || err?.error || err?.payload?.message || err?.payload?.error || '',
+  ).toLowerCase()
+
+  if (
+    message.includes('insufficient token') ||
+    message.includes('not enough token') ||
+    message.includes('buy token') ||
+    message.includes('token balance') ||
+    message.includes('no tokens') ||
+    message.includes('tokens required')
+  ) {
+    return true
+  }
+
+  if (status === 402) return true
+
+  if (status === 403) {
+    return (
+      message.includes('token') ||
+      message.includes('balance') ||
+      message.includes('wallet') ||
+      message.includes('credit')
+    )
+  }
+
+  return false
+}
+
 export async function fetchTokenPackages({ requireAuth = false } = {}) {
   const payload = await apiRequest('/api/packages', {
     token: requireAuth ? getAccessToken() : getAccessToken() || undefined,

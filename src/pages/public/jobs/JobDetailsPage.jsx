@@ -89,6 +89,35 @@ export default function JobDetailsPage() {
     )
   }
 
+  const isOpenJob =
+    String(job.statusCode || job.status || '')
+      .trim()
+      .toUpperCase()
+      .replace(/[\s-]+/g, '_') === 'OPEN'
+
+  if (!isOpenJob) {
+    return (
+      <section className="bg-[#F8FAFC] py-8 lg:py-12">
+        <div className="container mx-auto px-6 lg:px-8">
+          <div className="rounded-2xl border border-[#E5E7EB] bg-white px-6 py-12 text-center">
+            <p className="text-base font-semibold text-[#111827]">
+              This job is no longer open
+            </p>
+            <p className="mt-2 text-sm text-[#64748B]">
+              Only open jobs are available for browsing and quotes.
+            </p>
+            <Link
+              to="/jobs"
+              className="mt-6 inline-flex items-center justify-center rounded-lg bg-btn-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]"
+            >
+              Back to Browse Jobs
+            </Link>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="bg-[#F8FAFC] py-8 lg:py-12">
       <div className="container mx-auto px-6 lg:px-8">

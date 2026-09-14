@@ -80,6 +80,37 @@ export function mapApiReviewsSummary(summary = {}) {
   }
 }
 
+export async function fetchTradesmanPublicReviews(
+  tradesmanId,
+  { page = 1, limit = TRADESMAN_REVIEWS_PAGE_SIZE } = {},
+) {
+  if (!tradesmanId) {
+    return {
+      summary: mapApiReviewsSummary({}),
+      reviews: [],
+      pagination: { page: 1, limit, total: 0, totalPages: 1 },
+    }
+  }
+
+  const params = new URLSearchParams()
+  params.set('page', String(page))
+  params.set('limit', String(limit))
+
+  const payload = await apiRequest(
+    `/api/reviews/tradesman/${encodeURIComponent(tradesmanId)}?${params.toString()}`,
+  )
+
+  const data = payload?.data ?? {}
+  const rows = data.reviews ?? []
+  const pagination = normalizePagination(payload, { page, limit, rowsLength: rows.length })
+
+  return {
+    summary: mapApiReviewsSummary(data.summary ?? {}),
+    reviews: rows.map(mapApiReviewToCard),
+    pagination,
+  }
+}
+
 export async function fetchTradesmanReviews({ page = 1, limit = TRADESMAN_REVIEWS_PAGE_SIZE } = {}) {
   const params = new URLSearchParams()
   params.set('page', String(page))

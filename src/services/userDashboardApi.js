@@ -7,20 +7,20 @@ export function isUserDashboardApiEnabled() {
 }
 
 export async function fetchUserDashboard() {
-  const [jobsResult, bookingsResult, conversationsResult] = await Promise.all([
-    fetchMyJobs({ page: 1, limit: 3 }),
-    fetchUserBookings({ page: 1, limit: 3 }),
-    fetchConversations({ page: 1, limit: 10 }),
-  ])
+  const [jobsResult, openJobsResult, bookingsResult, conversationsResult] =
+    await Promise.all([
+      fetchMyJobs({ page: 1, limit: 3 }),
+      fetchMyJobs({ status: 'OPEN', page: 1, limit: 1 }),
+      fetchUserBookings({ page: 1, limit: 3 }),
+      fetchConversations({ page: 1, limit: 10 }),
+    ])
 
   const unreadMessages = (conversationsResult.conversations ?? []).reduce(
     (total, conversation) => total + Number(conversation.unreadCount ?? 0),
     0,
   )
 
-  const openJobs = jobsResult.jobs.filter(
-    (job) => String(job.status ?? '').toLowerCase() === 'open',
-  ).length
+  const openJobsCount = openJobsResult.pagination.total ?? openJobsResult.jobs.length
 
   const activeBookings = bookingsResult.bookings.filter((booking) => {
     const status = String(booking.status ?? '').toLowerCase()
@@ -33,7 +33,7 @@ export async function fetchUserDashboard() {
         id: 'jobs',
         label: 'Job posts',
         value: String(jobsResult.pagination.total ?? jobsResult.jobs.length),
-        subtext: `${openJobs} open`,
+        subtext: `${openJobsCount} open`,
         iconKey: 'briefcase',
         iconTone: 'blue',
       },

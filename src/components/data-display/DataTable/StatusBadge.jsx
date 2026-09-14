@@ -5,6 +5,7 @@ const STATUS_STYLES = {
   accepted: 'bg-[#EFF6FF] text-[#2563EB]',
   'in progress': 'bg-[#ECFEFF] text-[#0891B2]',
   'in-progress': 'bg-[#ECFEFF] text-[#0891B2]',
+  in_progress: 'bg-[#ECFEFF] text-[#0891B2]',
   open: 'bg-[#EFF6FF] text-[#2563EB]',
   cancelled: 'bg-[#F1F5F9] text-[#64748B]',
   pending: 'bg-[#FFF7ED] text-[#EA580C]',
@@ -24,16 +25,21 @@ export default function StatusBadge({
   showChevron = false,
   className = '',
 }) {
-  const key = String(status || label || '')
-    .trim()
-    .toLowerCase()
-  const styles = STATUS_STYLES[key] || STATUS_STYLES.default
+  const raw = String(label || status || '').trim()
+  const key = raw.toLowerCase().replace(/_/g, ' ')
+  const styles = STATUS_STYLES[key] || STATUS_STYLES[raw.toLowerCase()] || STATUS_STYLES.default
+  const displayLabel =
+    label ||
+    raw
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, (char) => char.toUpperCase())
 
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap ${styles} ${className}`}
     >
-      {label || status}
+      {displayLabel}
       {showChevron ? (
         <ChevronDown className="size-3.5 shrink-0 opacity-80" aria-hidden />
       ) : null}

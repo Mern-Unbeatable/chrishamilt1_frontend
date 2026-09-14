@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router'
 import LeaveReviewModal from '@/components/data-display/LeaveReviewModal'
 import JobDetails from '@/components/data-display/JobDetails'
+import { useAuth } from '@/auth/AuthProvider'
 import {
   showApiErrorFromError,
   showConfirmAlert,
@@ -16,11 +17,16 @@ import {
   fetchUserBookingDetails,
   isUserBookingsApiEnabled,
 } from '@/services/userBookingsApi'
-import { isUserReviewsApiEnabled, submitJobReview } from '@/services/userReviewsApi'
+import {
+  checkJobReviewed,
+  isUserReviewsApiEnabled,
+  submitJobReview,
+} from '@/services/userReviewsApi'
 
 export default function BookingDetailsPage() {
   const navigate = useNavigate()
   const { bookingId } = useParams()
+  const { session } = useAuth()
   const useApi = isUserBookingsApiEnabled()
   const useReviewApi = isUserReviewsApiEnabled()
 
@@ -50,10 +56,29 @@ export default function BookingDetailsPage() {
 
       try {
         const data = await fetchUserBookingDetails(bookingId)
-        if (!cancelled) {
-          setBooking(data)
-          setReviewSubmitted(Boolean(data.hasReviewed))
+        if (cancelled) return
+
+        let hasReviewed = Boolean(data.hasReviewed)
+        const jobId = data.jobId
+        const tradesmanId = data.tradesmanId ?? data.tradesman?.id ?? null
+
+        if (
+          useReviewApi &&
+          !hasReviewed &&
+          jobId &&
+          String(data.status ?? '').toLowerCase() === 'completed'
+        ) {
+          hasReviewed = await checkJobReviewed({
+            jobId,
+            tradesmanId,
+            reviewerId: session?.id ?? null,
+          })
         }
+
+        if (cancelled) return
+
+        setBooking({ ...data, hasReviewed })
+        setReviewSubmitted(hasReviewed)
       } catch (err) {
         if (!cancelled) {
           setBooking(null)
@@ -69,7 +94,7 @@ export default function BookingDetailsPage() {
     return () => {
       cancelled = true
     }
-  }, [bookingId, useApi])
+  }, [bookingId, session?.id, useApi, useReviewApi])
 
   const handleCancel = async () => {
     const confirmation = await showConfirmAlert({
@@ -103,8 +128,31 @@ export default function BookingDetailsPage() {
   }
 
   const handleSubmitReview = async ({ rating, comment }) => {
+    const jobId = booking?.jobId
+    if (!jobId) {
+      await showApiErrorFromError(
+        { message: 'This booking is missing a job reference, so the review cannot be saved.' },
+        'Unable to submit review',
+      )
+      return
+    }
+
     if (!useReviewApi) {
       setReviewSubmitted(true)
+      setBooking((current) =>
+        current
+          ? {
+              ...current,
+              hasReviewed: true,
+              tradesman: current.tradesman
+                ? {
+                    ...current.tradesman,
+                    reviewCount: Number(current.tradesman.reviewCount ?? 0) + 1,
+                  }
+                : current.tradesman,
+            }
+          : current,
+      )
       setReviewOpen(false)
       await showSuccessAlert({
         title: 'Review submitted',
@@ -117,12 +165,37 @@ export default function BookingDetailsPage() {
 
     try {
       await submitJobReview({
-        jobId: booking.jobId,
+        jobId,
         rating,
         comment,
       })
 
       setReviewSubmitted(true)
+      setBooking((current) =>
+        current
+          ? {
+              ...current,
+              hasReviewed: true,
+              tradesman: current.tradesman
+                ? {
+                    ...current.tradesman,
+                    reviewCount: Number(current.tradesman.reviewCount ?? 0) + 1,
+                    rating:
+                      current.tradesman.reviewCount > 0
+                        ? Number(
+                            (
+                              (Number(current.tradesman.rating ?? 0) *
+                                Number(current.tradesman.reviewCount ?? 0) +
+                                Number(rating)) /
+                              (Number(current.tradesman.reviewCount ?? 0) + 1)
+                            ).toFixed(1),
+                          )
+                        : Number(rating),
+                  }
+                : current.tradesman,
+            }
+          : current,
+      )
       setReviewOpen(false)
 
       await showSuccessAlert({
@@ -132,6 +205,7 @@ export default function BookingDetailsPage() {
     } catch (err) {
       if (String(err?.message ?? '').toLowerCase().includes('already reviewed')) {
         setReviewSubmitted(true)
+        setBooking((current) => (current ? { ...current, hasReviewed: true } : current))
         setReviewOpen(false)
         await showSuccessAlert({
           title: 'Already reviewed',

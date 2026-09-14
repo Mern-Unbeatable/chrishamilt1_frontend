@@ -1,5 +1,5 @@
 import { getDashboardHome } from '@/auth/demoAuth'
-import { getTradesmanHomePath, hasTradesmanSubscription } from '@/auth/tradesmanSubscription'
+import { getTradesmanHomePath } from '@/auth/tradesmanSubscription'
 
 export function resolvePostAuthPath(user, from) {
   if (user.role === 'user') {
@@ -7,11 +7,7 @@ export function resolvePostAuthPath(user, from) {
   }
 
   if (user.role === 'tradesman') {
-    if (!hasTradesmanSubscription(user.email)) {
-      return '/tradesman/choose-plan'
-    }
-
-    const fallback = getTradesmanHomePath(user.email)
+    const fallback = getTradesmanHomePath()
     return from?.startsWith('/tradesman') ? from : fallback
   }
 

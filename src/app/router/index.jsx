@@ -34,7 +34,6 @@ import TradesmanEarningsPage from '@/pages/tradesman/earnings/TradesmanEarningsP
 import TradesmanReviewsPage from '@/pages/tradesman/reviews/TradesmanReviewsPage'
 import TradesmanProfilePage from '@/pages/tradesman/profile/TradesmanProfilePage'
 import TradesmanChoosePlanPage from '@/pages/tradesman/onboarding/TradesmanChoosePlanPage'
-import TradesmanSubscriptionGuard from '@/app/router/TradesmanSubscriptionGuard'
 import AdminCustomersPage from '@/pages/admin/customers/AdminCustomersPage'
 import AdminCustomerDetailsPage from '@/pages/admin/customers/AdminCustomerDetailsPage'
 import AdminTradesmenPage from '@/pages/admin/tradesmen/AdminTradesmenPage'
@@ -120,25 +119,20 @@ export const router = createBrowserRouter([
         children: [
           { path: 'choose-plan', element: <TradesmanChoosePlanPage /> },
           {
-            element: <TradesmanSubscriptionGuard />,
+            element: <TradesmanLayout />,
             children: [
-              {
-                element: <TradesmanLayout />,
-                children: [
-                  { index: true, element: <Navigate to="dashboard" replace /> },
-                  { path: 'dashboard', element: <TradesmanDashboardPage /> },
-                  { path: 'browse-jobs', element: <TradesmanBrowseJobsPage /> },
-                  { path: 'browse-jobs/:jobId', element: <TradesmanBrowseJobDetailsPage /> },
-                  { path: 'quotes', element: <TradesmanQuotesPage /> },
-                  { path: 'jobs', element: <TradesmanJobsPage /> },
-                  { path: 'jobs/:jobId', element: <TradesmanJobDetailsPage /> },
-                  { path: 'messages', element: <TradesmanMessagesPage /> },
-                  { path: 'wallet', element: <TradesmanWalletPage /> },
-                  { path: 'earnings', element: <TradesmanEarningsPage /> },
-                  { path: 'reviews', element: <TradesmanReviewsPage /> },
-                  { path: 'profile', element: <TradesmanProfilePage /> },
-                ],
-              },
+              { index: true, element: <Navigate to="dashboard" replace /> },
+              { path: 'dashboard', element: <TradesmanDashboardPage /> },
+              { path: 'browse-jobs', element: <TradesmanBrowseJobsPage /> },
+              { path: 'browse-jobs/:jobId', element: <TradesmanBrowseJobDetailsPage /> },
+              { path: 'quotes', element: <TradesmanQuotesPage /> },
+              { path: 'jobs', element: <TradesmanJobsPage /> },
+              { path: 'jobs/:jobId', element: <TradesmanJobDetailsPage /> },
+              { path: 'messages', element: <TradesmanMessagesPage /> },
+              { path: 'wallet', element: <TradesmanWalletPage /> },
+              { path: 'earnings', element: <TradesmanEarningsPage /> },
+              { path: 'reviews', element: <TradesmanReviewsPage /> },
+              { path: 'profile', element: <TradesmanProfilePage /> },
             ],
           },
         ],

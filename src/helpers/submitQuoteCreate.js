@@ -3,6 +3,7 @@ import {
   submitJobQuote,
   validateQuoteForm,
 } from '@/services/tradesmanQuotesApi'
+import { isInsufficientTokensError } from '@/services/tradesmanWalletApi'
 import { showApiErrorFromError, showErrorAlert, showSuccessAlert } from '@/helpers/showAppAlert'
 
 export async function submitQuoteCreate(jobId, form) {
@@ -35,6 +36,10 @@ export async function submitQuoteCreate(jobId, form) {
 
     return created
   } catch (err) {
+    if (isInsufficientTokensError(err)) {
+      return { needsTokens: true, error: err }
+    }
+
     await showApiErrorFromError(err, 'Unable to submit quote')
     return null
   }

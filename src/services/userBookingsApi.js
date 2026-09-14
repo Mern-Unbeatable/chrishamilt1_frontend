@@ -143,7 +143,7 @@ export function mapApiBookingToDetails(booking = {}) {
 
   return {
     id: booking.id,
-    jobId: booking.jobId,
+    jobId: booking.jobId ?? job.id ?? null,
     tradesmanId: booking.tradesmanId ?? tradesman.id ?? null,
     title: job.title ?? 'Booking',
     location: job.location ?? job.city ?? '—',
@@ -151,7 +151,7 @@ export function mapApiBookingToDetails(booking = {}) {
     status,
     statusVariant: getStatusVariant(status),
     tradesman: {
-      id: tradesman.id ?? null,
+      id: tradesman.id ?? booking.tradesmanId ?? null,
       name: tradesmanName,
       initials: getInitials(tradesmanName),
       avatar: tradesman.profileImage ?? null,

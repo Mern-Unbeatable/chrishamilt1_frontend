@@ -133,6 +133,48 @@ export function showConfirmAlert({
   })
 }
 
+export function showBuyTokensRequiredAlert({
+  availableTokens = 0,
+  requiredTokens = 1,
+} = {}) {
+  return Swal.fire({
+    icon: 'warning',
+    title: 'Tokens required',
+    html: `
+      <p style="margin:0 0 1rem;color:#1F2937;font-size:0.95rem;line-height:1.55;font-weight:500;">
+        You need more tokens before you can submit a new quote.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin:0 0 1rem;">
+        <div style="padding:0.85rem 0.75rem;border-radius:0.75rem;background:#F3F4F6;border:1px solid #E5E7EB;text-align:center;">
+          <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.02em;text-transform:uppercase;color:#4B5563;">Available</div>
+          <div style="margin-top:0.35rem;font-size:1.5rem;font-weight:700;color:#111827;line-height:1;">${escapeHtml(String(availableTokens))}</div>
+        </div>
+        <div style="padding:0.85rem 0.75rem;border-radius:0.75rem;background:#EFF6FF;border:1px solid #BFDBFE;text-align:center;">
+          <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.02em;text-transform:uppercase;color:#1D4ED8;">Required</div>
+          <div style="margin-top:0.35rem;font-size:1.5rem;font-weight:700;color:#0160F2;line-height:1;">${escapeHtml(String(requiredTokens))}</div>
+        </div>
+      </div>
+      <p style="margin:0;color:#374151;font-size:0.875rem;line-height:1.55;">
+        Existing jobs stay available — you can still update their status. Only new quotes are locked.
+      </p>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Buy tokens',
+    cancelButtonText: 'Not now',
+    confirmButtonColor: THEME.primary,
+    reverseButtons: true,
+    focusConfirm: true,
+    customClass: {
+      popup: 'app-swal-popup app-swal-popup--tokens',
+      title: 'app-swal-title',
+      htmlContainer: 'app-swal-html app-swal-html--tokens',
+      confirmButton: 'app-swal-confirm',
+      cancelButton: 'app-swal-cancel app-swal-cancel--outline',
+      actions: 'app-swal-actions',
+    },
+  })
+}
+
 export function showApiErrorAlert(payload, fallbackTitle = 'Request failed') {
   const content = getApiErrorContent(payload, fallbackTitle)
   return showErrorAlert(content)

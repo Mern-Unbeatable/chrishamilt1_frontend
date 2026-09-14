@@ -3,12 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useAuth } from '@/auth/AuthProvider'
 import { AUTH_CONFIG } from '@/auth/authConfig'
-import {
-  activateTradesmanSubscription,
-  getTradesmanHomePath,
-  hasTradesmanSubscription,
-  syncTradesmanAccessFromWallet,
-} from '@/auth/tradesmanSubscription'
+import { activateTradesmanSubscription } from '@/auth/tradesmanSubscription'
 import { showApiErrorFromError } from '@/helpers/showAppAlert'
 import PricingHero from '@/pages/public/pricing/sections/PricingHero'
 import PricingPlans from '@/pages/public/pricing/sections/PricingPlans'
@@ -27,37 +22,9 @@ export default function TradesmanChoosePlanPage() {
 
   const [checkoutPackageId, setCheckoutPackageId] = useState('')
   const [notice, setNotice] = useState('')
-  const [checking, setChecking] = useState(true)
 
   useEffect(() => {
-    let cancelled = false
-
-    async function ensureAccess() {
-      if (hasTradesmanSubscription(email)) {
-        if (!cancelled) navigate(getTradesmanHomePath(email), { replace: true })
-        return
-      }
-
-      if (useApi) {
-        const ok = await syncTradesmanAccessFromWallet(email)
-        if (ok && !cancelled) {
-          navigate('/tradesman/dashboard', { replace: true })
-          return
-        }
-      }
-
-      if (!cancelled) setChecking(false)
-    }
-
-    ensureAccess()
-
-    return () => {
-      cancelled = true
-    }
-  }, [email, navigate, useApi])
-
-  useEffect(() => {
-    if (!useApi || checking) return undefined
+    if (!useApi) return undefined
 
     const status = searchParams.get('status')
     const sessionId = searchParams.get('session_id')
@@ -83,7 +50,10 @@ export default function TradesmanChoosePlanPage() {
         }
       } catch (err) {
         if (!cancelled) {
-          setNotice(err?.message || 'Payment confirmation failed. Contact support if tokens are missing.')
+          setNotice(
+            err?.message ||
+              'Payment confirmation failed. Contact support if tokens are missing.',
+          )
           setSearchParams({}, { replace: true })
         }
       }
@@ -94,12 +64,12 @@ export default function TradesmanChoosePlanPage() {
     return () => {
       cancelled = true
     }
-  }, [checking, email, navigate, searchParams, setSearchParams, useApi])
+  }, [email, navigate, searchParams, setSearchParams, useApi])
 
   const handleSelectPlan = async (plan) => {
     if (!useApi) {
       activateTradesmanSubscription(email, plan.id)
-      navigate('/tradesman/dashboard', { replace: true })
+      navigate('/tradesman/wallet', { replace: true })
       return
     }
 
@@ -115,35 +85,22 @@ export default function TradesmanChoosePlanPage() {
     }
   }
 
-  const handleSkip = () => {
-    activateTradesmanSubscription(email, 'skipped')
-    navigate('/tradesman/dashboard', { replace: true })
-  }
-
-  if (checking) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center px-6">
-        <p className="text-sm text-[#64748B]">Loading your plan options…</p>
-      </div>
-    )
-  }
-
   return (
     <>
       <Link
-        to="/"
+        to="/tradesman/dashboard"
         className="fixed top-5 left-6 z-50 flex items-center gap-1.5 text-sm font-medium text-[#64748B] transition-colors hover:text-[#111827]"
       >
         <ArrowLeft className="size-4" />
-        Back
+        Dashboard
       </Link>
 
       <button
         type="button"
-        onClick={handleSkip}
+        onClick={() => navigate('/tradesman/dashboard')}
         className="fixed top-5 right-6 z-50 flex items-center gap-1.5 text-sm font-medium text-[#64748B] transition-colors hover:text-[#111827]"
       >
-        Skip
+        Continue without buying
         <ArrowRight className="size-4" />
       </button>
 
@@ -157,9 +114,15 @@ export default function TradesmanChoosePlanPage() {
         </div>
       ) : null}
 
+      <div className="container mx-auto px-6 pb-4 lg:px-8">
+        <p className="mx-auto max-w-3xl text-center text-sm text-[#64748B]">
+          You can use the dashboard now. Tokens are only required when you submit a new quote.
+        </p>
+      </div>
+
       <PricingPlans
         onSelectPlan={handleSelectPlan}
-        buyLabel="Get started"
+        buyLabel="Buy tokens"
         checkoutPackageId={checkoutPackageId}
       />
     </>
