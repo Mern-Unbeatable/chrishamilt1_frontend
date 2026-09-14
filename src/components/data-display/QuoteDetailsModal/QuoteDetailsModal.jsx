@@ -34,10 +34,10 @@ function RatingStars({ rating, size = 'sm' }) {
 function MetricBox({ label, value }) {
   return (
     <div className="rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--secondary-text)] sm:text-xs">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-(--secondary-text) sm:text-xs">
         {label}
       </p>
-      <p className="mt-1 text-sm font-semibold text-[var(--primary-text)]">{value}</p>
+      <p className="mt-1 text-sm font-semibold text-(--primary-text)">{value}</p>
     </div>
   )
 }
@@ -56,7 +56,7 @@ function OverviewTab({ quote }) {
 
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--secondary-text)]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-(--secondary-text)">
             Materials included?
           </p>
           <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#DC2626]">
@@ -66,7 +66,7 @@ function OverviewTab({ quote }) {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--secondary-text)]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-(--secondary-text)">
             Warranty / guarantee
           </p>
           <span className="text-sm font-semibold text-[#DC2626]">
@@ -77,7 +77,7 @@ function OverviewTab({ quote }) {
 
       {quote.specialties?.length ? (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--secondary-text)]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-(--secondary-text)">
             Specialties
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -102,17 +102,17 @@ function ProposalTab({ quote }) {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--secondary-text)] sm:text-xs">
+        <p className="text-[10px] font-bold uppercase tracking-wide text-(--secondary-text) sm:text-xs">
           Full proposal
         </p>
         <div className="mt-3 rounded-xl bg-[#F8FAFC] p-4 sm:p-5">
-          <p className="text-sm leading-7 text-[var(--primary-text)]">{quote.fullProposal}</p>
+          <p className="text-sm leading-7 text-(--primary-text)">{quote.fullProposal}</p>
         </div>
       </div>
 
       {images.length > 0 ? (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--secondary-text)] sm:text-xs">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-(--secondary-text) sm:text-xs">
             Attachments / Images
           </p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -122,7 +122,7 @@ function ProposalTab({ quote }) {
                 href={img.url}
                 target="_blank"
                 rel="noreferrer"
-                className="group relative block aspect-[16/9] overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#EEF2F6]"
+                className="group relative block aspect-video overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#EEF2F6]"
               >
                 <img
                   src={img.url}
@@ -136,7 +136,7 @@ function ProposalTab({ quote }) {
       ) : (
         <div
           aria-hidden
-          className="aspect-[16/9] w-full rounded-xl border border-[#E5E7EB] bg-[#EEF2F6]"
+          className="aspect-video w-full rounded-xl border border-[#E5E7EB] bg-[#EEF2F6]"
         />
       )}
     </div>
@@ -183,13 +183,13 @@ function ReviewsTab({
           className="rounded-xl bg-[#F1F5F9] p-4 sm:p-5"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-[var(--primary-text)]">{review.name}</p>
-            <p className="text-xs text-[var(--secondary-text)]">{review.date}</p>
+            <p className="text-sm font-semibold text-(--primary-text)">{review.name}</p>
+            <p className="text-xs text-(--secondary-text)">{review.date}</p>
           </div>
           <div className="mt-2">
             <RatingStars rating={review.rating} />
           </div>
-          <p className="mt-3 text-sm leading-6 text-[var(--primary-text)]">{review.text}</p>
+          <p className="mt-3 text-sm leading-6 text-(--primary-text)">{review.text}</p>
         </article>
       ))}
     </div>
@@ -307,7 +307,7 @@ export default function QuoteDetailsModal({
       : reviewCount || 0
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-100 flex items-end justify-center p-0 sm:items-center sm:p-4">
       <button
         type="button"
         aria-label="Close quote details"
@@ -333,12 +333,12 @@ export default function QuoteDetailsModal({
               </div>
 
               <div className="min-w-0">
-                <h2 id="quote-details-title" className="text-base font-semibold text-[var(--primary-text)] sm:text-lg">
+                <h2 id="quote-details-title" className="text-base font-semibold text-(--primary-text) sm:text-lg">
                   {name}
                 </h2>
-                <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--secondary-text)] sm:text-sm">
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-(--secondary-text) sm:text-sm">
                   <RatingStars rating={rating} />
-                  <span className="font-medium text-[var(--primary-text)]">{rating}</span>
+                  <span className="font-medium text-(--primary-text)">{rating}</span>
                   <span>({displayReviewCount} reviews)</span>
                   <span aria-hidden>·</span>
                   <span>{jobsCompleted} jobs</span>
@@ -351,14 +351,14 @@ export default function QuoteDetailsModal({
             <div className="flex shrink-0 items-start gap-1 sm:gap-2">
               <div className="text-right">
                 <p className="text-xl font-bold text-btn-primary sm:text-2xl">{quote.amount}</p>
-                <p className="mt-0.5 text-[10px] text-[var(--secondary-text)] sm:text-xs">Total Quote</p>
+                <p className="mt-0.5 text-[10px] text-(--secondary-text) sm:text-xs">Total Quote</p>
               </div>
 
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-[#64748B] transition-colors hover:bg-[#F8FAFC] hover:text-[var(--primary-text)]"
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-[#64748B] transition-colors hover:bg-[#F8FAFC] hover:text-(--primary-text)"
               >
                 <X className="size-5" />
               </button>
@@ -375,7 +375,7 @@ export default function QuoteDetailsModal({
                   '-mb-px border-b-2 pb-3 text-sm font-semibold transition-colors',
                   activeTab === tab.id
                     ? 'border-btn-primary text-btn-primary'
-                    : 'border-transparent text-[var(--secondary-text)] hover:text-[var(--primary-text)]',
+                    : 'border-transparent text-(--secondary-text) hover:text-(--primary-text)',
                 )}
               >
                 {tab.label}
