@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Check, MessageCircle, Star, X, XCircle } from 'lucide-react'
 import { cn } from '@/helpers/cn'
+import { fetchTradesmanPublicReviews } from '@/services/tradesmanReviewsApi'
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
@@ -142,7 +143,38 @@ function ProposalTab({ quote }) {
   )
 }
 
-function ReviewsTab({ reviews = [] }) {
+function ReviewsTab({
+  reviews = [],
+  loading = false,
+  error = '',
+}) {
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-10 text-center">
+        <p className="text-sm text-[#64748B]">Loading reviews…</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-8 text-center">
+        <p className="text-sm text-[#B91C1C]">{error}</p>
+      </div>
+    )
+  }
+
+  if (!reviews.length) {
+    return (
+      <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-10 text-center">
+        <p className="text-sm font-medium text-[#111827]">No reviews yet</p>
+        <p className="mt-1 text-sm text-[#64748B]">
+          Customer reviews for this tradesman will appear here.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-3">
       {reviews.map((review) => (
@@ -174,10 +206,19 @@ export default function QuoteDetailsModal({
   messageLabel = 'Message',
 }) {
   const [activeTab, setActiveTab] = useState('overview')
+  const [reviews, setReviews] = useState([])
+  const [reviewsTotal, setReviewsTotal] = useState(null)
+  const [reviewsLoading, setReviewsLoading] = useState(false)
+  const [reviewsError, setReviewsError] = useState('')
+  const [reviewsLoadedFor, setReviewsLoadedFor] = useState('')
 
   useEffect(() => {
     if (!open) {
       setActiveTab('overview')
+      setReviews([])
+      setReviewsTotal(null)
+      setReviewsError('')
+      setReviewsLoadedFor('')
       return undefined
     }
 
@@ -196,6 +237,57 @@ export default function QuoteDetailsModal({
     }
   }, [open, onClose])
 
+  useEffect(() => {
+    if (!open || activeTab !== 'reviews') return undefined
+
+    const tradesmanId = quote?.tradesman?.id
+    if (!tradesmanId) {
+      const fallback = Array.isArray(quote?.reviews) ? quote.reviews : []
+      setReviews(fallback)
+      setReviewsTotal(fallback.length)
+      setReviewsError('')
+      setReviewsLoading(false)
+      return undefined
+    }
+
+    if (reviewsLoadedFor === tradesmanId) return undefined
+
+    let cancelled = false
+
+    async function loadReviews() {
+      setReviewsLoading(true)
+      setReviewsError('')
+
+      try {
+        const result = await fetchTradesmanPublicReviews(tradesmanId, {
+          page: 1,
+          limit: 20,
+        })
+        if (cancelled) return
+        setReviews(result.reviews)
+        setReviewsTotal(
+          result.summary?.totalReviews ??
+            result.pagination?.total ??
+            result.reviews.length,
+        )
+        setReviewsLoadedFor(tradesmanId)
+      } catch (err) {
+        if (cancelled) return
+        setReviews([])
+        setReviewsTotal(null)
+        setReviewsError(err?.message || 'Unable to load reviews right now.')
+      } finally {
+        if (!cancelled) setReviewsLoading(false)
+      }
+    }
+
+    loadReviews()
+
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, open, quote, reviewsLoadedFor])
+
   if (!open || !quote) return null
 
   const { tradesman } = quote
@@ -208,6 +300,11 @@ export default function QuoteDetailsModal({
     jobsCompleted,
     yearsExperience,
   } = tradesman || {}
+
+  const displayReviewCount =
+    reviewsLoadedFor && reviewsLoadedFor === tradesman?.id && reviewsTotal != null
+      ? reviewsTotal
+      : reviewCount || 0
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-4">
@@ -242,7 +339,7 @@ export default function QuoteDetailsModal({
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--secondary-text)] sm:text-sm">
                   <RatingStars rating={rating} />
                   <span className="font-medium text-[var(--primary-text)]">{rating}</span>
-                  <span>({reviewCount} reviews)</span>
+                  <span>({displayReviewCount} reviews)</span>
                   <span aria-hidden>·</span>
                   <span>{jobsCompleted} jobs</span>
                   <span aria-hidden>·</span>
@@ -290,7 +387,13 @@ export default function QuoteDetailsModal({
         <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
           {activeTab === 'overview' ? <OverviewTab quote={quote} /> : null}
           {activeTab === 'proposal' ? <ProposalTab quote={quote} /> : null}
-          {activeTab === 'reviews' ? <ReviewsTab reviews={quote.reviews} /> : null}
+          {activeTab === 'reviews' ? (
+            <ReviewsTab
+              reviews={reviews}
+              loading={reviewsLoading}
+              error={reviewsError}
+            />
+          ) : null}
         </div>
 
         {(onMessage || onHireTradesman) ? (

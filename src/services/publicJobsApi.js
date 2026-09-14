@@ -89,6 +89,7 @@ export function mapApiJobToCard(job) {
     postedAt: formatRelativeTime(job.createdAt),
     category: job.category?.name ?? 'General',
     image: job.images?.[0]?.url ?? null,
+    status: job.status ?? null,
   }
 }
 
@@ -102,6 +103,7 @@ export function mapApiJobToDetails(job) {
     jobCode: job.jobCode,
     status: status.label,
     statusVariant: status.variant,
+    statusCode: String(job.status ?? '').trim().toUpperCase() || 'OPEN',
     category: job.category?.name ?? 'General',
     urgency: urgency.label,
     urgencyVariant: urgency.variant,
@@ -153,12 +155,14 @@ function buildJobsQuery({
   budgetLabel,
   page,
   limit,
+  status = 'OPEN',
 }) {
   const params = new URLSearchParams()
 
   if (categorySlug) params.set('category', categorySlug)
   if (location?.trim()) params.set('location', location.trim())
   if (search?.trim()) params.set('search', search.trim())
+  if (status) params.set('status', status)
 
   const budgetParams = getBudgetParams(budgetLabel)
   Object.entries(budgetParams).forEach(([key, value]) => {
@@ -217,8 +221,12 @@ export async function fetchPublicJobs({
   budgetLabel = DEMO_BROWSE_BUDGETS[0],
   page = 1,
   limit = PUBLIC_JOBS_PAGE_SIZE,
+  status = 'OPEN',
   token,
 } = {}) {
+  // Marketplace browse is OPEN-only for public + tradesman.
+  const marketplaceStatus = status || 'OPEN'
+
   const query = buildJobsQuery({
     categorySlug,
     location,
@@ -226,14 +234,22 @@ export async function fetchPublicJobs({
     budgetLabel,
     page,
     limit,
+    status: marketplaceStatus,
   })
 
   const payload = await apiRequest(`/api/jobs?${query}`, { token })
   const rows = payload?.data ?? []
-  const pagination = normalizePagination(payload, { page, limit, rowsLength: rows.length })
+  const openOnly = rows.filter(
+    (job) => String(job.status ?? 'OPEN').trim().toUpperCase() === 'OPEN',
+  )
+  const pagination = normalizePagination(payload, {
+    page,
+    limit,
+    rowsLength: openOnly.length,
+  })
 
   return {
-    jobs: rows.map(mapApiJobToCard),
+    jobs: openOnly.map(mapApiJobToCard),
     pagination,
   }
 }

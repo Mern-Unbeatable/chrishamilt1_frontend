@@ -6,12 +6,14 @@ import SendQuoteModal from '@/components/data-display/SendQuoteModal'
 import { getAccessToken } from '@/auth/authService'
 import { DEMO_BROWSE_JOBS, DEMO_JOB_DETAILS } from '@/data/demoData'
 import { submitQuoteCreate } from '@/helpers/submitQuoteCreate'
+import useTradesmanTokenGate from '@/hooks/useTradesmanTokenGate'
 import JobDetailsCustomer from '@/pages/public/jobs/sections/JobDetailsCustomer'
 import JobDetailsSummary from '@/pages/public/jobs/sections/JobDetailsSummary'
 import {
   fetchPublicJobDetails,
   isPublicJobsApiEnabled,
 } from '@/services/publicJobsApi'
+import { resolveQuoteTokenCost } from '@/services/tradesmanWalletApi'
 
 function buildDemoJobDetails(browseJob) {
   return {
@@ -22,6 +24,7 @@ function buildDemoJobDetails(browseJob) {
     price: browseJob.priceRange,
     category: browseJob.category,
     postedAt: browseJob.postedAt,
+    leadPrice: browseJob.leadPrice ?? browseJob.tokenCost ?? 1,
   }
 }
 
@@ -30,6 +33,7 @@ export default function TradesmanBrowseJobDetailsPage() {
   const { jobId } = useParams()
   const useApi = isPublicJobsApiEnabled()
   const [quoteModalOpen, setQuoteModalOpen] = useState(false)
+  const { checking, requireTokensForAction, promptBuyTokens } = useTradesmanTokenGate()
 
   const demoBrowseJob = DEMO_BROWSE_JOBS.find((item) => item.id === jobId)
   const [job, setJob] = useState(
@@ -72,6 +76,29 @@ export default function TradesmanBrowseJobDetailsPage() {
       cancelled = true
     }
   }, [useApi, jobId])
+
+  const handleSendQuoteClick = async () => {
+    const allowed = await requireTokensForAction(job)
+    if (allowed) setQuoteModalOpen(true)
+  }
+
+  const handleSubmitQuote = async (form) => {
+    const allowed = await requireTokensForAction(job)
+    if (!allowed) {
+      setQuoteModalOpen(false)
+      return null
+    }
+
+    const result = await submitQuoteCreate(jobId, form)
+
+    if (result?.needsTokens) {
+      setQuoteModalOpen(false)
+      await promptBuyTokens(0, resolveQuoteTokenCost(job))
+      return null
+    }
+
+    return result
+  }
 
   if (loading) {
     return (
@@ -120,6 +147,41 @@ export default function TradesmanBrowseJobDetailsPage() {
     )
   }
 
+  const isOpenJob =
+    String(job.statusCode || job.status || '')
+      .trim()
+      .toUpperCase()
+      .replace(/[\s-]+/g, '_') === 'OPEN'
+
+  if (!isOpenJob) {
+    return (
+      <div className="space-y-6">
+        <Link
+          to="/tradesman/browse-jobs"
+          className="inline-flex items-center gap-1 text-sm font-medium text-[#64748B] transition-colors hover:text-[#111827]"
+        >
+          <ChevronLeft className="size-4 shrink-0" strokeWidth={2} />
+          Back
+        </Link>
+
+        <div className="rounded-2xl border border-[#E5E7EB] bg-white px-6 py-12 text-center">
+          <p className="text-base font-semibold text-[#111827]">
+            This job is no longer open
+          </p>
+          <p className="mt-2 text-sm text-[#64748B]">
+            You can only submit quotes on open jobs. Check browse jobs for new leads.
+          </p>
+          <Link
+            to="/tradesman/browse-jobs"
+            className="mt-6 inline-flex h-10 items-center justify-center rounded-lg bg-btn-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC]"
+          >
+            Back to browse jobs
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <>
       <div className="space-y-6">
@@ -131,7 +193,12 @@ export default function TradesmanBrowseJobDetailsPage() {
           Back
         </Link>
 
-        <JobDetailsSummary job={job} onSendQuote={() => setQuoteModalOpen(true)} />
+        <JobDetailsSummary
+          job={job}
+          onSendQuote={handleSendQuoteClick}
+          sendQuoteLabel={checking ? 'Checking…' : 'Submit Quote'}
+          sendQuoteDisabled={checking}
+        />
         <JobDetailsCustomer customer={job.customer} />
 
         <JobDetails job={job} showSummary={false} showTradesman={false} />
@@ -142,7 +209,7 @@ export default function TradesmanBrowseJobDetailsPage() {
         onClose={() => setQuoteModalOpen(false)}
         jobTitle={job.title}
         customerBudget={job.price}
-        onSubmit={(form) => submitQuoteCreate(jobId, form)}
+        onSubmit={handleSubmitQuote}
         onViewQuotes={() => {
           setQuoteModalOpen(false)
           navigate('/tradesman/quotes')

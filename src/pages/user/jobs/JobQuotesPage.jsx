@@ -7,10 +7,11 @@ import {
   showConfirmAlert,
   showSuccessAlert,
 } from '@/helpers/showAppAlert'
-import { getJobQuote, getJobQuotes } from '@/data/jobQuotesData'
+import { getJobQuote } from '@/data/jobQuotesData'
 import Cta from '@/pages/public/home/sections/Cta'
 import JobQuotesBreadcrumbs from '@/pages/user/jobs/sections/JobQuotesBreadcrumbs'
 import {
+  canHireQuote,
   fetchJobQuotes,
   getDemoQuotesForJob,
   hireQuote,
@@ -23,6 +24,7 @@ export default function JobQuotesPage() {
   const useApi = isJobQuotesApiEnabled()
 
   const [quotes, setQuotes] = useState([])
+  const [job, setJob] = useState(null)
   const [loading, setLoading] = useState(useApi)
   const [error, setError] = useState('')
   const [selectedQuoteId, setSelectedQuoteId] = useState(null)
@@ -33,6 +35,7 @@ export default function JobQuotesPage() {
   useEffect(() => {
     if (!useApi) {
       setQuotes(demoQuotes)
+      setJob({ id: jobId, status: 'OPEN', title: 'Demo job' })
       setLoading(false)
       setError('')
       return undefined
@@ -46,10 +49,14 @@ export default function JobQuotesPage() {
 
       try {
         const result = await fetchJobQuotes(jobId)
-        if (!cancelled) setQuotes(result.quotes)
+        if (!cancelled) {
+          setQuotes(result.quotes)
+          setJob(result.job)
+        }
       } catch (err) {
         if (!cancelled) {
           setQuotes([])
+          setJob(null)
           setError(err?.message || 'Unable to load quotes right now.')
         }
       } finally {
@@ -74,7 +81,18 @@ export default function JobQuotesPage() {
     return getJobQuote(jobId, selectedQuoteId)
   }, [jobId, quotes, selectedQuoteId, useApi])
 
+  const jobIsOpen = String(job?.status ?? 'OPEN').trim().toUpperCase() === 'OPEN'
+  const jobTitle = job?.title || 'Job quotes'
+
   const handleHire = async (quote) => {
+    if (!canHireQuote(job, quote, quotes)) {
+      await showApiErrorFromError(
+        { message: 'This job is no longer open for hiring.' },
+        'Unable to hire tradesman',
+      )
+      return
+    }
+
     const confirmation = await showConfirmAlert({
       title: 'Hire this tradesman?',
       text: `Confirm hiring ${quote.tradesman?.name ?? 'this tradesman'} for ${quote.amount}.`,
@@ -125,6 +143,15 @@ export default function JobQuotesPage() {
           <div className="mx-auto max-w-4xl">
             <JobQuotesBreadcrumbs />
 
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-[#111827] sm:text-3xl">{jobTitle}</h1>
+              <p className="mt-1 text-sm text-[#64748B]">
+                {jobIsOpen
+                  ? 'Compare quotes and hire a tradesman for this open job.'
+                  : `This job is ${String(job?.status ?? 'closed').toLowerCase().replace(/_/g, ' ')} — hiring is closed.`}
+              </p>
+            </div>
+
             {error ? (
               <p className="mb-4 rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
                 {error}
@@ -138,26 +165,31 @@ export default function JobQuotesPage() {
             ) : (
               <div className="space-y-4">
                 {quotes.length ? (
-                  quotes.map((quote) => (
-                    <QuoteCard
-                      key={quote.id}
-                      variant="customer"
-                      tradesman={quote.tradesman}
-                      amount={quote.amount}
-                      duration={quote.duration}
-                      startDate={quote.startDate}
-                      distance={quote.distance}
-                      responseTime={quote.responseTime}
-                      submittedAt={quote.submittedAt}
-                      proposalPreview={quote.proposalPreview}
-                      statusVariant={quote.statusVariant}
-                      onHireTradesman={
-                        hiringId === quote.id ? undefined : () => handleHire(quote)
-                      }
-                      onViewDetails={() => setSelectedQuoteId(quote.id)}
-                      onMessage={() => handleMessage(quote)}
-                    />
-                  ))
+                  quotes.map((quote) => {
+                    const showHire =
+                      hiringId !== quote.id && canHireQuote(job, quote, quotes)
+
+                    return (
+                      <QuoteCard
+                        key={quote.id}
+                        variant="customer"
+                        tradesman={quote.tradesman}
+                        amount={quote.amount}
+                        duration={quote.duration}
+                        startDate={quote.startDate}
+                        distance={quote.distance}
+                        responseTime={quote.responseTime}
+                        submittedAt={quote.submittedAt}
+                        proposalPreview={quote.proposalPreview}
+                        statusVariant={quote.statusVariant}
+                        onHireTradesman={
+                          showHire ? () => handleHire(quote) : undefined
+                        }
+                        onViewDetails={() => setSelectedQuoteId(quote.id)}
+                        onMessage={() => handleMessage(quote)}
+                      />
+                    )
+                  })
                 ) : (
                   <div className="rounded-xl border border-[#E5E7EB] bg-white px-6 py-16 text-center">
                     <p className="text-base font-semibold text-[#111827]">No quotes yet</p>
@@ -177,7 +209,9 @@ export default function JobQuotesPage() {
         quote={selectedQuote}
         onClose={() => setSelectedQuoteId(null)}
         onHireTradesman={
-          selectedQuote && hiringId !== selectedQuote.id
+          selectedQuote &&
+          hiringId !== selectedQuote.id &&
+          canHireQuote(job, selectedQuote, quotes)
             ? () => handleHire(selectedQuote)
             : undefined
         }

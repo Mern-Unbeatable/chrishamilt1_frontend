@@ -5,10 +5,19 @@ import JobCard from '@/components/data-display/JobCard/JobCard'
 import WalletStatCard from '@/components/data-display/WalletStatCard/WalletStatCard'
 import PostedJobCard from '@/components/data-display/PostedJobCard'
 import {
+  showApiErrorFromError,
+  showConfirmAlert,
+  showSuccessAlert,
+} from '@/helpers/showAppAlert'
+import {
   fetchUserDashboard,
   getDemoUserDashboard,
   isUserDashboardApiEnabled,
 } from '@/services/userDashboardApi'
+import {
+  canEditUserJob,
+  deleteUserJob,
+} from '@/services/userJobsApi'
 import Cta from '@/pages/public/home/sections/Cta'
 
 const DASHBOARD_ICONS = {
@@ -26,7 +35,15 @@ export default function UserDashboardPage() {
   const [recentJobs, setRecentJobs] = useState(demoData.recentJobs)
   const [recentBookings, setRecentBookings] = useState(demoData.recentBookings)
   const [loading, setLoading] = useState(useApi)
+  const [deletingId, setDeletingId] = useState('')
   const [error, setError] = useState('')
+
+  const reloadDashboard = async () => {
+    const data = await fetchUserDashboard()
+    setStats(data.stats)
+    setRecentJobs(data.recentJobs)
+    setRecentBookings(data.recentBookings)
+  }
 
   useEffect(() => {
     if (!useApi) return undefined
@@ -58,6 +75,41 @@ export default function UserDashboardPage() {
       cancelled = true
     }
   }, [useApi])
+
+  const handleDeleteJob = async (job) => {
+    const confirmation = await showConfirmAlert({
+      title: 'Delete job post?',
+      text: `"${job.title}" will be permanently removed. This cannot be undone.`,
+      confirmButtonText: 'Delete job',
+      cancelButtonText: 'Keep job',
+    })
+
+    if (!confirmation.isConfirmed) return
+
+    if (!useApi) {
+      setRecentJobs((current) => current.filter((item) => item.id !== job.id))
+      await showSuccessAlert({
+        title: 'Job deleted',
+        text: 'Your job post has been removed.',
+      })
+      return
+    }
+
+    setDeletingId(job.id)
+
+    try {
+      await deleteUserJob(job.id)
+      await reloadDashboard()
+      await showSuccessAlert({
+        title: 'Job deleted',
+        text: 'Your job post has been permanently removed.',
+      })
+    } catch (err) {
+      await showApiErrorFromError(err, 'Unable to delete job')
+    } finally {
+      setDeletingId('')
+    }
+  }
 
   return (
     <>
@@ -121,7 +173,17 @@ export default function UserDashboardPage() {
                           key={job.id}
                           {...job}
                           onViewQuote={() => navigate(`/my-jobs/${job.id}/quotes`)}
-                          onEdit={() => navigate(`/post-job/${job.id}`)}
+                          onEdit={
+                            canEditUserJob(job.status)
+                              ? () => navigate(`/post-job/${job.id}`)
+                              : undefined
+                          }
+                          onDelete={
+                            deletingId !== job.id
+                              ? () => handleDeleteJob(job)
+                              : undefined
+                          }
+                          deleteAriaLabel="Delete job"
                         />
                       ))
                     ) : (

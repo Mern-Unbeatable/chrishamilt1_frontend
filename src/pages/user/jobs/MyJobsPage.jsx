@@ -11,8 +11,8 @@ import {
 import { DEMO_MY_JOBS } from '@/data/myJobsData'
 import Cta from '@/pages/public/home/sections/Cta'
 import {
-  canCancelUserJob,
-  cancelUserJob,
+  canEditUserJob,
+  deleteUserJob,
   fetchMyJobs,
   isUserJobsApiEnabled,
   MY_JOB_STATUS_FILTERS,
@@ -32,7 +32,7 @@ export default function MyJobsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(useApi ? 0 : DEMO_MY_JOBS.length)
   const [loading, setLoading] = useState(useApi)
-  const [cancellingId, setCancellingId] = useState('')
+  const [deletingId, setDeletingId] = useState('')
   const [error, setError] = useState('')
 
   const demoPaginatedJobs = useMemo(() => {
@@ -102,31 +102,33 @@ export default function MyJobsPage() {
     listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const handleCancel = async (job) => {
+  const handleDelete = async (job) => {
     const confirmation = await showConfirmAlert({
-      title: 'Cancel job post?',
-      text: `"${job.title}" will be cancelled and will no longer receive new quotes.`,
-      confirmButtonText: 'Cancel job',
+      title: 'Delete job post?',
+      text: `"${job.title}" will be permanently removed. This cannot be undone.`,
+      confirmButtonText: 'Delete job',
       cancelButtonText: 'Keep job',
     })
 
     if (!confirmation.isConfirmed) return
 
     if (!useApi) {
-      setJobs((current) =>
-        current.map((item) =>
-          item.id === job.id ? { ...item, status: 'CANCELLED' } : item,
-        ),
-      )
+      setJobs((current) => current.filter((item) => item.id !== job.id))
+      setTotalCount((current) => Math.max(0, current - 1))
+      await showSuccessAlert({
+        title: 'Job deleted',
+        text: 'Your job post has been removed.',
+      })
       return
     }
 
-    setCancellingId(job.id)
+    setDeletingId(job.id)
 
     try {
-      await cancelUserJob(job.id)
+      await deleteUserJob(job.id)
 
-      const targetPage = jobs.length === 1 && page > 1 ? page - 1 : page
+      const remainingOnPage = jobs.length - 1
+      const targetPage = remainingOnPage <= 0 && page > 1 ? page - 1 : page
       const result = await fetchMyJobs({
         status: statusFilter,
         page: targetPage,
@@ -142,13 +144,13 @@ export default function MyJobsPage() {
       }
 
       await showSuccessAlert({
-        title: 'Job cancelled',
-        text: 'Your job post has been cancelled.',
+        title: 'Job deleted',
+        text: 'Your job post has been permanently removed.',
       })
     } catch (err) {
-      await showApiErrorFromError(err, 'Unable to cancel job')
+      await showApiErrorFromError(err, 'Unable to delete job')
     } finally {
-      setCancellingId('')
+      setDeletingId('')
     }
   }
 
@@ -157,7 +159,7 @@ export default function MyJobsPage() {
       <section className="bg-[#F8FAFC] py-8 lg:py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div ref={listRef} className="mx-auto max-w-4xl scroll-mt-24">
-            <h1 className="text-2xl font-bold text-[#111827] sm:text-3xl">My Job Post</h1>
+            <h1 className="text-2xl font-bold text-[#111827] sm:text-3xl">My Job Posts</h1>
             <p className="mt-1 text-sm text-[#64748B] lg:text-base">
               Manage your posted jobs and view quotes from tradesmen.
             </p>
@@ -203,16 +205,14 @@ export default function MyJobsPage() {
                       {...job}
                       onViewQuote={() => navigate(`/my-jobs/${job.id}/quotes`)}
                       onEdit={
-                        canCancelUserJob(job.status)
+                        canEditUserJob(job.status)
                           ? () => navigate(`/post-job/${job.id}`)
                           : undefined
                       }
                       onDelete={
-                        canCancelUserJob(job.status) && cancellingId !== job.id
-                          ? () => handleCancel(job)
-                          : undefined
+                        deletingId !== job.id ? () => handleDelete(job) : undefined
                       }
-                      deleteAriaLabel="Cancel job"
+                      deleteAriaLabel="Delete job"
                     />
                   ))}
                 </div>

@@ -226,6 +226,7 @@ export async function updateUserJob(
     specialNotes = '',
     requirements = '',
     files = [],
+    existingImages = [],
   },
 ) {
   if (!jobId) {
@@ -247,6 +248,14 @@ export async function updateUserJob(
     requirements,
     files,
   })
+
+  // Backend replaces all images when `images` is present. Preserve existing URLs
+  // whenever new files are uploaded so old photos are not wiped.
+  if (files.length > 0) {
+    existingImages.forEach((image) => {
+      if (image?.url) formData.append('images', image.url)
+    })
+  }
 
   const payload = await apiRequest(`/api/jobs/${encodeURIComponent(jobId)}`, {
     method: 'PUT',
@@ -301,8 +310,30 @@ export async function fetchMyJobs({
   }
 }
 
-export function canCancelUserJob(status) {
+export function canEditUserJob(status) {
   return String(status ?? '').trim().toUpperCase() === 'OPEN'
+}
+
+/** Soft-cancel is OPEN-only in the UI; prefer hard delete for removing posts. */
+export function canCancelUserJob(status) {
+  return canEditUserJob(status)
+}
+
+/** Owner can permanently remove any of their job posts. */
+export function canDeleteUserJob() {
+  return true
+}
+
+export function formatUserJobStatus(status) {
+  const value = String(status ?? '').trim().toUpperCase()
+  const labels = {
+    OPEN: 'Open',
+    ACCEPTED: 'Accepted',
+    IN_PROGRESS: 'In Progress',
+    COMPLETED: 'Completed',
+    CANCELLED: 'Cancelled',
+  }
+  return labels[value] || status || 'Open'
 }
 
 export async function cancelUserJob(jobId) {

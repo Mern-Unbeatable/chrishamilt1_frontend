@@ -107,6 +107,7 @@ export default function PostJobPage() {
       specialNotes: values.specialNotes,
       requirements: values.requirements,
       files: values.files,
+      existingImages: values.existingImages,
     }
 
     if (useApi) {

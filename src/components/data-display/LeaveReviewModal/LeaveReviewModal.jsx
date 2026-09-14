@@ -64,7 +64,9 @@ export default function LeaveReviewModal({
           className="space-y-5 px-5 py-5 sm:px-6"
           onSubmit={async (event) => {
             event.preventDefault()
-            await onSubmit?.({ rating, comment })
+            const trimmed = comment.trim()
+            if (trimmed.length < 10) return
+            await onSubmit?.({ rating, comment: trimmed })
           }}
         >
           <div>

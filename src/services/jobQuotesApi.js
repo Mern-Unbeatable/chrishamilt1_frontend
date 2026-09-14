@@ -95,13 +95,18 @@ export async function fetchJobQuotes(jobId) {
     throw new Error('Job ID is required.')
   }
 
-  const payload = await apiRequest(`/api/jobs/${encodeURIComponent(jobId)}/quotes`, {
-    token: getAccessToken(),
-  })
+  const [quotesPayload, jobPayload] = await Promise.all([
+    apiRequest(`/api/jobs/${encodeURIComponent(jobId)}/quotes`, {
+      token: getAccessToken(),
+    }),
+    apiRequest(`/api/jobs/${encodeURIComponent(jobId)}`, {
+      token: getAccessToken(),
+    }),
+  ])
 
-  const rows = payload?.data ?? []
+  const rows = quotesPayload?.data ?? []
   const quotes = rows.map(mapApiQuoteToCustomerCard)
-  const job = quotes[0]?.job ?? null
+  const job = jobPayload?.data ?? quotes[0]?.job ?? null
 
   return {
     quotes,
@@ -111,6 +116,31 @@ export async function fetchJobQuotes(jobId) {
 
 export function getDemoQuotesForJob(jobId) {
   return getFallbackJobQuotes(jobId)
+}
+
+/** Hire only while the job is still open and the quote is still submitted. */
+export function canHireQuote(job, quote, quotes = []) {
+  const jobStatus = String(job?.status ?? '').trim().toUpperCase()
+  if (jobStatus && jobStatus !== 'OPEN') return false
+
+  const quoteStatus = String(quote?.status ?? quote?.statusVariant ?? '')
+    .trim()
+    .toUpperCase()
+    .replace(/[\s-]+/g, '_')
+
+  if (quoteStatus && quoteStatus !== 'SUBMITTED' && quoteStatus !== 'PENDING') {
+    return false
+  }
+
+  const alreadyHired = quotes.some((item) => {
+    const status = String(item.status ?? item.statusVariant ?? '')
+      .trim()
+      .toUpperCase()
+      .replace(/[\s-]+/g, '_')
+    return status === 'ACCEPTED'
+  })
+
+  return !alreadyHired
 }
 
 export async function hireQuote(quoteId) {

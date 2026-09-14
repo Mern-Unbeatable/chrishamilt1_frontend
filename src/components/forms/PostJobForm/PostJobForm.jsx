@@ -71,7 +71,7 @@ function TextAreaField({ label, value, onChange, placeholder, rows = 4 }) {
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className={cn(controlClassName, 'h-auto min-h-[96px] resize-y py-3')}
+        className={cn(controlClassName, 'h-auto min-h-24 resize-y py-3')}
       />
     </label>
   )
@@ -170,7 +170,7 @@ function UploadField({ files, onFilesChange, existingImages = [] }) {
           addFiles(event.dataTransfer.files)
         }}
         className={cn(
-          'flex min-h-[140px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed px-4 py-8 text-center transition-colors',
+          'flex min-h-35 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed px-4 py-8 text-center transition-colors',
           dragging
             ? 'border-btn-primary bg-[#EFF6FF]'
             : 'border-[#CBD5E1] bg-[#F8FAFC] hover:border-btn-primary/60 hover:bg-[#F8FAFC]',
@@ -180,12 +180,12 @@ function UploadField({ files, onFilesChange, existingImages = [] }) {
         <p className="mt-3 text-sm font-medium text-btn-primary">
           Click to upload or drag and drop
         </p>
-        <p className="mt-1 text-xs text-[#64748B]">PNG, JPG or PDF up to 10MB</p>
+        <p className="mt-1 text-xs text-[#64748B]">PNG, JPG, WEBP or AVIF up to 5MB</p>
         <input
           ref={inputRef}
           type="file"
           multiple
-          accept="image/png,image/jpeg,image/jpg,application/pdf"
+          accept="image/png,image/jpeg,image/jpg,image/webp,image/avif"
           className="sr-only"
           onChange={(event) => {
             addFiles(event.target.files)
@@ -330,6 +330,7 @@ export default function PostJobForm({
     validateJobDates({
       preferredStart: form.preferredStart,
       completionBy: form.completionBy,
+      allowPastDates: isEditMode,
     })
 
   const applyDateValidation = (result) => {
@@ -413,6 +414,7 @@ export default function PostJobForm({
         preferredStart: dateValidation.preferredStart,
         completionBy: dateValidation.completionBy,
         files,
+        existingImages,
       })
     } catch (err) {
       await showApiErrorFromError(err, submitErrorTitle)
