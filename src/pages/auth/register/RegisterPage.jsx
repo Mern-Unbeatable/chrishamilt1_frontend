@@ -83,7 +83,7 @@ export default function RegisterPage() {
       <AuthHeroImage src={registerImage} />
 
       <div className="flex items-center justify-center bg-white px-6 py-12 sm:px-10 lg:px-16">
-        <div className="w-full max-w-[400px]">
+        <div className="w-full max-w-100">
           <h1 className="text-[1.75rem] font-bold leading-tight tracking-[-0.02em] text-[#111827] sm:text-[2rem]">
             Create your Account
           </h1>
@@ -183,9 +183,9 @@ export default function RegisterPage() {
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
-                    <EyeOff className="size-[18px]" strokeWidth={1.75} />
+                    <EyeOff className="size-4.5" strokeWidth={1.75} />
                   ) : (
-                    <Eye className="size-[18px]" strokeWidth={1.75} />
+                    <Eye className="size-4.5" strokeWidth={1.75} />
                   )}
                 </button>
               </div>
@@ -194,7 +194,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="!mt-6 inline-flex h-12 w-full items-center justify-center rounded-lg bg-btn-primary text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-6! inline-flex h-12 w-full items-center justify-center rounded-lg bg-btn-primary text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSubmitting ? 'Creating account…' : 'Sign Up'}
             </button>
