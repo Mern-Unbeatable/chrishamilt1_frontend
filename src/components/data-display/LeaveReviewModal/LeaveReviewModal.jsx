@@ -34,7 +34,7 @@ export default function LeaveReviewModal({
   const displayRating = hoverRating || rating
 
   return createPortal(
-    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/45 p-4 sm:items-center">
+    <div className="fixed inset-0 z-120 flex items-end justify-center bg-black/45 p-4 sm:items-center">
       <div
         className="w-full max-w-lg rounded-2xl border border-[#E5E7EB] bg-white shadow-xl"
         role="dialog"
