@@ -22,6 +22,7 @@ import UserGuard from '@/app/router/UserGuard'
 import LoginPage from '@/pages/auth/login/LoginPage'
 import RegisterPage from '@/pages/auth/register/RegisterPage'
 import SignUpPage from '@/pages/auth/signup/SignUpPage'
+import ForgotPasswordPage from '@/pages/auth/forgot-password/ForgotPasswordPage'
 import TradesmanDashboardPage from '@/pages/tradesman/dashboard/TradesmanDashboardPage'
 import TradesmanBrowseJobsPage from '@/pages/tradesman/browse-jobs/TradesmanBrowseJobsPage'
 import TradesmanBrowseJobDetailsPage from '@/pages/tradesman/browse-jobs/TradesmanBrowseJobDetailsPage'
@@ -106,6 +107,7 @@ export const router = createBrowserRouter([
           { path: 'login', element: <LoginPage /> },
           { path: 'signup', element: <SignUpPage /> },
           { path: 'register', element: <RegisterPage /> },
+          { path: 'forgot-password', element: <ForgotPasswordPage /> },
         ],
       },
     ],
