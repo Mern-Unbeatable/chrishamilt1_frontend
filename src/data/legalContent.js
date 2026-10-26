@@ -185,7 +185,7 @@ export const LEGAL_DOCUMENTS = {
         id: 'agreement',
         title: '1. Agreement to these terms',
         paragraphs: [
-          `These Terms of Service ("Terms") form a binding agreement between you and ${LEGAL_COMPANY.legalName}, trading as ${LEGAL_COMPANY.brand}.`,
+          `These Terms of Service ("Terms") form a binding agreement between you and ${LEGAL_COMPANY.brand}.`,
           'By accessing or using our website, mobile experience, or related services (collectively, the "Platform"), you agree to these Terms and our Privacy Policy. If you do not agree, do not use the Platform.',
         ],
       },
@@ -304,7 +304,7 @@ export const LEGAL_DOCUMENTS = {
         id: 'contact-terms',
         title: '13. Contact',
         paragraphs: [
-          `${LEGAL_COMPANY.legalName} — ${LEGAL_COMPANY.brand}`,
+          `${LEGAL_COMPANY.legalName}`,
           `Email: ${LEGAL_COMPANY.email}`,
           `Address: ${LEGAL_COMPANY.address}`,
         ],
