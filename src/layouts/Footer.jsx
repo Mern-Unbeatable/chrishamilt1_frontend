@@ -26,9 +26,20 @@ const LEGAL_LINKS = [
 ]
 
 const CONTACT_ITEMS = [
-  { icon: MapPin, text: '123 Trade House, London EC2A 4AB, United Kingdom' },
-  { icon: Phone, text: '0800 123 4567' },
-  { icon: Mail, text: 'hello@tradesmarket.co.uk' },
+  {
+    icon: MapPin,
+    text: '2 enterprise house, barking, London IG11 0JZ, United Kingdom',
+  },
+  {
+    icon: Phone,
+    text: '07392225536',
+    href: 'tel:07392225536',
+  },
+  {
+    icon: Mail,
+    text: 'admin@tradersinloop.co.uk',
+    href: 'mailto:admin@tradersinloop.co.uk',
+  },
 ]
 
 const SOCIAL_LINKS = [
@@ -93,12 +104,21 @@ export default function Footer() {
           <div>
             <h3 className="text-base font-semibold text-[#111827]">Contact Us</h3>
             <ul className="mt-5 space-y-4">
-              {CONTACT_ITEMS.map(({ icon: Icon, text }) => (
+              {CONTACT_ITEMS.map(({ icon: Icon, text, href }) => (
                 <li key={text} className="flex gap-3">
                   <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center text-btn-primary">
                     <Icon className="size-5" strokeWidth={1.75} />
                   </span>
-                  <span className="text-sm leading-6 text-[#374151]">{text}</span>
+                  {href ? (
+                    <a
+                      href={href}
+                      className="text-sm leading-6 text-[#374151] transition-colors hover:text-btn-primary"
+                    >
+                      {text}
+                    </a>
+                  ) : (
+                    <span className="text-sm leading-6 text-[#374151]">{text}</span>
+                  )}
                 </li>
               ))}
             </ul>

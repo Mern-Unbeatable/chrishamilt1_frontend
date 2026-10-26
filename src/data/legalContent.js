@@ -1,10 +1,10 @@
 export const LEGAL_COMPANY = {
   brand: 'Traders In Loop',
-  legalName: 'TradesMarket Ltd',
-  email: 'hello@tradesmarket.co.uk',
-  privacyEmail: 'privacy@tradesmarket.co.uk',
-  address: '123 Trade House, London EC2A 4AB, United Kingdom',
-  phone: '0800 123 4567',
+  legalName: 'Traders In Loop Ltd',
+  email: 'admin@tradersinloop.co.uk',
+  privacyEmail: 'admin@tradersinloop.co.uk',
+  address: '2 enterprise house, barking, London IG11 0JZ, United Kingdom',
+  phone: '07392225536',
   jurisdiction: 'England and Wales',
 }
 
@@ -136,7 +136,7 @@ export const LEGAL_DOCUMENTS = {
           'Withdraw consent at any time for processing based on consent',
           'Lodge a complaint with the Information Commissioner\'s Office (ICO) at ico.org.uk',
         ],
-        note: 'To exercise your rights, contact us at privacy@tradesmarket.co.uk. We respond within one month unless an extension is permitted by law.',
+        note: `To exercise your rights, contact us at ${LEGAL_COMPANY.privacyEmail}. We respond within one month unless an extension is permitted by law.`,
       },
       {
         id: 'security',
