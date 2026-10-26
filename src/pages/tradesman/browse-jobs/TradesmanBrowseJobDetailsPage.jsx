@@ -196,7 +196,7 @@ export default function TradesmanBrowseJobDetailsPage() {
         <JobDetailsSummary
           job={job}
           onSendQuote={handleSendQuoteClick}
-          sendQuoteLabel={checking ? 'Checking…' : 'Submit Quote'}
+          sendQuoteLabel={checking ? 'Checking…' : 'Buy This'}
           sendQuoteDisabled={checking}
         />
         <JobDetailsCustomer customer={job.customer} />

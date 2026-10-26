@@ -31,7 +31,7 @@ const FAQ_ITEMS = [
     id: '5',
     question: 'How does the token system work for tradesmen?',
     answer:
-      'Tradesmen purchase Lead Tokens to unlock job leads in their postcode area. Each lead is capped at 3–4 tradesmen, so you only pay for quality opportunities with a real chance of winning the work.',
+      'Tradesmen purchase leads token to unlock job leads and customers contact details. Each lead is capped at 2–3 tradesmen, so you only pay for quality opportunities with a real chance of winning the work.',
   },
   {
     id: '6',

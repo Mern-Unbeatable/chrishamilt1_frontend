@@ -6,6 +6,7 @@ import { DEMO_JOB_DETAILS } from '@/data/demoData'
 import JobDetailsBreadcrumbs from '@/pages/public/jobs/sections/JobDetailsBreadcrumbs'
 import JobDetailsCustomer from '@/pages/public/jobs/sections/JobDetailsCustomer'
 import JobDetailsSummary from '@/pages/public/jobs/sections/JobDetailsSummary'
+import { getAccessToken } from '@/auth/authService'
 import {
   fetchPublicJobDetails,
   isPublicJobsApiEnabled,
@@ -14,7 +15,7 @@ import {
 export default function JobDetailsPage() {
   const { jobId } = useParams()
   const navigate = useNavigate()
-  const { isAdmin } = useAuth()
+  const { isTradesman, isAdmin } = useAuth()
   const useApi = isPublicJobsApiEnabled()
 
   const [job, setJob] = useState(useApi ? null : DEMO_JOB_DETAILS)
@@ -36,7 +37,7 @@ export default function JobDetailsPage() {
       setError('')
 
       try {
-        const data = await fetchPublicJobDetails(jobId)
+        const data = await fetchPublicJobDetails(jobId, { token: getAccessToken() })
         if (!cancelled) setJob(data)
       } catch (err) {
         if (!cancelled) {
@@ -55,7 +56,13 @@ export default function JobDetailsPage() {
     }
   }, [useApi, jobId])
 
-  const handleSendQuote = () => navigate('/auth/login')
+  const handleBuy = () => {
+    if (isTradesman) {
+      navigate(`/tradesman/browse-jobs/${jobId}`)
+    } else {
+      navigate('/auth/login', { state: { from: `/tradesman/browse-jobs/${jobId}` } })
+    }
+  }
 
   if (loading) {
     return (
@@ -126,7 +133,8 @@ export default function JobDetailsPage() {
         <div className="space-y-6">
           <JobDetailsSummary
             job={job}
-            onSendQuote={handleSendQuote}
+            onSendQuote={handleBuy}
+            sendQuoteLabel="Buy This"
             sendQuoteDisabled={isAdmin}
           />
           <JobDetailsCustomer customer={job.customer} />

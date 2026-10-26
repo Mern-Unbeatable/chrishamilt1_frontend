@@ -5,6 +5,7 @@ import JobDetails from '@/components/data-display/JobDetails'
 import { DEMO_BROWSE_JOBS, DEMO_JOB_DETAILS } from '@/data/demoData'
 import JobDetailsCustomer from '@/pages/public/jobs/sections/JobDetailsCustomer'
 import JobDetailsSummary from '@/pages/public/jobs/sections/JobDetailsSummary'
+import { getAccessToken } from '@/auth/authService'
 import {
   fetchPublicJobDetails,
   isPublicJobsApiEnabled,
@@ -63,7 +64,7 @@ export default function AdminJobDetailsPage() {
       setError('')
 
       try {
-        const data = await fetchPublicJobDetails(jobId)
+        const data = await fetchPublicJobDetails(jobId, { token: getAccessToken() })
         if (!cancelled) setJob(data)
       } catch (err) {
         if (!cancelled) {

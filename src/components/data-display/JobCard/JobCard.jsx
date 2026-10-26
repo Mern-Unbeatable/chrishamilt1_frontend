@@ -188,13 +188,6 @@ export default function JobCard({
               <span className="font-semibold text-[#111827]">{amount}</span>
             ) : null}
 
-            {variant === 'browse' && amount ? (
-              <span className="inline-flex items-center gap-1.5">
-                <PoundSterling className="size-4 shrink-0" />
-                {amount}
-              </span>
-            ) : null}
-
             {variant === 'browse' && postedAt ? (
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="size-4 shrink-0" />
@@ -204,6 +197,14 @@ export default function JobCard({
           </div>
         </div>
       </div>
+
+      {variant === 'browse' && amount ? (
+        <div className="shrink-0 self-start sm:self-center sm:px-4 sm:text-right">
+          <p className="text-lg font-bold tracking-tight text-[#111827] sm:text-xl">
+            {amount}
+          </p>
+        </div>
+      ) : null}
 
       {variant === 'browse' ? (
         <div className="flex w-full shrink-0 flex-col items-stretch gap-3 sm:w-auto sm:items-end sm:gap-4">

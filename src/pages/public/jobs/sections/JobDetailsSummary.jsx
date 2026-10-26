@@ -1,4 +1,4 @@
-import { Clock, Flame, Mail, MapPin, Navigation } from 'lucide-react'
+import { Clock, Flame, Mail, MapPin, Navigation, ShoppingCart } from 'lucide-react'
 import { cn } from '@/helpers/cn'
 
 const URGENCY_STYLES = {
@@ -10,7 +10,7 @@ const URGENCY_STYLES = {
 export default function JobDetailsSummary({
   job,
   onSendQuote,
-  sendQuoteLabel = 'Send Quote',
+  sendQuoteLabel = 'Buy This',
   sendQuoteDisabled = false,
 }) {
   const {
@@ -20,10 +20,16 @@ export default function JobDetailsSummary({
     status,
     title,
     location,
+    city,
     postedAt,
     distance,
     price,
   } = job
+
+  const fullLocation = [location, city]
+    .filter(Boolean)
+    .filter((val, idx, arr) => arr.indexOf(val) === idx)
+    .join(', ')
 
   return (
     <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8">
@@ -54,10 +60,17 @@ export default function JobDetailsSummary({
       </h1>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[var(--secondary-text)]">
-        <span className="inline-flex items-center gap-1.5">
-          <MapPin className="size-4 shrink-0" />
-          {location}
-        </span>
+        {fullLocation ? (
+          <span className="inline-flex items-center gap-1.5">
+            <MapPin className="size-4 shrink-0 text-btn-primary" />
+            {fullLocation}
+          </span>
+        ) : null}
+        {city ? (
+          <span className="inline-flex items-center rounded-md bg-[#F1F5F9] px-2.5 py-0.5 text-xs font-medium text-[#475569]">
+            City: {city}
+          </span>
+        ) : null}
         <span className="inline-flex items-center gap-1.5">
           <Clock className="size-4 shrink-0" />
           {postedAt}
@@ -80,7 +93,11 @@ export default function JobDetailsSummary({
             disabled={sendQuoteDisabled}
             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-btn-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
-            <Mail className="size-4" />
+            {sendQuoteLabel.toLowerCase().includes('buy') ? (
+              <ShoppingCart className="size-4" />
+            ) : (
+              <Mail className="size-4" />
+            )}
             {sendQuoteLabel}
           </button>
         ) : null}
