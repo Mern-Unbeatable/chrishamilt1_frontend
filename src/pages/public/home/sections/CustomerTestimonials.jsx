@@ -7,7 +7,7 @@ const TESTIMONIALS = [
   {
     id: '1',
     quote:
-      'Found an amazing plumber through TradesMarket within 24 hours. Got 4 quotes in a day, picked the best value, and the job was done perfectly. Saves so much time versus ringing around!',
+      'Found an amazing plumber through Traders In Loop within 24 hours. Got 4 quotes in a day, picked the best value, and the job was done perfectly. Saves so much time versus ringing around!',
     name: 'Sarah Nichols',
     location: 'Brighton',
     service: 'Plumbing',

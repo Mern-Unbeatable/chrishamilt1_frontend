@@ -3,7 +3,7 @@ import PageHeader from '@/components/PageHeader'
 import { showSuccessAlert } from '@/helpers/showAppAlert'
 import Cta from '@/pages/public/home/sections/Cta'
 
-const SUPPORT_EMAIL = 'support@tradetrust.uk'
+const SUPPORT_EMAIL = 'admin@tradersinloop.co.uk'
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -30,7 +30,7 @@ export default function ContactPage() {
     ].join('\n')
 
     const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
-      form.subject.trim() || 'TradeTrust enquiry',
+      form.subject.trim() || 'Traders In Loop enquiry',
     )}&body=${encodeURIComponent(body)}`
 
     window.location.href = mailto
@@ -71,14 +71,21 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <dt className="font-semibold text-[#111827]">Phone</dt>
-                    <dd className="mt-1">+44 20 7946 0958</dd>
+                    <dd className="mt-1">
+                      <a
+                        href="tel:07392225536"
+                        className="text-btn-primary hover:underline"
+                      >
+                        07392225536
+                      </a>
+                    </dd>
                   </div>
                   <div>
                     <dt className="font-semibold text-[#111827]">Office</dt>
                     <dd className="mt-1">
-                      221B Baker Street
+                      2 enterprise house, barking,
                       <br />
-                      London, NW1 6XE
+                      London IG11 0JZ, United Kingdom
                     </dd>
                   </div>
                 </dl>
