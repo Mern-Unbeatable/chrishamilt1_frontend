@@ -60,6 +60,7 @@ export default function JobDetails({
     statusVariant = 'open',
     title,
     location,
+    city,
     price,
     tradesman,
     description,
@@ -69,6 +70,11 @@ export default function JobDetails({
     specialNotes,
     photos = [],
   } = job
+
+  const fullLocation = [location, city]
+    .filter(Boolean)
+    .filter((val, idx, arr) => arr.indexOf(val) === idx)
+    .join(', ')
 
   const displayText = isExpanded ? description.full : description.summary
   const activePhoto = photos[activePhotoIndex]
@@ -92,10 +98,19 @@ export default function JobDetails({
             {title}
           </h1>
 
-          <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-(--secondary-text)">
-            <MapPin className="size-4 shrink-0" />
-            {location}
-          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {fullLocation ? (
+              <p className="inline-flex items-center gap-1.5 text-sm text-(--secondary-text)">
+                <MapPin className="size-4 shrink-0 text-btn-primary" />
+                {fullLocation}
+              </p>
+            ) : null}
+            {city ? (
+              <span className="inline-flex items-center rounded-md bg-[#F1F5F9] px-2.5 py-0.5 text-xs font-medium text-[#475569]">
+                City: {city}
+              </span>
+            ) : null}
+          </div>
 
           <p className="mt-6 text-2xl font-bold text-(--primary-text)">{price}</p>
         </section>
@@ -195,6 +210,25 @@ export default function JobDetails({
           ) : null}
 
           <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {fullLocation ? (
+              <div className="rounded-xl bg-[#F8FAFC] p-4 sm:col-span-2">
+                <p className="inline-flex items-center gap-2 text-xs font-medium text-(--secondary-text)">
+                  <MapPin className="size-4 text-btn-primary" />
+                  Job Location & City
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-semibold text-(--primary-text)">
+                    {fullLocation}
+                  </p>
+                  {city ? (
+                    <span className="inline-flex items-center rounded-md border border-[#E2E8F0] bg-white px-2 py-0.5 text-xs font-medium text-[#475569]">
+                      City: {city}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+
             <div className="rounded-xl bg-[#F8FAFC] p-4">
               <p className="inline-flex items-center gap-2 text-xs font-medium text-(--secondary-text)">
                 <CalendarDays className="size-4" />

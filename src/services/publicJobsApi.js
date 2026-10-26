@@ -81,10 +81,14 @@ export function getFallbackJobCategories() {
 }
 
 export function mapApiJobToCard(job) {
+  const location = job.location || job.city || 'Location not specified'
+  const city = job.city ?? ''
+
   return {
     id: job.id,
     title: job.title,
-    location: job.location,
+    location,
+    city,
     priceRange: formatBudgetRange(job.budgetMin, job.budgetMax),
     postedAt: formatRelativeTime(job.createdAt),
     category: job.category?.name ?? 'General',
@@ -97,6 +101,8 @@ export function mapApiJobToDetails(job) {
   const status = mapStatus(job.status)
   const urgency = mapUrgency(job.urgency)
   const customerName = job.customer?.fullName || job.customer?.firstName || 'Customer'
+  const location = job.location || job.city || 'Location not specified'
+  const city = job.city ?? ''
 
   return {
     id: job.id,
@@ -109,7 +115,8 @@ export function mapApiJobToDetails(job) {
     urgencyVariant: urgency.variant,
     postedAt: formatRelativeTime(job.createdAt),
     title: job.title,
-    location: job.location,
+    location,
+    city,
     price: formatBudgetRange(job.budgetMin, job.budgetMax),
     leadPrice: job.leadPrice,
     quoteCount: job._count?.quotes ?? 0,
