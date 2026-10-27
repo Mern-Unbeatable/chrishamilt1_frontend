@@ -3,9 +3,10 @@ import Logo from '@/components/Logo'
 import { useAuth } from '@/auth/AuthProvider'
 import { cn } from '@/helpers/cn'
 import { DASHBOARD_HEADER_CLASS } from '@/layouts/dashboard/constants'
+import TraderAccountWidget from '@/components/common/TraderAccountWidget'
 
 export default function DashboardHeader({ onMenuOpen }) {
-  const { session } = useAuth()
+  const { session, isTradesman } = useAuth()
 
   return (
     <header
@@ -26,14 +27,18 @@ export default function DashboardHeader({ onMenuOpen }) {
         <Logo className="lg:hidden [&_img]:h-9" />
       </div>
 
-      <div className="min-w-0 text-right">
-        <p className="truncate text-sm font-semibold text-[#111827]">
-          {session?.name || 'Guest User'}
-        </p>
-        <p className="truncate text-xs text-[#64748B]">
-          {session?.roleLabel || 'Account'}
-        </p>
-      </div>
+      {isTradesman || session?.role === 'tradesman' ? (
+        <TraderAccountWidget />
+      ) : (
+        <div className="min-w-0 text-right">
+          <p className="truncate text-sm font-semibold text-[#111827]">
+            {session?.name || 'Guest User'}
+          </p>
+          <p className="truncate text-xs text-[#64748B]">
+            {session?.roleLabel || 'Account'}
+          </p>
+        </div>
+      )}
     </header>
   )
 }
