@@ -66,7 +66,7 @@ export default function BrowseJobsResults({
         <div className="mt-6 flex flex-col gap-4">
           {loading ? (
             <div className="rounded-xl border border-[#E5E7EB] bg-white px-6 py-12 text-center">
-              <p className="text-sm text-[#64748B]">Fetching the latest job leads…</p>
+              <p className="text-sm text-[#64748B]">Loading jobs…</p>
             </div>
           ) : jobs.length > 0 ? (
             jobs.map((job) => (

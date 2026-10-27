@@ -1,11 +1,15 @@
+import { useState } from 'react'
 import {
   ChevronRight,
   Clock,
+  Coins,
   MapPin,
   Pencil,
   PoundSterling,
+  Tag,
   Trash2,
 } from 'lucide-react'
+import BuyLeadModal from '@/components/data-display/BuyLeadModal'
 import StatusBadge from '@/components/data-display/DataTable/StatusBadge'
 import { canCancelBooking } from '@/data/myBookingsData'
 import { cn } from '@/helpers/cn'
@@ -26,6 +30,7 @@ function CardImage({ image, alt = '' }) {
  * Pass variant and callbacks from the parent — component never navigates itself.
  */
 export default function JobCard({
+  id,
   variant = 'browse',
   title,
   image,
@@ -37,8 +42,14 @@ export default function JobCard({
   time,
   category,
   status,
+  tokenCost,
+  leadPrice,
   onViewLead,
   viewLeadLabel = 'View Lead',
+  onBuyThis,
+  buyThisLabel = 'Buy This',
+  onBuyWithToken,
+  showBuyThis = true,
   onOpen,
   onCancel,
   cancelLabel = 'Cancel Booking',
@@ -49,7 +60,9 @@ export default function JobCard({
   deleteAriaLabel = 'Delete job',
   className = '',
 }) {
+  const [buyModalOpen, setBuyModalOpen] = useState(false)
   const amount = price ?? priceRange
+  const resolvedTokenCost = tokenCost ?? leadPrice ?? null
   const showCancel = variant === 'booking' && canCancelBooking(status) && onCancel
 
   if (variant === 'posted') {
@@ -67,7 +80,12 @@ export default function JobCard({
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-base font-semibold text-[#111827] sm:text-lg">{title}</h3>
+                  <h3
+                    title={title}
+                    className="line-clamp-3 lg:line-clamp-1 text-base font-semibold text-[#111827] sm:text-lg"
+                  >
+                    {title}
+                  </h3>
                   {status ? <StatusBadge status={status} /> : null}
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[#64748B]">
@@ -147,25 +165,43 @@ export default function JobCard({
         <CardImage image={image} alt={title} />
 
         <div className="min-w-0 flex-1">
-          {variant === 'booking' && onOpen ? (
-            <button
-              type="button"
-              onClick={onOpen}
-              className="text-left text-base font-semibold text-(--primary-text) transition-colors hover:text-btn-primary sm:text-lg"
-            >
-              {title}
-            </button>
-          ) : variant === 'browse' && onViewLead ? (
-            <button
-              type="button"
-              onClick={onViewLead}
-              className="text-left text-base font-semibold text-(--primary-text) transition-colors hover:text-btn-primary sm:text-lg"
-            >
-              {title}
-            </button>
-          ) : (
-            <h3 className="text-base font-semibold text-(--primary-text) sm:text-lg">{title}</h3>
-          )}
+          {variant === 'browse' && category ? (
+            <div className="mb-1.5">
+              <span className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-xs font-medium text-[#475569]">
+                <Tag className="size-3 text-[#64748B]" />
+                {category}
+              </span>
+            </div>
+          ) : null}
+
+          <div className="min-w-0">
+            {variant === 'booking' && onOpen ? (
+              <button
+                type="button"
+                onClick={onOpen}
+                title={title}
+                className="line-clamp-3 lg:line-clamp-1 text-left text-base font-semibold text-(--primary-text) transition-colors hover:text-btn-primary sm:text-lg"
+              >
+                {title}
+              </button>
+            ) : variant === 'browse' && onViewLead ? (
+              <button
+                type="button"
+                onClick={onViewLead}
+                title={title}
+                className="line-clamp-3 lg:line-clamp-1 text-left text-base font-semibold text-(--primary-text) transition-colors hover:text-btn-primary sm:text-lg"
+              >
+                {title}
+              </button>
+            ) : (
+              <h3
+                title={title}
+                className="line-clamp-3 lg:line-clamp-1 text-base font-semibold text-(--primary-text) sm:text-lg"
+              >
+                {title}
+              </h3>
+            )}
+          </div>
 
           {variant === 'booking' && date ? (
             <p className="mt-1 text-sm text-[#64748B]">
@@ -198,28 +234,26 @@ export default function JobCard({
         </div>
       </div>
 
-      {variant === 'browse' && amount ? (
-        <div className="shrink-0 self-start sm:self-center sm:px-4 sm:text-right">
-          <p className="text-lg font-bold tracking-tight text-[#111827] sm:text-xl">
-            {amount}
-          </p>
-        </div>
-      ) : null}
-
       {variant === 'browse' ? (
-        <div className="flex w-full shrink-0 flex-col items-stretch gap-3 sm:w-auto sm:items-end sm:gap-4">
-          {category ? (
-            <span className="self-start rounded-md border border-[#E5E7EB] px-3 py-1 text-xs font-medium text-(--secondary-text)">
-              {category}
+        <div className="flex w-full shrink-0 flex-wrap items-center justify-between gap-3 sm:w-auto sm:flex-nowrap sm:justify-end sm:gap-10 lg:gap-12">
+          {/* Token Badge */}
+          {resolvedTokenCost != null ? (
+            <span
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs sm:text-sm font-bold text-amber-900 shadow-xs"
+              title={`${resolvedTokenCost} Tokens to unlock`}
+            >
+              <Coins className="size-4 text-amber-600" />
+              {resolvedTokenCost} T
             </span>
           ) : null}
 
-          <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          {/* Action buttons: row on mobile, stacked column on desktop */}
+          <div className="flex flex-row items-center gap-2 sm:flex-col sm:gap-2.5 w-auto sm:w-36">
             {onViewQuote ? (
               <button
                 type="button"
                 onClick={onViewQuote}
-                className="w-full rounded-lg border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#F8FAFC] sm:w-auto"
+                className="rounded-lg border border-[#E5E7EB] bg-white px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-[#111827] transition-colors hover:bg-[#F8FAFC] text-center sm:w-full"
               >
                 {viewQuoteLabel}
               </button>
@@ -229,9 +263,19 @@ export default function JobCard({
               <button
                 type="button"
                 onClick={onViewLead}
-                className="w-full rounded-lg bg-btn-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] sm:w-auto"
+                className="rounded-lg border border-[#CBD5E1] bg-white px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-[#1E293B] transition-colors hover:bg-[#F8FAFC] text-center sm:w-full"
               >
                 {viewLeadLabel}
+              </button>
+            ) : null}
+
+            {showBuyThis ? (
+              <button
+                type="button"
+                onClick={onBuyThis || (() => setBuyModalOpen(true))}
+                className="rounded-lg bg-btn-primary px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs transition-colors hover:bg-[#0150CC] text-center sm:w-full"
+              >
+                {buyThisLabel}
               </button>
             ) : null}
           </div>
@@ -266,6 +310,23 @@ export default function JobCard({
           )}
         </div>
       )}
+
+      {variant === 'browse' ? (
+        <BuyLeadModal
+          open={buyModalOpen}
+          onClose={() => setBuyModalOpen(false)}
+          job={{
+            id,
+            title,
+            location,
+            priceRange: amount,
+            category,
+            tokenCost: resolvedTokenCost,
+            leadPrice,
+          }}
+          onBuyWithToken={onBuyWithToken}
+        />
+      ) : null}
     </article>
   )
 }

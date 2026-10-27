@@ -1,5 +1,5 @@
 import { apiRequest } from '@/auth/apiClient'
-import { getAccessToken } from '@/auth/authService'
+import { getAccessToken, fetchCurrentUser } from '@/auth/authService'
 import { AUTH_CONFIG } from '@/auth/authConfig'
 import { DEMO_TOKEN_PRICING, DEMO_WALLET_STATS } from '@/data/demoData'
 import { mapApiPackageToCard } from '@/services/adminPackagesApi'
@@ -63,20 +63,34 @@ export function getDemoAvailableTokens() {
 
 /** Raw wallet balance for action gates (quote / unlock lead). */
 export async function fetchTradesmanAvailableTokens() {
-  if (!isTradesmanWalletApiEnabled() || AUTH_CONFIG.useDemoAuth) {
-    return getDemoAvailableTokens()
+  const token = getAccessToken()
+  if (!token) return 0
+
+  // 1. Fetch from /api/auth/me which returns the actual user tokenBalance
+  try {
+    const user = await fetchCurrentUser()
+    if (user && typeof user === 'object' && user.tokenBalance !== undefined) {
+      return Number(user.tokenBalance ?? 0)
+    }
+  } catch {
+    // continue to wallet check
   }
 
-  const payload = await apiRequest('/api/tradesman/wallet', {
-    token: getAccessToken(),
-  })
-
-  const wallet = payload?.data ?? payload
-  if (!wallet || typeof wallet !== 'object') {
-    throw new Error('Unable to load wallet.')
+  // 2. Fallback to /api/tradesman/wallet
+  try {
+    const payload = await apiRequest('/api/tradesman/wallet', { token })
+    const wallet = payload?.data ?? payload
+    if (wallet && typeof wallet === 'object') {
+      const balance = wallet.availableTokens ?? wallet.tokenBalance
+      if (balance !== undefined) {
+        return Number(balance ?? 0)
+      }
+    }
+  } catch {
+    // ignore
   }
 
-  return Number(wallet.availableTokens ?? 0)
+  return 0
 }
 
 export function resolveQuoteTokenCost(jobOrCost = 1) {

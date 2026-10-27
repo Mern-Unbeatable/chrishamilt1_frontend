@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
-import { useAuth } from '@/auth/AuthProvider'
+import { Link, useParams } from 'react-router'
 import JobDetails from '@/components/data-display/JobDetails'
 import { DEMO_JOB_DETAILS } from '@/data/demoData'
 import JobDetailsBreadcrumbs from '@/pages/public/jobs/sections/JobDetailsBreadcrumbs'
@@ -14,8 +13,6 @@ import {
 
 export default function JobDetailsPage() {
   const { jobId } = useParams()
-  const navigate = useNavigate()
-  const { isTradesman, isAdmin } = useAuth()
   const useApi = isPublicJobsApiEnabled()
 
   const [job, setJob] = useState(useApi ? null : DEMO_JOB_DETAILS)
@@ -56,13 +53,6 @@ export default function JobDetailsPage() {
     }
   }, [useApi, jobId])
 
-  const handleBuy = () => {
-    if (isTradesman) {
-      navigate(`/tradesman/browse-jobs/${jobId}`)
-    } else {
-      navigate('/auth/login', { state: { from: `/tradesman/browse-jobs/${jobId}` } })
-    }
-  }
 
   if (loading) {
     return (
@@ -131,12 +121,7 @@ export default function JobDetailsPage() {
         <JobDetailsBreadcrumbs category={job.category} />
 
         <div className="space-y-6">
-          <JobDetailsSummary
-            job={job}
-            onSendQuote={handleBuy}
-            sendQuoteLabel="Buy This"
-            sendQuoteDisabled={isAdmin}
-          />
+          <JobDetailsSummary job={job} />
           <JobDetailsCustomer customer={job.customer} />
 
           <JobDetails

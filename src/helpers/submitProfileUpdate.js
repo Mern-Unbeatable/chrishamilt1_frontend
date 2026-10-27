@@ -26,24 +26,26 @@ export async function submitProfileUpdate(payload, { role = 'admin' } = {}) {
       text: 'Profile update is simulated in demo mode.',
     })
 
-    const demoUser =
-      role === 'user'
-        ? {
-            firstName: payload.firstName?.trim() ?? '',
-            lastName: payload.lastName?.trim() ?? '',
-            email: payload.email?.trim() ?? '',
-            phoneNumber: payload.phone?.trim() ?? '',
-            region: payload.region ?? '',
-            city: payload.city ?? '',
-            zipCode: payload.zipCode?.trim() ?? '',
-            address: payload.address?.trim() ?? '',
-          }
-        : {
-            fullName: payload.name?.trim() ?? '',
-            email: payload.email?.trim() ?? '',
-            phoneNumber: payload.phone?.trim() ?? '',
-            warehouses: payload.warehouses ?? [],
-          }
+    const firstName = payload.firstName?.trim() ?? ''
+    const lastName = payload.lastName?.trim() ?? ''
+    const fullName =
+      payload.fullName ||
+      [firstName, lastName].filter(Boolean).join(' ').trim() ||
+      payload.name?.trim() ||
+      ''
+
+    const demoUser = {
+      fullName,
+      firstName,
+      lastName,
+      email: payload.email?.trim() ?? '',
+      phoneNumber: (payload.phone ?? payload.phoneNumber ?? '').trim(),
+      region: payload.region ?? '',
+      city: payload.city ?? '',
+      zipCode: payload.zipCode?.trim() ?? '',
+      address: payload.address?.trim() ?? '',
+      warehouses: payload.warehouses ?? [],
+    }
 
     return mapApiUserToProfile(demoUser, role)
   }

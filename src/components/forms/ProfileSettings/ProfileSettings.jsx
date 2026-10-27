@@ -10,6 +10,7 @@ const ROLE_CONFIG = {
     showAvatarUpload: false,
     showAccountPhone: true,
     showAddressFields: true,
+    useFirstLastName: true,
     showWarehouses: false,
     passwordMode: 'full',
     passwordInSeparateCard: true,
@@ -21,7 +22,8 @@ const ROLE_CONFIG = {
     showPageHeader: true,
     showAvatarUpload: false,
     showAccountPhone: true,
-    showAddressFields: false,
+    showAddressFields: true,
+    useFirstLastName: true,
     showWarehouses: false,
     passwordMode: 'simple',
     passwordInSeparateCard: false,
@@ -34,6 +36,7 @@ const ROLE_CONFIG = {
     showAvatarUpload: false,
     showAccountPhone: false,
     showAddressFields: false,
+    useFirstLastName: false,
     showWarehouses: false,
     passwordMode: 'full',
     passwordInSeparateCard: false,
@@ -90,14 +93,37 @@ function TextInput({ value, onChange, placeholder, type = 'text', className = ''
 }
 
 function SelectInput({ value, onChange, options = [], className = '' }) {
+  const normalizedValue = (() => {
+    if (!value) return ''
+    const valStr = String(value).trim().toLowerCase()
+    const match = options.find(
+      (opt) =>
+        opt.value.toLowerCase() === valStr ||
+        opt.label.toLowerCase() === valStr ||
+        opt.value.toLowerCase().replace(/-/g, ' ') === valStr.replace(/-/g, ' '),
+    )
+    return match ? match.value : value
+  })()
+
+  const hasMatch = options.some(
+    (opt) =>
+      opt.value === normalizedValue ||
+      opt.value.toLowerCase() === String(value).toLowerCase(),
+  )
+
+  const renderedOptions =
+    hasMatch || !value
+      ? options
+      : [...options, { value, label: value }]
+
   return (
     <div className={cn('relative w-full', className)}>
       <select
-        value={value ?? ''}
+        value={normalizedValue}
         onChange={(event) => onChange?.(event.target.value)}
         className={cn(controlBase, 'h-11 appearance-none px-3 pr-9')}
       >
-        {options.map((option) => (
+        {renderedOptions.map((option) => (
           <option key={option.value || 'empty'} value={option.value}>
             {option.label}
           </option>
@@ -243,23 +269,50 @@ function AvatarHeader({ form, showUpload, fileRef, fileInputId, onPick }) {
 }
 
 function AvatarDisplay({ form }) {
+  const hasTokenBalance = form.tokenBalance !== undefined && form.tokenBalance !== null
+  const businessName = form.tradesmanProfile?.businessName
+
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-      <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E5E7EB] text-[var(--secondary-text)] sm:size-[72px]">
-        {form.avatarUrl ? (
-          <img src={form.avatarUrl} alt="" className="size-full object-cover" />
-        ) : (
-          <User className="size-8" strokeWidth={1.5} />
-        )}
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-4 min-w-0">
+        <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E5E7EB] text-[var(--secondary-text)] sm:size-[72px]">
+          {form.avatarUrl ? (
+            <img src={form.avatarUrl} alt="" className="size-full object-cover" />
+          ) : (
+            <User className="size-8" strokeWidth={1.5} />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="truncate text-base font-semibold text-[var(--primary-text)] sm:text-lg">
+              {form.displayName || form.name || [form.firstName, form.lastName].filter(Boolean).join(' ') || '—'}
+            </h2>
+            {form.tradesmanProfile?.isVerified ? (
+              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                Verified
+              </span>
+            ) : null}
+          </div>
+          {businessName ? (
+            <p className="truncate text-xs font-semibold text-btn-primary">
+              {businessName}
+            </p>
+          ) : null}
+          <p className="truncate text-sm text-[var(--secondary-text)]">
+            {form.displayEmail || form.email || '—'}
+          </p>
+        </div>
       </div>
-      <div className="min-w-0 flex-1">
-        <h2 className="truncate text-base font-semibold text-[var(--primary-text)] sm:text-lg">
-          {form.displayName || form.name || '—'}
-        </h2>
-        <p className="truncate text-sm text-[var(--secondary-text)]">
-          {form.displayEmail || form.email || '—'}
-        </p>
-      </div>
+
+      {hasTokenBalance ? (
+        <div className="flex items-center gap-2 self-start sm:self-auto rounded-xl border border-amber-200 bg-amber-50/80 px-3.5 py-2 shadow-xs">
+          <span className="text-base">🪙</span>
+          <div className="text-xs">
+            <span className="font-bold text-amber-950">{Number(form.tokenBalance).toLocaleString()}</span>
+            <span className="text-amber-800 ml-1 font-medium">Tokens</span>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -334,23 +387,27 @@ export default function ProfileSettings({
     setUpdatingProfile(true)
 
     try {
-      const payload =
-        cfg.layout === 'account'
-          ? {
-              firstName: form.firstName,
-              lastName: form.lastName,
-              email: form.email,
-              phone: form.phone,
-              region: form.region,
-              city: form.city,
-              zipCode: form.zipCode,
-              address: form.address,
-            }
-          : {
-              name: form.name,
-              email: form.email,
-              phone: form.phone,
-            }
+      const firstName = form.firstName?.trim() ?? ''
+      const lastName = form.lastName?.trim() ?? ''
+      const fullName =
+        [firstName, lastName].filter(Boolean).join(' ').trim() ||
+        form.name?.trim() ||
+        form.fullName?.trim() ||
+        ''
+
+      const payload = {
+        firstName,
+        lastName,
+        name: fullName,
+        fullName,
+        email: form.email?.trim() ?? '',
+        phone: form.phone?.trim() ?? '',
+        phoneNumber: form.phone?.trim() ?? '',
+        region: form.region?.trim() || null,
+        city: form.city?.trim() || null,
+        zipCode: form.zipCode?.trim() ?? '',
+        address: form.address?.trim() ?? '',
+      }
 
       await onUpdateProfile?.(payload)
     } finally {
@@ -421,13 +478,42 @@ export default function ProfileSettings({
     <>
       <SectionTitle>Account information</SectionTitle>
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Name">
-          <TextInput
-            value={form.name}
-            onChange={setField('name')}
-            placeholder="Your name"
-          />
-        </Field>
+        {cfg.useFirstLastName ? (
+          <>
+            <Field label="First name">
+              <TextInput
+                value={form.firstName}
+                onChange={(val) => {
+                  patch({
+                    firstName: val,
+                    name: [val, form.lastName].filter(Boolean).join(' ').trim(),
+                  })
+                }}
+                placeholder="First name"
+              />
+            </Field>
+            <Field label="Last name">
+              <TextInput
+                value={form.lastName}
+                onChange={(val) => {
+                  patch({
+                    lastName: val,
+                    name: [form.firstName, val].filter(Boolean).join(' ').trim(),
+                  })
+                }}
+                placeholder="Last name"
+              />
+            </Field>
+          </>
+        ) : (
+          <Field label="Name">
+            <TextInput
+              value={form.name}
+              onChange={setField('name')}
+              placeholder="Your name"
+            />
+          </Field>
+        )}
         <Field label="Email">
           <TextInput
             type="email"
@@ -437,7 +523,7 @@ export default function ProfileSettings({
           />
         </Field>
         {cfg.showAccountPhone ? (
-          <Field label="Phone number" className="sm:col-span-2">
+          <Field label="Phone number">
             <TextInput
               value={form.phone}
               onChange={setField('phone')}
@@ -445,10 +531,42 @@ export default function ProfileSettings({
             />
           </Field>
         ) : null}
+        {cfg.showAddressFields ? (
+          <>
+            <Field label="County / region">
+              <SelectInput
+                value={form.region}
+                onChange={setField('region')}
+                options={regionOptions}
+              />
+            </Field>
+            <Field label="City">
+              <SelectInput
+                value={form.city}
+                onChange={setField('city')}
+                options={cityOptions}
+              />
+            </Field>
+            <Field label="Postcode">
+              <TextInput
+                value={form.zipCode}
+                onChange={setField('zipCode')}
+                placeholder="Postcode"
+              />
+            </Field>
+            <Field label="Address (Flat / House no, Street name)" className="sm:col-span-2">
+              <TextInput
+                value={form.address}
+                onChange={setField('address')}
+                placeholder="Flat / House no, Street name"
+              />
+            </Field>
+          </>
+        ) : null}
       </div>
-      <div className={cn('mt-5 flex', alignClass(cfg.profileActionsAlign))}>
-        <PrimaryButton onClick={handleUpdateProfile} disabled={updatingProfile}>
-          {updatingProfile ? 'Saving…' : 'Update profile'}
+      <div className={cn('mt-6 flex', alignClass(cfg.profileActionsAlign))}>
+        <PrimaryButton size="lg" onClick={handleUpdateProfile} disabled={updatingProfile}>
+          {updatingProfile ? 'Saving…' : 'Save changes'}
         </PrimaryButton>
       </div>
     </>
@@ -512,15 +630,25 @@ export default function ProfileSettings({
               <Field label="First name">
                 <TextInput
                   value={form.firstName}
-                  onChange={setField('firstName')}
+                  onChange={(val) => {
+                    patch({
+                      firstName: val,
+                      name: [val, form.lastName].filter(Boolean).join(' ').trim(),
+                    })
+                  }}
                   placeholder="First name"
                 />
               </Field>
               <Field label="Last name">
                 <TextInput
                   value={form.lastName}
-                  onChange={setField('lastName')}
-                  placeholder="Display name"
+                  onChange={(val) => {
+                    patch({
+                      lastName: val,
+                      name: [form.firstName, val].filter(Boolean).join(' ').trim(),
+                    })
+                  }}
+                  placeholder="Last name"
                 />
               </Field>
               <Field label="Email">
@@ -559,11 +687,11 @@ export default function ProfileSettings({
                   placeholder="Postcode"
                 />
               </Field>
-              <Field label="Address" className="sm:col-span-2">
+              <Field label="Address (Flat / House no, Street name)" className="sm:col-span-2">
                 <TextInput
                   value={form.address}
                   onChange={setField('address')}
-                  placeholder="Road No. 13/x, House no. 1320/C, Flat No. 5D"
+                  placeholder="Flat / House no, Street name"
                 />
               </Field>
             </div>
