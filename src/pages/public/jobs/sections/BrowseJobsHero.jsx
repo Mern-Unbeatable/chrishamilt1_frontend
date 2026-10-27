@@ -114,12 +114,17 @@ export default function BrowseJobsHero({
               </label>
               <Dropdown className="w-full">
                 <DropdownTrigger className="h-12 w-full justify-between rounded-lg border-[#E5E7EB] px-4 text-[#111827] shadow-none hover:bg-[#F8FAFC]">
-                  <span className="truncate">{budget}</span>
+                  <span className="truncate">{budget || 'Under £1,000'}</span>
                   <ChevronDown className="size-4 shrink-0 text-[#94A3B8]" />
                 </DropdownTrigger>
                 <DropdownMenu className="w-full">
                   {BUDGET_FILTER_OPTIONS.map((item) => (
-                    <DropdownItem key={item.label} onClick={() => onBudgetChange(item.label)}>
+                    <DropdownItem
+                      key={item.label}
+                      onClick={() =>
+                        onBudgetChange(budget === item.label ? '' : item.label)
+                      }
+                    >
                       {item.label}
                     </DropdownItem>
                   ))}
