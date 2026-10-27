@@ -29,7 +29,7 @@ function parsePriceRange(priceRange = '') {
 }
 
 function matchesBudget(priceRange, budget) {
-  if (budget === DEMO_BROWSE_BUDGETS[0]) return true
+  if (!budget) return true
 
   const { min, max } = parsePriceRange(priceRange)
 
@@ -74,7 +74,7 @@ export default function BrowseJobsPage() {
   )
   const [categorySlug, setCategorySlug] = useState(initialCategorySlug)
   const [location, setLocation] = useState('')
-  const [budget, setBudget] = useState(DEMO_BROWSE_BUDGETS[0])
+  const [budget, setBudget] = useState('')
   const [keyword, setKeyword] = useState('')
   const [page, setPage] = useState(1)
 

@@ -55,11 +55,10 @@ function mapUrgency(urgency) {
 export const ALL_CATEGORIES_OPTION = { label: 'All Trade Categories', slug: '' }
 
 export const BUDGET_FILTER_OPTIONS = [
-  { label: DEMO_BROWSE_BUDGETS[0], params: {} },
-  { label: DEMO_BROWSE_BUDGETS[1], params: { maxBudget: 1000 } },
-  { label: DEMO_BROWSE_BUDGETS[2], params: { minBudget: 1000, maxBudget: 5000 } },
-  { label: DEMO_BROWSE_BUDGETS[3], params: { minBudget: 5000, maxBudget: 10000 } },
-  { label: DEMO_BROWSE_BUDGETS[4], params: { minBudget: 10000 } },
+  { label: DEMO_BROWSE_BUDGETS[0], params: { maxBudget: 1000 } },
+  { label: DEMO_BROWSE_BUDGETS[1], params: { minBudget: 1000, maxBudget: 5000 } },
+  { label: DEMO_BROWSE_BUDGETS[2], params: { minBudget: 5000, maxBudget: 10000 } },
+  { label: DEMO_BROWSE_BUDGETS[3], params: { minBudget: 10000 } },
 ]
 
 export function isPublicJobsApiEnabled() {
@@ -231,7 +230,7 @@ export async function fetchPublicJobs({
   categorySlug = '',
   location = '',
   search = '',
-  budgetLabel = DEMO_BROWSE_BUDGETS[0],
+  budgetLabel = '',
   page = 1,
   limit = PUBLIC_JOBS_PAGE_SIZE,
   status = 'OPEN',
