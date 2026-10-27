@@ -55,18 +55,38 @@ function mapUrgency(urgency) {
 export const ALL_CATEGORIES_OPTION = { label: 'All Trade Categories', slug: '' }
 
 export const BUDGET_FILTER_OPTIONS = [
-  { label: DEMO_BROWSE_BUDGETS[0], params: { maxBudget: 1000 } },
-  { label: DEMO_BROWSE_BUDGETS[1], params: { minBudget: 1000, maxBudget: 5000 } },
-  { label: DEMO_BROWSE_BUDGETS[2], params: { minBudget: 5000, maxBudget: 10000 } },
-  { label: DEMO_BROWSE_BUDGETS[3], params: { minBudget: 10000 } },
+  { label: DEMO_BROWSE_BUDGETS[0], min: 0, max: 100 },
+  { label: DEMO_BROWSE_BUDGETS[1], min: 100, max: 250 },
+  { label: DEMO_BROWSE_BUDGETS[2], min: 250, max: 500 },
+  { label: DEMO_BROWSE_BUDGETS[3], min: 500, max: 1000 },
+  { label: DEMO_BROWSE_BUDGETS[4], min: 1000, max: 4000 },
+  { label: DEMO_BROWSE_BUDGETS[5], min: 4000, max: null },
 ]
+
+const MAX_API_PAGE_SIZE = 50
 
 export function isPublicJobsApiEnabled() {
   return Boolean(AUTH_CONFIG.apiBaseUrl)
 }
 
-export function getBudgetParams(budgetLabel) {
-  return BUDGET_FILTER_OPTIONS.find((option) => option.label === budgetLabel)?.params ?? {}
+export function getBudgetOption(budgetLabel) {
+  return BUDGET_FILTER_OPTIONS.find((option) => option.label === budgetLabel) ?? null
+}
+
+/**
+ * Each job belongs to exactly one bucket, chosen by its maximum budget.
+ * Buckets are (min, max], except the first which also includes 0.
+ */
+export function jobMatchesBudget(budgetMin, budgetMax, budgetLabel) {
+  const option = getBudgetOption(budgetLabel)
+  if (!option) return true
+
+  const top = Number(budgetMax ?? budgetMin)
+  if (!Number.isFinite(top)) return false
+
+  const aboveMin = option.min === 0 ? top >= 0 : top > option.min
+  const belowMax = option.max == null ? true : top <= option.max
+  return aboveMin && belowMax
 }
 
 export function getFallbackJobCategories() {
@@ -164,7 +184,7 @@ function buildJobsQuery({
   categorySlug,
   location,
   search,
-  budgetLabel,
+  minBudget,
   page,
   limit,
   status = 'OPEN',
@@ -175,11 +195,7 @@ function buildJobsQuery({
   if (location?.trim()) params.set('location', location.trim())
   if (search?.trim()) params.set('search', search.trim())
   if (status) params.set('status', status)
-
-  const budgetParams = getBudgetParams(budgetLabel)
-  Object.entries(budgetParams).forEach(([key, value]) => {
-    params.set(key, String(value))
-  })
+  if (minBudget) params.set('minBudget', String(minBudget))
 
   params.set('page', String(page))
   params.set('limit', String(limit))
@@ -238,12 +254,60 @@ export async function fetchPublicJobs({
 } = {}) {
   // Marketplace browse is OPEN-only for public + tradesman.
   const marketplaceStatus = status || 'OPEN'
+  const isOpen = (job) => String(job.status ?? 'OPEN').trim().toUpperCase() === 'OPEN'
+  const budgetOption = getBudgetOption(budgetLabel)
+
+  if (budgetOption) {
+    const baseQuery = {
+      categorySlug,
+      location,
+      search,
+      minBudget: budgetOption.min,
+      limit: MAX_API_PAGE_SIZE,
+      status: marketplaceStatus,
+    }
+
+    const all = []
+    let apiPage = 1
+    let apiTotalPages = 1
+
+    do {
+      const payload = await apiRequest(
+        `/api/jobs?${buildJobsQuery({ ...baseQuery, page: apiPage })}`,
+        { token },
+      )
+      const rows = payload?.data ?? []
+      all.push(...rows)
+      apiTotalPages = normalizePagination(payload, {
+        page: apiPage,
+        limit: MAX_API_PAGE_SIZE,
+        rowsLength: rows.length,
+      }).totalPages
+      if (!rows.length) break
+      apiPage += 1
+    } while (apiPage <= apiTotalPages)
+
+    const matched = all.filter(
+      (job) => isOpen(job) && jobMatchesBudget(job.budgetMin, job.budgetMax, budgetLabel),
+    )
+    const total = matched.length
+    const start = (page - 1) * limit
+
+    return {
+      jobs: matched.slice(start, start + limit).map(mapApiJobToCard),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
+      },
+    }
+  }
 
   const query = buildJobsQuery({
     categorySlug,
     location,
     search,
-    budgetLabel,
     page,
     limit,
     status: marketplaceStatus,
@@ -251,9 +315,7 @@ export async function fetchPublicJobs({
 
   const payload = await apiRequest(`/api/jobs?${query}`, { token })
   const rows = payload?.data ?? []
-  const openOnly = rows.filter(
-    (job) => String(job.status ?? 'OPEN').trim().toUpperCase() === 'OPEN',
-  )
+  const openOnly = rows.filter(isOpen)
   const pagination = normalizePagination(payload, {
     page,
     limit,

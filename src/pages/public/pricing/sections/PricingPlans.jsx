@@ -43,11 +43,11 @@ export default function PricingPlans({
       try {
         const packages = await fetchTokenPackages()
         if (cancelled) return
-        setPlans(packages.length ? packages : getDemoTokenPackages())
+        setPlans(packages)
       } catch (err) {
         if (cancelled) return
-        setPlans(getDemoTokenPackages())
-        setError(err?.message || 'Unable to load live packages. Showing demo plans.')
+        setPlans([])
+        setError(err?.message || 'Unable to load token packages right now.')
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -122,6 +122,10 @@ export default function PricingPlans({
         {loading ? (
           <div className="mx-auto mt-10 max-w-5xl rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC] px-6 py-16 text-center">
             <p className="text-sm text-[#64748B]">Loading token packages…</p>
+          </div>
+        ) : !plans.length && !error ? (
+          <div className="mx-auto mt-10 max-w-5xl rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC] px-6 py-16 text-center">
+            <p className="text-sm text-[#64748B]">No token packages are available right now.</p>
           </div>
         ) : (
           <div className="mx-auto mt-10 grid max-w-5xl grid-cols-1 gap-6 pt-4 md:grid-cols-2 lg:mt-12 lg:grid-cols-3 lg:gap-8">

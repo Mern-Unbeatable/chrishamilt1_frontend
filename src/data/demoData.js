@@ -213,10 +213,12 @@ export const DEMO_BROWSE_JOB_CATEGORIES = [
 ]
 
 export const DEMO_BROWSE_BUDGETS = [
-  'Under £1,000',
-  '£1,000–£5,000',
-  '£5,000–£10,000',
-  '£10,000+',
+  '£0–£100',
+  '£100–£250',
+  '£250–£500',
+  '£500–£1,000',
+  '£1,000–£4,000',
+  '£4,000+',
 ]
 
 export const DEMO_BROWSE_JOBS = [
