@@ -4,6 +4,7 @@ import {
   Check,
   ChevronDown,
   Flag,
+  Lock,
   MapPin,
   MessageCircle,
   Star,
@@ -48,6 +49,9 @@ export default function JobDetails({
   showSummary = true,
   showTradesman = true,
   showGallery = true,
+  isLocked = false,
+  showLockedPrompt = false,
+  onUnlock,
   onMessage,
   messageLabel = 'Message',
   className = '',
@@ -169,97 +173,135 @@ export default function JobDetails({
       ) : null}
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 xl:items-start">
-        <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8">
-          <h2 className="text-xs lg:text-sm font-semibold uppercase tracking-[0.12em] text-(--secondary-text)">
-            Job Description
-          </h2>
-
-          <div className="mt-5">
-            <p className="whitespace-pre-line text-sm lg:text-base leading-7 text-(--secondary-text)">
-              {displayText}
-            </p>
-
-            {description.full !== description.summary ? (
-              <button
-                type="button"
-                onClick={() => setIsExpanded((current) => !current)}
-                className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-btn-primary hover:underline"
-              >
-                <ChevronDown
-                  className={cn('size-4 transition-transform', isExpanded && 'rotate-180')}
-                />
-                {isExpanded ? 'Show less' : 'Read full description'}
-              </button>
-            ) : null}
-          </div>
-
-          {requirements.length > 0 ? (
-            <div className="mt-8">
-              <h3 className="text-base font-semibold text-(--primary-text)">
-                Requirements
-              </h3>
-              <ul className="mt-4 space-y-3">
-                {requirements.map((item) => (
-                  <li key={item} className="flex gap-3 text-sm lg:text-base leading-6 text-(--secondary-text)">
-                    <Check className="mt-0.5 size-4 shrink-0 text-btn-primary" strokeWidth={2.5} />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
-          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {fullLocation ? (
-              <div className="rounded-xl bg-[#F8FAFC] p-4 sm:col-span-2">
-                <p className="inline-flex items-center gap-2 text-xs font-medium text-(--secondary-text)">
-                  <MapPin className="size-4 text-btn-primary" />
-                  Job Location & City
-                </p>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold text-(--primary-text)">
-                    {fullLocation}
+        {isLocked ? (
+          showLockedPrompt ? (
+            <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex size-9 items-center justify-center rounded-lg bg-amber-50 text-amber-600 border border-amber-200">
+                  <Lock className="size-4" />
+                </span>
+                <div>
+                  <h2 className="text-xs lg:text-sm font-semibold uppercase tracking-[0.12em] text-(--secondary-text)">
+                    Job Details & Requirements
+                  </h2>
+                  <p className="text-xs text-amber-700 font-medium mt-0.5">
+                    Locked for this lead
                   </p>
-                  {city ? (
-                    <span className="inline-flex items-center rounded-md border border-[#E2E8F0] bg-white px-2 py-0.5 text-xs font-medium text-[#475569]">
-                      City: {city}
-                    </span>
-                  ) : null}
                 </div>
+              </div>
+
+              <div className="mt-5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] p-5 text-center">
+                <p className="text-sm text-[#475569] leading-relaxed">
+                  Full job requirements, completion timeline, and customer notes are locked.
+                </p>
+                <p className="text-xs text-[#64748B] mt-1">
+                  Unlock this lead with tokens to view complete details and submit your quotation.
+                </p>
+                {onUnlock ? (
+                  <button
+                    type="button"
+                    onClick={onUnlock}
+                    className="mt-4 inline-flex items-center gap-2 rounded-lg bg-btn-primary px-5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#0150CC]"
+                  >
+                    Buy Tokens to Unlock
+                  </button>
+                ) : null}
+              </div>
+            </section>
+          ) : null
+        ) : (
+          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8">
+            <h2 className="text-xs lg:text-sm font-semibold uppercase tracking-[0.12em] text-(--secondary-text)">
+              Job Description
+            </h2>
+
+            <div className="mt-5">
+              <p className="whitespace-pre-line text-sm lg:text-base leading-7 text-(--secondary-text)">
+                {displayText}
+              </p>
+
+              {description?.full && description?.summary && description.full !== description.summary ? (
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded((current) => !current)}
+                  className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-btn-primary hover:underline"
+                >
+                  <ChevronDown
+                    className={cn('size-4 transition-transform', isExpanded && 'rotate-180')}
+                  />
+                  {isExpanded ? 'Show less' : 'Read full description'}
+                </button>
+              ) : null}
+            </div>
+
+            {requirements.length > 0 ? (
+              <div className="mt-8">
+                <h3 className="text-base font-semibold text-(--primary-text)">
+                  Requirements
+                </h3>
+                <ul className="mt-4 space-y-3">
+                  {requirements.map((item) => (
+                    <li key={item} className="flex gap-3 text-sm lg:text-base leading-6 text-(--secondary-text)">
+                      <Check className="mt-0.5 size-4 shrink-0 text-btn-primary" strokeWidth={2.5} />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ) : null}
 
-            <div className="rounded-xl bg-[#F8FAFC] p-4">
-              <p className="inline-flex items-center gap-2 text-xs font-medium text-(--secondary-text)">
-                <CalendarDays className="size-4" />
-                Preferred Start
-              </p>
-              <p className="mt-2 text-sm font-semibold text-(--primary-text)">
-                {preferredStart}
-              </p>
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {fullLocation ? (
+                <div className="rounded-xl bg-[#F8FAFC] p-4 sm:col-span-2">
+                  <p className="inline-flex items-center gap-2 text-xs font-medium text-(--secondary-text)">
+                    <MapPin className="size-4 text-btn-primary" />
+                    Job Location & City
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-semibold text-(--primary-text)">
+                      {fullLocation}
+                    </p>
+                    {city ? (
+                      <span className="inline-flex items-center rounded-md border border-[#E2E8F0] bg-white px-2 py-0.5 text-xs font-medium text-[#475569]">
+                        City: {city}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="rounded-xl bg-[#F8FAFC] p-4">
+                <p className="inline-flex items-center gap-2 text-xs font-medium text-(--secondary-text)">
+                  <CalendarDays className="size-4" />
+                  Preferred Start
+                </p>
+                <p className="mt-2 text-sm font-semibold text-(--primary-text)">
+                  {preferredStart}
+                </p>
+              </div>
+
+              <div className="rounded-xl bg-[#F8FAFC] p-4">
+                <p className="inline-flex items-center gap-2 text-xs font-medium text-(--secondary-text)">
+                  <Flag className="size-4" />
+                  Completion By
+                </p>
+                <p className="mt-2 text-sm font-semibold text-(--primary-text)">
+                  {completionBy}
+                </p>
+              </div>
             </div>
 
-            <div className="rounded-xl bg-[#F8FAFC] p-4">
-              <p className="inline-flex items-center gap-2 text-xs font-medium text-(--secondary-text)">
-                <Flag className="size-4" />
-                Completion By
-              </p>
-              <p className="mt-2 text-sm font-semibold text-(--primary-text)">
-                {completionBy}
-              </p>
-            </div>
-          </div>
-
-          {specialNotes ? (
-            <div className="mt-6 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] p-4">
-              <p className="inline-flex items-center gap-2 text-sm font-semibold text-[#B45309]">
-                <AlertTriangle className="size-4" />
-                Special Notes
-              </p>
-              <p className="mt-2 text-sm leading-6 text-[#92400E]">{specialNotes}</p>
-            </div>
-          ) : null}
-        </section>
+            {specialNotes ? (
+              <div className="mt-6 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] p-4">
+                <p className="inline-flex items-center gap-2 text-sm font-semibold text-[#B45309]">
+                  <AlertTriangle className="size-4" />
+                  Special Notes
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[#92400E]">{specialNotes}</p>
+              </div>
+            ) : null}
+          </section>
+        )}
 
         {showGallery && photos.length > 0 ? (
           <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8 xl:self-start">

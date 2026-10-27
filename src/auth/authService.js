@@ -202,31 +202,23 @@ export async function fetchCurrentUser() {
 export function validateProfileUpdatePayload(payload, role = 'admin') {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-  if (role === 'user') {
-    if (!payload.firstName?.trim() && !payload.lastName?.trim()) {
+  if (role === 'user' || role === 'tradesman') {
+    if (!payload.firstName?.trim() && !payload.lastName?.trim() && !payload.name?.trim()) {
       return 'First or last name is required.'
     }
 
-    if (!payload.email?.trim()) {
-      return 'Email is required.'
-    }
-
-    if (!emailPattern.test(payload.email.trim())) {
+    if (payload.email?.trim() && !emailPattern.test(payload.email.trim())) {
       return 'Enter a valid email address.'
     }
 
     return null
   }
 
-  if (!payload.name?.trim()) {
+  if (!payload.name?.trim() && !payload.firstName?.trim()) {
     return 'Name is required.'
   }
 
-  if (!payload.email?.trim()) {
-    return 'Email is required.'
-  }
-
-  if (!emailPattern.test(payload.email.trim())) {
+  if (payload.email?.trim() && !emailPattern.test(payload.email.trim())) {
     return 'Enter a valid email address.'
   }
 
@@ -234,31 +226,40 @@ export function validateProfileUpdatePayload(payload, role = 'admin') {
 }
 
 export function buildProfileUpdateBody(payload, role = 'admin') {
-  if (role === 'user') {
-    const firstName = payload.firstName?.trim() ?? ''
-    const lastName = payload.lastName?.trim() ?? ''
-    const fullName = [firstName, lastName].filter(Boolean).join(' ').trim()
+  let firstName = payload.firstName?.trim() ?? ''
+  let lastName = payload.lastName?.trim() ?? ''
 
-    return {
-      firstName,
-      lastName,
-      fullName,
-      email: payload.email.trim(),
-      phoneNumber: payload.phone?.trim() ?? '',
-      address: payload.address?.trim() ?? '',
-      region: payload.region?.trim() || null,
-      city: payload.city?.trim() || null,
-      zipCode: payload.zipCode?.trim() ?? '',
-    }
+  // If separate first/last name were not provided, parse from fullName or name
+  if (!firstName && !lastName && (payload.fullName || payload.name)) {
+    const rawName = (payload.fullName || payload.name).trim()
+    const parts = rawName.split(' ')
+    firstName = parts[0] || ''
+    lastName = parts.slice(1).join(' ') || ''
   }
+
+  const fullName =
+    payload.fullName?.trim() ||
+    [firstName, lastName].filter(Boolean).join(' ').trim() ||
+    payload.name?.trim() ||
+    ''
 
   const body = {
-    fullName: payload.name.trim(),
-    email: payload.email.trim(),
+    firstName,
+    lastName,
+    fullName,
+    phoneNumber: (payload.phone ?? payload.phoneNumber ?? '').trim(),
+    address: payload.address?.trim() ?? '',
+    region: payload.region?.trim() || null,
+    city: payload.city?.trim() || null,
+    zipCode: payload.zipCode?.trim() ?? '',
   }
 
-  if (role === 'tradesman' && payload.phone !== undefined) {
-    body.phoneNumber = payload.phone?.trim() ?? ''
+  if (payload.email?.trim()) {
+    body.email = payload.email.trim()
+  }
+
+  if (payload.profileImage !== undefined) {
+    body.profileImage = payload.profileImage
   }
 
   return body
@@ -272,7 +273,17 @@ export async function updateUserProfile(body) {
   })
 
   const payload = unwrapPayload(data)
-  return payload?.user ?? payload
+  const user = payload?.user ?? payload
+
+  if (!user || typeof user !== 'object' || (!user.id && !user.email)) {
+    try {
+      return await fetchCurrentUser()
+    } catch {
+      return body
+    }
+  }
+
+  return user
 }
 
 export function patchSessionUser(updates = {}) {
@@ -289,24 +300,21 @@ export function mapApiUserToAdminProfile(user) {
     user.fullName?.trim() ||
     [user.firstName, user.lastName].filter(Boolean).join(' ').trim()
 
+  let firstName = user.firstName ?? ''
+  let lastName = user.lastName ?? ''
+  if (!firstName && !lastName && fullName) {
+    const parts = fullName.split(' ')
+    firstName = parts[0] || ''
+    lastName = parts.slice(1).join(' ') || ''
+  }
+
   return {
-    displayName: fullName,
+    id: user.id ?? user._id ?? null,
+    displayName: fullName || user.email || '',
     displayEmail: user.email ?? '',
     name: fullName,
-    email: user.email ?? '',
-    phone: user.phoneNumber ?? '',
-    avatarUrl: user.profileImage ?? null,
-    warehouses: user.warehouses ?? [],
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  }
-}
-
-export function mapApiUserToUserProfile(user) {
-  return {
-    firstName: user.firstName ?? '',
-    lastName: user.lastName ?? '',
+    firstName,
+    lastName,
     email: user.email ?? '',
     phone: user.phoneNumber ?? '',
     region: user.region ?? '',
@@ -314,6 +322,44 @@ export function mapApiUserToUserProfile(user) {
     zipCode: user.zipCode ?? '',
     address: user.address ?? '',
     avatarUrl: user.profileImage ?? null,
+    warehouses: user.warehouses ?? [],
+    tokenBalance: user.tokenBalance ?? 0,
+    tradesmanProfile: user.tradesmanProfile ?? null,
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  }
+}
+
+export function mapApiUserToUserProfile(user) {
+  const fullName =
+    user.fullName?.trim() ||
+    [user.firstName, user.lastName].filter(Boolean).join(' ').trim()
+
+  let firstName = user.firstName ?? ''
+  let lastName = user.lastName ?? ''
+  if (!firstName && !lastName && fullName) {
+    const parts = fullName.split(' ')
+    firstName = parts[0] || ''
+    lastName = parts.slice(1).join(' ') || ''
+  }
+
+  return {
+    id: user.id ?? user._id ?? null,
+    displayName: fullName || user.email || '',
+    displayEmail: user.email ?? '',
+    name: fullName,
+    firstName,
+    lastName,
+    email: user.email ?? '',
+    phone: user.phoneNumber ?? '',
+    region: user.region ?? '',
+    city: user.city ?? '',
+    zipCode: user.zipCode ?? '',
+    address: user.address ?? '',
+    avatarUrl: user.profileImage ?? null,
+    tokenBalance: user.tokenBalance ?? 0,
+    tradesmanProfile: user.tradesmanProfile ?? null,
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
@@ -321,7 +367,39 @@ export function mapApiUserToUserProfile(user) {
 }
 
 export function mapApiUserToTradesmanProfile(user) {
-  return mapApiUserToAdminProfile(user)
+  const fullName =
+    user.fullName?.trim() ||
+    [user.firstName, user.lastName].filter(Boolean).join(' ').trim()
+
+  let firstName = user.firstName ?? ''
+  let lastName = user.lastName ?? ''
+  if (!firstName && !lastName && fullName) {
+    const parts = fullName.split(' ')
+    firstName = parts[0] || ''
+    lastName = parts.slice(1).join(' ') || ''
+  }
+
+  return {
+    id: user.id ?? user._id ?? null,
+    displayName: fullName || user.tradesmanProfile?.businessName || user.email || '',
+    displayEmail: user.email ?? '',
+    name: fullName,
+    firstName,
+    lastName,
+    email: user.email ?? '',
+    phone: user.phoneNumber ?? '',
+    region: user.region ?? '',
+    city: user.city ?? '',
+    zipCode: user.zipCode ?? '',
+    address: user.address ?? '',
+    avatarUrl: user.profileImage ?? null,
+    tokenBalance: user.tokenBalance ?? 0,
+    tradesmanProfile: user.tradesmanProfile ?? null,
+    warehouses: user.warehouses ?? [],
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  }
 }
 
 const PROFILE_MAPPERS = {
@@ -336,8 +414,9 @@ export function mapApiUserToProfile(user, role = 'admin') {
 }
 
 function getSessionNameFromProfile(profile, role = 'admin') {
-  if (role === 'user') {
-    return [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim()
+  if (role === 'user' || role === 'tradesman') {
+    const fromParts = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim()
+    if (fromParts) return fromParts
   }
 
   return profile.name ?? profile.displayName ?? profile.email ?? ''

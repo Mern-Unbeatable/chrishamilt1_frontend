@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router'
 import { BadgeCheck } from 'lucide-react'
 import TokenPricingCard from '@/components/data-display/TokenPricingCard/TokenPricingCard'
 import { DEMO_TOKEN_PRICING } from '@/data/demoData'
+import { useAuth } from '@/auth/AuthProvider'
 import {
   fetchTokenPackages,
   getDemoTokenPackages,
   isTradesmanWalletApiEnabled,
+  startTokenPackageCheckout,
 } from '@/services/tradesmanWalletApi'
 
 export default function PricingPlans({
@@ -15,10 +17,14 @@ export default function PricingPlans({
   checkoutPackageId = '',
 }) {
   const navigate = useNavigate()
+  const { isTradesman, isAuthenticated } = useAuth()
   const useApi = isTradesmanWalletApiEnabled()
   const [plans, setPlans] = useState(useApi ? [] : DEMO_TOKEN_PRICING)
   const [loading, setLoading] = useState(useApi)
   const [error, setError] = useState('')
+  const [activeCheckoutId, setActiveCheckoutId] = useState('')
+
+  const currentCheckoutId = checkoutPackageId || activeCheckoutId
 
   useEffect(() => {
     if (!useApi) {
@@ -54,13 +60,40 @@ export default function PricingPlans({
     }
   }, [useApi])
 
-  const handleBuy = (plan) => {
+  const handleBuy = async (plan) => {
     if (onSelectPlan) {
       onSelectPlan(plan)
       return
     }
 
-    navigate('/auth/signup')
+    if (!isAuthenticated) {
+      navigate('/auth/login', { state: { from: '/pricing', packageId: plan.id } })
+      return
+    }
+
+    if (!isTradesman) {
+      setError('Token packages can only be purchased by tradesman accounts to unlock job leads.')
+      return
+    }
+
+    if (!useApi) {
+      navigate('/tradesman/wallet')
+      return
+    }
+
+    setActiveCheckoutId(plan.id)
+    setError('')
+    try {
+      const checkout = await startTokenPackageCheckout(plan.id)
+      if (checkout?.checkoutUrl) {
+        window.location.assign(checkout.checkoutUrl)
+      } else {
+        throw new Error('Unable to start checkout.')
+      }
+    } catch (err) {
+      setError(err?.message || 'Unable to start checkout. Please try again.')
+      setActiveCheckoutId('')
+    }
   }
 
   return (
@@ -97,10 +130,10 @@ export default function PricingPlans({
                 <TokenPricingCard
                   {...plan}
                   buyLabel={
-                    checkoutPackageId === plan.id ? 'Redirecting…' : buyLabel
+                    currentCheckoutId === plan.id ? 'Redirecting…' : buyLabel
                   }
                   onBuyTokens={
-                    checkoutPackageId && checkoutPackageId !== plan.id
+                    currentCheckoutId && currentCheckoutId !== plan.id
                       ? undefined
                       : () => handleBuy(plan)
                   }

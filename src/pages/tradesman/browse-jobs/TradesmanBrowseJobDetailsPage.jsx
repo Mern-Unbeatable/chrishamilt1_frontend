@@ -13,7 +13,10 @@ import {
   fetchPublicJobDetails,
   isPublicJobsApiEnabled,
 } from '@/services/publicJobsApi'
-import { resolveQuoteTokenCost } from '@/services/tradesmanWalletApi'
+import {
+  fetchTradesmanAvailableTokens,
+  resolveQuoteTokenCost,
+} from '@/services/tradesmanWalletApi'
 
 function buildDemoJobDetails(browseJob) {
   return {
@@ -41,6 +44,25 @@ export default function TradesmanBrowseJobDetailsPage() {
   )
   const [loading, setLoading] = useState(useApi)
   const [error, setError] = useState('')
+  const [tokensAvailable, setTokensAvailable] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function checkTokens() {
+      try {
+        const bal = await fetchTradesmanAvailableTokens()
+        if (!cancelled) setTokensAvailable(bal)
+      } catch {
+        if (!cancelled) setTokensAvailable(0)
+      }
+    }
+
+    checkTokens()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (!useApi) {
@@ -77,9 +99,18 @@ export default function TradesmanBrowseJobDetailsPage() {
     }
   }, [useApi, jobId])
 
+  const requiredTokens = resolveQuoteTokenCost(job)
+  const isLocked = tokensAvailable !== null && tokensAvailable < requiredTokens
+
+  const handleUnlockClick = async () => {
+    await promptBuyTokens(tokensAvailable ?? 0, requiredTokens)
+  }
+
   const handleSendQuoteClick = async () => {
     const allowed = await requireTokensForAction(job)
-    if (allowed) setQuoteModalOpen(true)
+    if (allowed) {
+      setQuoteModalOpen(true)
+    }
   }
 
   const handleSubmitQuote = async (form) => {
@@ -195,13 +226,33 @@ export default function TradesmanBrowseJobDetailsPage() {
 
         <JobDetailsSummary
           job={job}
-          onSendQuote={handleSendQuoteClick}
-          sendQuoteLabel={checking ? 'Checking…' : 'Buy This'}
+          onSendQuote={isLocked ? handleUnlockClick : handleSendQuoteClick}
+          sendQuoteLabel={
+            checking
+              ? 'Checking…'
+              : isLocked
+                ? `Buy Tokens to Unlock (${requiredTokens} Tokens)`
+                : 'Buy This'
+          }
           sendQuoteDisabled={checking}
         />
-        <JobDetailsCustomer customer={job.customer} />
+        <JobDetailsCustomer
+          customer={job.customer}
+          isLocked={isLocked}
+          showLockedPrompt={true}
+          tokenCost={requiredTokens}
+          availableTokens={tokensAvailable}
+          onUnlock={handleUnlockClick}
+        />
 
-        <JobDetails job={job} showSummary={false} showTradesman={false} />
+        <JobDetails
+          job={job}
+          showSummary={false}
+          showTradesman={false}
+          isLocked={isLocked}
+          showLockedPrompt={true}
+          onUnlock={handleUnlockClick}
+        />
       </div>
 
       <SendQuoteModal
