@@ -60,6 +60,16 @@ export function mapApiPackageToCard(pkg) {
   }
 }
 
+export function keepSinglePopular(packages = []) {
+  let found = false
+  return packages.map((pkg) => {
+    if (!pkg.featured) return pkg
+    if (found) return { ...pkg, featured: false }
+    found = true
+    return pkg
+  })
+}
+
 export function getDemoAdminPackages() {
   return DEMO_ADMIN_TOKEN_PACKAGES.map((plan) => ({ ...plan }))
 }
@@ -69,12 +79,32 @@ export async function fetchAdminPackages() {
     token: getAccessToken(),
   })
 
-  const rows = payload?.data ?? []
+  const rows = (payload?.data ?? []).filter((pkg) => pkg.isActive !== false)
 
   return {
-    packages: rows.map(mapApiPackageToCard),
-    total: payload?.total ?? rows.length,
+    packages: keepSinglePopular(rows.map(mapApiPackageToCard)),
+    total: rows.length,
   }
+}
+
+export async function clearOtherPopularPackages(keepPackageId) {
+  const payload = await apiRequest('/api/admin/packages', {
+    token: getAccessToken(),
+  })
+
+  const others = (payload?.data ?? []).filter(
+    (pkg) => pkg.id !== keepPackageId && (pkg.isPopular || pkg.badge),
+  )
+
+  await Promise.all(
+    others.map((pkg) =>
+      apiRequest(`/api/admin/packages/${encodeURIComponent(pkg.id)}`, {
+        method: 'PUT',
+        body: { isPopular: false },
+        token: getAccessToken(),
+      }),
+    ),
+  )
 }
 
 export async function createAdminPackage(body) {
@@ -106,10 +136,13 @@ export async function deleteAdminPackage(packageId) {
     throw new Error('Package not found.')
   }
 
-  await apiRequest(`/api/admin/packages/${encodeURIComponent(packageId)}`, {
+  const payload = await apiRequest(`/api/admin/packages/${encodeURIComponent(packageId)}`, {
     method: 'DELETE',
     token: getAccessToken(),
   })
+
+  const data = payload?.data ?? payload ?? {}
+  return { deactivated: Boolean(data.deactivated) }
 }
 
 export function mapApiPurchaseToRow(purchase = {}) {

@@ -1,6 +1,7 @@
 import { AUTH_CONFIG } from '@/auth/authConfig'
 import {
   buildPackagePayload,
+  clearOtherPopularPackages,
   createAdminPackage,
   deleteAdminPackage,
   fetchAdminPackages,
@@ -12,10 +13,12 @@ export async function submitAdminPackageSave(values, { packageId } = {}) {
   const payload = buildPackagePayload(values)
 
   try {
-    if (packageId) {
-      await updateAdminPackage(packageId, payload)
-    } else {
-      await createAdminPackage(payload)
+    const saved = packageId
+      ? await updateAdminPackage(packageId, payload)
+      : await createAdminPackage(payload)
+
+    if (payload.isPopular && saved?.id) {
+      await clearOtherPopularPackages(saved.id)
     }
 
     const result = await fetchAdminPackages()
@@ -51,12 +54,14 @@ export async function submitAdminPackageDelete(packageId, packageName) {
   }
 
   try {
-    await deleteAdminPackage(packageId)
+    const { deactivated } = await deleteAdminPackage(packageId)
     const result = await fetchAdminPackages()
 
     await showSuccessAlert({
       title: 'Package deleted',
-      text: 'The token package has been removed.',
+      text: deactivated
+        ? 'This package has past purchases, so it was archived. It is no longer shown to tradesmen and purchase history is kept.'
+        : 'The token package has been removed.',
     })
 
     return { ok: true, packages: result.packages }
