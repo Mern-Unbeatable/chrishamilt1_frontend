@@ -34,22 +34,14 @@ export function buildPackagePayload({
   tokens,
   description,
   featured,
-  stripePriceId,
 }) {
-  const body = {
+  return {
     name: planName.trim(),
     price: parseNumericPrice(price),
     tokenQuantity: Number(tokens),
     description: description.trim(),
     isPopular: Boolean(featured),
   }
-
-  const stripeId = stripePriceId?.trim()
-  if (stripeId) {
-    body.stripePriceId = stripeId
-  }
-
-  return body
 }
 
 export function mapApiPackageToCard(pkg) {

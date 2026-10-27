@@ -10,10 +10,7 @@ const EMPTY_FORM = {
   description: '',
   featured: false,
   badgeLabel: 'Most popular',
-  stripePriceId: '',
 }
-
-const STRIPE_PRICE_ID_PATTERN = /^price_[A-Za-z0-9]+$/
 
 function sanitizePriceInput(value = '') {
   const cleaned = String(value).replace(/[^\d.]/g, '')
@@ -50,7 +47,6 @@ export default function AddTokenPackageModal({
             description: initialPackage.description,
             featured: Boolean(initialPackage.featured),
             badgeLabel: initialPackage.badgeLabel || 'Most popular',
-            stripePriceId: initialPackage.stripePriceId ?? '',
           }
         : EMPTY_FORM,
     )
@@ -106,12 +102,6 @@ export default function AddTokenPackageModal({
       return
     }
 
-    const stripePriceId = form.stripePriceId.trim()
-    if (stripePriceId && !STRIPE_PRICE_ID_PATTERN.test(stripePriceId)) {
-      setError('Stripe Price ID must look like price_1UBSnvPc4Do23EYoZc37LZnO.')
-      return
-    }
-
     const price = `£${priceValue}`
 
     setSaving(true)
@@ -124,7 +114,6 @@ export default function AddTokenPackageModal({
         description: form.description.trim(),
         featured: form.featured,
         badgeLabel: form.featured ? form.badgeLabel.trim() || 'Most popular' : undefined,
-        stripePriceId,
         rateLabel: formatTokenRate(price, tokens),
       })
 
@@ -238,21 +227,6 @@ export default function AddTokenPackageModal({
               placeholder="Best choice for growing businesses purchasing leads regularly."
               className="mt-2 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#94A3B8] focus:border-btn-primary focus:ring-2 focus:ring-btn-primary/15"
             />
-          </label>
-
-          <label className="mt-4 block">
-            <span className="text-sm font-medium text-[#111827]">Stripe Price ID</span>
-            <input
-              type="text"
-              value={form.stripePriceId}
-              onChange={handleChange('stripePriceId')}
-              placeholder="price_1UBSnvPc4Do23EYoZc37LZnO"
-              pattern="price_[A-Za-z0-9]+"
-              className="mt-2 h-11 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#94A3B8] focus:border-btn-primary focus:ring-2 focus:ring-btn-primary/15"
-            />
-            <span className="mt-1 block text-xs text-[#64748B]">
-              Optional. Must start with <code className="text-[#111827]">price_</code> when provided.
-            </span>
           </label>
 
           <div className="mt-4 rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] p-4">
