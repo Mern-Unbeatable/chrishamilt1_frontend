@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import {
-  DEMO_BROWSE_BUDGETS,
   DEMO_BROWSE_JOB_CATEGORIES,
   DEMO_BROWSE_JOBS,
 } from '@/data/demoData'
@@ -14,6 +13,7 @@ import {
   fetchPublicJobs,
   getFallbackJobCategories,
   isPublicJobsApiEnabled,
+  jobMatchesBudget,
   PUBLIC_JOBS_PAGE_SIZE,
 } from '@/services/publicJobsApi'
 
@@ -32,13 +32,7 @@ function matchesBudget(priceRange, budget) {
   if (!budget) return true
 
   const { min, max } = parsePriceRange(priceRange)
-
-  if (budget === 'Under £1,000') return max < 1000
-  if (budget === '£1,000–£5,000') return max >= 1000 && min <= 5000
-  if (budget === '£5,000–£10,000') return max >= 5000 && min <= 10000
-  if (budget === '£10,000+') return min >= 10000
-
-  return true
+  return jobMatchesBudget(min, max, budget)
 }
 
 function filterByHeroFilters(jobs, categoryLabel, location, budget) {

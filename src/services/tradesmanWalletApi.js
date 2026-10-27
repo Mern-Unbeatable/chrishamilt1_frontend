@@ -2,7 +2,7 @@ import { apiRequest } from '@/auth/apiClient'
 import { getAccessToken, fetchCurrentUser } from '@/auth/authService'
 import { AUTH_CONFIG } from '@/auth/authConfig'
 import { DEMO_TOKEN_PRICING, DEMO_WALLET_STATS } from '@/data/demoData'
-import { mapApiPackageToCard } from '@/services/adminPackagesApi'
+import { keepSinglePopular, mapApiPackageToCard } from '@/services/adminPackagesApi'
 
 export function isTradesmanWalletApiEnabled() {
   return Boolean(AUTH_CONFIG.apiBaseUrl)
@@ -145,7 +145,7 @@ export async function fetchTokenPackages({ requireAuth = false } = {}) {
 
   const rows = (payload?.data ?? []).filter((pkg) => pkg.isActive !== false)
 
-  return rows.map(mapApiPackageToCard)
+  return keepSinglePopular(rows.map(mapApiPackageToCard))
 }
 
 export function getDemoWalletStats() {
