@@ -106,6 +106,19 @@ export default function TradesmanBrowseJobDetailsPage() {
     await promptBuyTokens(tokensAvailable ?? 0, requiredTokens)
   }
 
+  const handleMessageClick = async () => {
+    if (isLocked) {
+      await handleUnlockClick()
+      return
+    }
+    navigate('/tradesman/messages', {
+      state: {
+        customerId: job?.customer?.id ?? null,
+        jobId: job?.id ?? null,
+      },
+    })
+  }
+
   const handleSendQuoteClick = async () => {
     const allowed = await requireTokensForAction(job)
     if (allowed) {
@@ -226,13 +239,16 @@ export default function TradesmanBrowseJobDetailsPage() {
 
         <JobDetailsSummary
           job={job}
+          onMessage={handleMessageClick}
+          messageLabel="Message"
+          messageDisabled={checking}
           onSendQuote={isLocked ? handleUnlockClick : handleSendQuoteClick}
           sendQuoteLabel={
             checking
               ? 'Checking…'
               : isLocked
                 ? `Buy Tokens to Unlock (${requiredTokens} Tokens)`
-                : 'Buy This'
+                : 'Quotation'
           }
           sendQuoteDisabled={checking}
         />

@@ -970,3 +970,36 @@ export const DEMO_ABOUT_MARKETPLACE_ADVANTAGE = [
       'Built specifically for customers and tradesmen across the United Kingdom.',
   },
 ]
+
+export const DEMO_ADMINS = [
+  {
+    id: 'admin-1',
+    fullName: 'Main Administrator',
+    email: 'admin@tradersinloop.co.uk',
+    phoneNumber: '+44 7700 900077',
+    address: 'London, UK',
+    role: 'ADMIN',
+    status: 'Active',
+    joinedDate: 'Jan 10, 2026',
+  },
+  {
+    id: 'admin-2',
+    fullName: 'Second Admin',
+    email: 'admin2@tradersinloop.co.uk',
+    phoneNumber: '+44 7700 111333',
+    address: 'London, UK',
+    role: 'ADMIN',
+    status: 'Active',
+    joinedDate: 'Feb 15, 2026',
+  },
+  {
+    id: 'admin-3',
+    fullName: 'Operations Admin',
+    email: 'operations@tradersinloop.co.uk',
+    phoneNumber: '+44 7700 900288',
+    address: 'Manchester, UK',
+    role: 'ADMIN',
+    status: 'Active',
+    joinedDate: 'Mar 22, 2026',
+  },
+]

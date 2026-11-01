@@ -11,6 +11,8 @@ const ROLE_CONFIG = {
     showAccountPhone: true,
     showAddressFields: true,
     useFirstLastName: true,
+    canEditEmail: true,
+    showTokenBalance: false,
     showWarehouses: false,
     passwordMode: 'full',
     passwordInSeparateCard: true,
@@ -24,6 +26,8 @@ const ROLE_CONFIG = {
     showAccountPhone: true,
     showAddressFields: true,
     useFirstLastName: true,
+    canEditEmail: true,
+    showTokenBalance: true,
     showWarehouses: false,
     passwordMode: 'simple',
     passwordInSeparateCard: false,
@@ -37,6 +41,8 @@ const ROLE_CONFIG = {
     showAccountPhone: false,
     showAddressFields: false,
     useFirstLastName: false,
+    canEditEmail: false,
+    showTokenBalance: false,
     showWarehouses: false,
     passwordMode: 'full',
     passwordInSeparateCard: false,
@@ -243,7 +249,7 @@ function AvatarUpload({ form, fileRef, fileInputId, onPick }) {
   )
 }
 
-function AvatarHeader({ form, showUpload, fileRef, fileInputId, onPick }) {
+function AvatarHeader({ form, showUpload, showTokenBalance, fileRef, fileInputId, onPick }) {
   if (showUpload) {
     return (
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -265,11 +271,11 @@ function AvatarHeader({ form, showUpload, fileRef, fileInputId, onPick }) {
     )
   }
 
-  return <AvatarDisplay form={form} />
+  return <AvatarDisplay form={form} showTokenBalance={showTokenBalance} />
 }
 
-function AvatarDisplay({ form }) {
-  const hasTokenBalance = form.tokenBalance !== undefined && form.tokenBalance !== null
+function AvatarDisplay({ form, showTokenBalance }) {
+  const hasTokenBalance = Boolean(showTokenBalance) && form.tokenBalance !== undefined && form.tokenBalance !== null
   const businessName = form.tradesmanProfile?.businessName
 
   return (
@@ -387,8 +393,21 @@ export default function ProfileSettings({
     setUpdatingProfile(true)
 
     try {
-      const firstName = form.firstName?.trim() ?? ''
-      const lastName = form.lastName?.trim() ?? ''
+      let firstName = form.firstName?.trim() ?? ''
+      let lastName = form.lastName?.trim() ?? ''
+
+      if (form.name?.trim()) {
+        const trimmed = form.name.trim().replace(/\s+/g, ' ')
+        const lastSpaceIndex = trimmed.lastIndexOf(' ')
+        if (lastSpaceIndex !== -1) {
+          firstName = trimmed.slice(0, lastSpaceIndex).trim()
+          lastName = trimmed.slice(lastSpaceIndex + 1).trim()
+        } else {
+          firstName = trimmed
+          lastName = ''
+        }
+      }
+
       const fullName =
         [firstName, lastName].filter(Boolean).join(' ').trim() ||
         form.name?.trim() ||
@@ -520,6 +539,10 @@ export default function ProfileSettings({
             value={form.email}
             onChange={setField('email')}
             placeholder="you@example.com"
+            disabled={!cfg.canEditEmail}
+            readOnly={!cfg.canEditEmail}
+            className={!cfg.canEditEmail ? 'cursor-not-allowed bg-[#F8FAFC] text-[#64748B]' : ''}
+            title={!cfg.canEditEmail ? 'Email address cannot be changed' : undefined}
           />
         </Field>
         {cfg.showAccountPhone ? (
@@ -657,6 +680,10 @@ export default function ProfileSettings({
                   value={form.email}
                   onChange={setField('email')}
                   placeholder="you@example.com"
+                  disabled={!cfg.canEditEmail}
+                  readOnly={!cfg.canEditEmail}
+                  className={!cfg.canEditEmail ? 'cursor-not-allowed bg-[#F8FAFC] text-[#64748B]' : ''}
+                  title={!cfg.canEditEmail ? 'Email address cannot be changed' : undefined}
                 />
               </Field>
               <Field label="Phone number">
@@ -742,6 +769,7 @@ export default function ProfileSettings({
           <AvatarHeader
             form={form}
             showUpload={cfg.showAvatarUpload}
+            showTokenBalance={cfg.showTokenBalance}
             fileRef={fileRef}
             fileInputId={fileInputId}
             onPick={handleAvatarPick}
