@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   MessageCircle,
   Search,
+  Settings,
   Star,
   TrendingUp,
   User,
@@ -35,5 +36,6 @@ export const ADMIN_NAV = [
   { label: 'Jobs', to: '/admin/jobs', icon: CalendarCheck },
   { label: 'Categories', to: '/admin/categories', icon: Grid3x3 },
   { label: 'Token management', to: '/admin/tokens', icon: Coins },
+  { label: 'Settings', to: '/admin/settings', icon: Settings },
   { label: 'My Profile', to: '/admin/profile', icon: User },
 ]

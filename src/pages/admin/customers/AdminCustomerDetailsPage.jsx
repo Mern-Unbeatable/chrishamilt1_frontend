@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
-import { ArrowLeft } from 'lucide-react'
+import { Link, useNavigate, useParams } from 'react-router'
+import { ArrowLeft, Trash2 } from 'lucide-react'
 import { StatusBadge } from '@/components/data-display/DataTable/DataTable'
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
 import { DEMO_ADMIN_CUSTOMERS } from '@/data/demoData'
 import { submitAdminUserStatus } from '@/helpers/submitAdminUserStatus'
+import { submitAdminUserDelete } from '@/helpers/submitAdminUserDelete'
 import {
   fetchAdminCustomer,
   isAdminCustomersApiEnabled,
@@ -27,6 +28,7 @@ function getDemoCustomerDetail(customerId) {
 
 export default function AdminCustomerDetailsPage() {
   const { customerId } = useParams()
+  const navigate = useNavigate()
   const useApi = isAdminCustomersApiEnabled()
 
   const [customer, setCustomer] = useState(useApi ? null : getDemoCustomerDetail(customerId))
@@ -110,6 +112,16 @@ export default function AdminCustomerDetailsPage() {
     }
   }
 
+  const handleDelete = async () => {
+    if (!customer || updating) return
+    const success = await submitAdminUserDelete(customer.id, customer.userName, {
+      userType: 'Customer',
+    })
+    if (success) {
+      navigate('/admin/customers', { replace: true })
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -174,6 +186,15 @@ export default function AdminCustomerDetailsPage() {
             className="inline-flex h-10 items-center justify-center rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 text-sm font-semibold text-[#B91C1C] transition-colors hover:bg-[#FEE2E2] disabled:opacity-60"
           >
             Suspend
+          </button>
+          <button
+            type="button"
+            disabled={updating}
+            onClick={handleDelete}
+            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-[#FECACA] bg-white px-4 text-sm font-semibold text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:opacity-60"
+          >
+            <Trash2 className="size-4" />
+            Delete account
           </button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import DataTable, { StatusBadge } from '@/components/data-display/DataTable/Data
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
 import { DEMO_ADMIN_TRADESMEN } from '@/data/demoData'
 import { submitAdminUserStatus } from '@/helpers/submitAdminUserStatus'
+import { submitAdminUserDelete } from '@/helpers/submitAdminUserDelete'
 import {
   ADMIN_TRADESMEN_PAGE_SIZE,
   fetchAdminTradesmen,
@@ -20,11 +21,21 @@ const TRADESMAN_COLUMNS = [
   {
     key: 'location',
     header: 'Location',
-    wrap: true,
-    className: 'max-w-[220px]',
-    render: (value) => (
-      <span className="whitespace-pre-line text-sm leading-5">{value}</span>
-    ),
+    wrap: false,
+    className: 'max-w-[200px]',
+    render: (value) => {
+      const firstLine = String(value || '')
+        .split('\n')[0]
+        .trim()
+      return (
+        <span
+          className="block truncate text-sm leading-5 text-[#334155]"
+          title={value}
+        >
+          {firstLine || '—'}
+        </span>
+      )
+    },
   },
   {
     key: 'status',
@@ -33,7 +44,7 @@ const TRADESMAN_COLUMNS = [
   },
 ]
 
-function buildTradesmanActions({ onSeeDetails, onSetActive, onSetSuspend }) {
+function buildTradesmanActions({ onSeeDetails, onSetActive, onSetSuspend, onDelete }) {
   return [
     {
       id: 'details',
@@ -51,12 +62,12 @@ function buildTradesmanActions({ onSeeDetails, onSetActive, onSetSuspend }) {
       label: 'Suspend',
       onClick: onSetSuspend,
     },
-    // {
-    //   id: 'delete',
-    //   label: 'Delete',
-    //   variant: 'danger',
-    //   onClick: onDelete,
-    // },
+    {
+      id: 'delete',
+      label: 'Delete',
+      variant: 'danger',
+      onClick: onDelete,
+    },
   ]
 }
 
@@ -201,9 +212,15 @@ export default function AdminTradesmenPage() {
     [useApi, updatingId],
   )
 
-  // const handleDelete = useCallback((row) => {
-  //   setTradesmen((current) => current.filter((tradesman) => tradesman.id !== row.id))
-  // }, [])
+  const handleDelete = useCallback(async (row) => {
+    const success = await submitAdminUserDelete(row.id, row.tradesmanName, {
+      userType: 'Tradesman',
+    })
+    if (success) {
+      setTradesmen((current) => current.filter((tradesman) => tradesman.id !== row.id))
+      setTotalCount((current) => Math.max(0, current - 1))
+    }
+  }, [])
 
   const actions = useMemo(
     () =>
@@ -211,8 +228,9 @@ export default function AdminTradesmenPage() {
         onSeeDetails: handleSeeDetails,
         onSetActive: handleSetActive,
         onSetSuspend: handleSetSuspend,
+        onDelete: handleDelete,
       }),
-    [handleSeeDetails, handleSetActive, handleSetSuspend],
+    [handleSeeDetails, handleSetActive, handleSetSuspend, handleDelete],
   )
 
   const from = displayTotalCount === 0 ? 0 : (page - 1) * pageSize + 1

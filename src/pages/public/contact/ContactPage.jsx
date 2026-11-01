@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PageHeader from '@/components/PageHeader'
 import { showSuccessAlert } from '@/helpers/showAppAlert'
 import Cta from '@/pages/public/home/sections/Cta'
+import { fetchContactSettings, DEFAULT_CONTACT_SETTINGS } from '@/services/adminSettingsApi'
 
 const SUPPORT_EMAIL = 'admin@tradersinloop.co.uk'
 
 export default function ContactPage() {
+  const [contact, setContact] = useState(DEFAULT_CONTACT_SETTINGS)
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -13,6 +15,21 @@ export default function ContactPage() {
     message: '',
   })
   const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchContactSettings()
+      .then((data) => {
+        if (!cancelled && data) {
+          setContact(data)
+        }
+      })
+      .catch(() => {})
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const updateField = (key) => (event) => {
     setForm((current) => ({ ...current, [key]: event.target.value }))
@@ -29,7 +46,7 @@ export default function ContactPage() {
       form.message.trim(),
     ].join('\n')
 
-    const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+    const mailto = `mailto:${contact.email || SUPPORT_EMAIL}?subject=${encodeURIComponent(
       form.subject.trim() || 'Traders In Loop enquiry',
     )}&body=${encodeURIComponent(body)}`
 
@@ -62,10 +79,10 @@ export default function ContactPage() {
                     <dt className="font-semibold text-[#111827]">Email</dt>
                     <dd className="mt-1">
                       <a
-                        href={`mailto:${SUPPORT_EMAIL}`}
-                        className="text-btn-primary hover:underline"
+                        href={`mailto:${contact.email || SUPPORT_EMAIL}`}
+                        className="text-btn-primary hover:underline break-all"
                       >
-                        {SUPPORT_EMAIL}
+                        {contact.email || SUPPORT_EMAIL}
                       </a>
                     </dd>
                   </div>
@@ -73,19 +90,17 @@ export default function ContactPage() {
                     <dt className="font-semibold text-[#111827]">Phone</dt>
                     <dd className="mt-1">
                       <a
-                        href="tel:07392225536"
+                        href={`tel:${(contact.phone || '07392255366').replace(/\s+/g, '')}`}
                         className="text-btn-primary hover:underline"
                       >
-                        07392225536
+                        {contact.phone || '07392255366'}
                       </a>
                     </dd>
                   </div>
                   <div>
                     <dt className="font-semibold text-[#111827]">Office</dt>
-                    <dd className="mt-1">
-                      2 enterprise house, barking,
-                      <br />
-                      London IG11 0JZ, United Kingdom
+                    <dd className="mt-1 whitespace-pre-line leading-relaxed">
+                      {contact.address || DEFAULT_CONTACT_SETTINGS.address}
                     </dd>
                   </div>
                 </dl>

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
 import { getAdminTradesmanDetail } from '@/data/adminTradesmanDetailData'
 import { submitAdminUserStatus } from '@/helpers/submitAdminUserStatus'
+import { submitAdminUserDelete } from '@/helpers/submitAdminUserDelete'
 import AdminTradesmanCompletedJobsCard from '@/pages/admin/tradesmen/sections/AdminTradesmanCompletedJobsCard'
 import AdminTradesmanPerformanceCard from '@/pages/admin/tradesmen/sections/AdminTradesmanPerformanceCard'
 import AdminTradesmanProfileHeader, {
@@ -20,6 +21,7 @@ import { ADMIN_USER_STATUS } from '@/services/adminUsersApi'
 
 export default function AdminTradesmanDetailsPage() {
   const { tradesmanId } = useParams()
+  const navigate = useNavigate()
   const useApi = isAdminTradesmenApiEnabled()
 
   const [tradesman, setTradesman] = useState(
@@ -110,6 +112,16 @@ export default function AdminTradesmanDetailsPage() {
     }
   }
 
+  const handleDelete = async () => {
+    if (!tradesman || updating) return
+    const success = await submitAdminUserDelete(tradesman.id, tradesman.tradesmanName, {
+      userType: 'Tradesman',
+    })
+    if (success) {
+      navigate('/admin/tradesmen', { replace: true })
+    }
+  }
+
   const handleGrantTokens = async (amount) => {
     if (!useApi) return true
 
@@ -168,6 +180,7 @@ export default function AdminTradesmanDetailsPage() {
           tradesman={tradesman}
           onSuspend={handleSuspend}
           onSetActive={handleSetActive}
+          onDelete={handleDelete}
         />
       </div>
 

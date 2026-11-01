@@ -118,12 +118,23 @@ export function mapQuoteCardToFormValues(quote = {}) {
 
 export function buildQuoteFormData(form = {}) {
   const formData = new FormData()
-  const amount = Number(form.quoteAmount)
+  const rawAmount = String(form.quoteAmount ?? form.amount ?? '').replace(/,/g, '').trim()
+  const amount = Number(rawAmount)
 
   formData.append('amount', String(Number.isFinite(amount) ? amount : 0))
-  formData.append('estimatedDuration', form.duration?.trim() ?? '')
-  formData.append('startDate', form.startDate ?? '')
-  formData.append('materialsIncluded', String(Boolean(form.materialsIncluded)))
+  formData.append(
+    'estimatedDuration',
+    (form.estimatedDuration ?? form.duration)?.trim() ?? '',
+  )
+  formData.append('startDate', form.startDate?.trim() ?? '')
+
+  const isMaterialsIncluded =
+    form.materialsIncluded === true ||
+    form.materialsIncluded === 'true' ||
+    form.materialsIncluded === 1 ||
+    form.materialsIncluded === '1'
+
+  formData.append('materialsIncluded', String(isMaterialsIncluded))
   formData.append('warranty', form.warranty?.trim() ?? '')
   formData.append('proposal', form.proposal?.trim() ?? '')
 
@@ -142,13 +153,15 @@ export function buildQuoteUpdateBody(form = {}) {
 }
 
 export function validateQuoteForm(form = {}) {
-  const amount = Number(form.quoteAmount)
+  const rawAmount = String(form.quoteAmount ?? form.amount ?? '').replace(/,/g, '').trim()
+  const amount = Number(rawAmount)
 
   if (!Number.isFinite(amount) || amount <= 0) {
     return 'Enter a valid quote amount.'
   }
 
-  if (!form.duration?.trim()) {
+  const duration = (form.estimatedDuration ?? form.duration)?.trim()
+  if (!duration) {
     return 'Estimated duration is required.'
   }
 
@@ -179,12 +192,19 @@ export async function submitJobQuote(jobId, form) {
     },
   )
 
-  const quote = payload?.data ?? payload
-  if (!quote?.id) {
+  const quote = payload?.data?.quote ?? payload?.data ?? payload?.quote ?? payload
+  const quoteId = quote?.id ?? quote?._id ?? quote?.quoteId ?? null
+
+  if (!quoteId && !payload?.success) {
     throw new Error('Unable to submit quote.')
   }
 
-  return mapApiQuoteToCard(quote)
+  const normalizedQuote = {
+    ...(typeof quote === 'object' ? quote : {}),
+    id: quoteId || `quote-${Date.now()}`,
+  }
+
+  return mapApiQuoteToCard(normalizedQuote)
 }
 
 export async function updateQuote(quoteId, form) {
@@ -198,12 +218,15 @@ export async function updateQuote(quoteId, form) {
     token: getAccessToken(),
   })
 
-  const quote = payload?.data ?? payload
-  if (!quote?.id) {
-    throw new Error('Unable to update quote.')
+  const quote = payload?.data?.quote ?? payload?.data ?? payload?.quote ?? payload
+  const id = quote?.id ?? quote?._id ?? quoteId
+
+  const normalizedQuote = {
+    ...(typeof quote === 'object' ? quote : {}),
+    id,
   }
 
-  return mapApiQuoteToCard(quote)
+  return mapApiQuoteToCard(normalizedQuote)
 }
 
 export async function withdrawQuote(quoteId) {

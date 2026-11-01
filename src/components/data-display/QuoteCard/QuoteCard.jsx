@@ -257,7 +257,7 @@ function CustomerQuoteCard({
         <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--secondary-text)] sm:text-xs">
           Proposal preview
         </p>
-        <p className="mt-2 text-sm leading-6 text-[var(--primary-text)]">
+        <p className="mt-2 text-sm leading-6 text-[var(--primary-text)] break-words [overflow-wrap:anywhere]">
           {proposalPreview}
         </p>
       </div>

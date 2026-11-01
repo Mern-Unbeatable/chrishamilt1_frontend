@@ -7,7 +7,7 @@ const ROLE_CONFIG = {
   user: {
     layout: 'account',
     showPageHeader: true,
-    showAvatarUpload: false,
+    showAvatarUpload: true,
     showAccountPhone: true,
     showAddressFields: true,
     useFirstLastName: true,
@@ -22,7 +22,7 @@ const ROLE_CONFIG = {
   tradesman: {
     layout: 'dashboard',
     showPageHeader: true,
-    showAvatarUpload: false,
+    showAvatarUpload: true,
     showAccountPhone: true,
     showAddressFields: true,
     useFirstLastName: true,
@@ -37,7 +37,7 @@ const ROLE_CONFIG = {
   admin: {
     layout: 'dashboard',
     showPageHeader: true,
-    showAvatarUpload: false,
+    showAvatarUpload: true,
     showAccountPhone: false,
     showAddressFields: false,
     useFirstLastName: false,
@@ -219,29 +219,40 @@ function SectionTitle({ children }) {
   )
 }
 
-function AvatarUpload({ form, fileRef, fileInputId, onPick }) {
+function AvatarUpload({ form, fileRef, fileInputId, onPick, uploading = false }) {
   return (
     <div className="relative inline-flex shrink-0 self-start">
-      <div className="flex size-20 items-center justify-center overflow-hidden rounded-full bg-[#E5E7EB] text-[var(--secondary-text)] sm:size-24">
+      <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-full bg-[#E5E7EB] text-[var(--secondary-text)] sm:size-24">
         {form.avatarUrl ? (
           <img src={form.avatarUrl} alt="" className="size-full object-cover" />
         ) : (
           <User className="size-10" strokeWidth={1.5} />
         )}
+        {uploading ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white">
+            <svg className="size-5 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+          </div>
+        ) : null}
       </div>
       <input
         ref={fileRef}
         id={fileInputId}
         type="file"
         accept="image/*"
+        disabled={uploading}
         className="sr-only"
         onChange={onPick}
       />
       <button
         type="button"
+        disabled={uploading}
         onClick={() => fileRef.current?.click()}
-        className="absolute right-0 bottom-0 flex size-8 items-center justify-center rounded-full border-2 border-white bg-btn-primary text-white shadow-sm hover:bg-[#0150CC]"
+        className="absolute right-0 bottom-0 flex size-8 items-center justify-center rounded-full border-2 border-white bg-btn-primary text-white shadow-sm transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-50"
         aria-label="Upload profile photo"
+        title="Upload profile photo"
       >
         <Camera className="size-4" />
       </button>
@@ -249,49 +260,48 @@ function AvatarUpload({ form, fileRef, fileInputId, onPick }) {
   )
 }
 
-function AvatarHeader({ form, showUpload, showTokenBalance, fileRef, fileInputId, onPick }) {
-  if (showUpload) {
-    return (
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <AvatarUpload
-          form={form}
-          fileRef={fileRef}
-          fileInputId={fileInputId}
-          onPick={onPick}
-        />
-        <div className="min-w-0 flex-1">
-          <h2 className="truncate text-base font-semibold text-[var(--primary-text)] sm:text-lg">
-            {form.displayName || form.name || '—'}
-          </h2>
-          <p className="truncate text-sm text-[var(--secondary-text)]">
-            {form.displayEmail || form.email || '—'}
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  return <AvatarDisplay form={form} showTokenBalance={showTokenBalance} />
-}
-
-function AvatarDisplay({ form, showTokenBalance }) {
-  const hasTokenBalance = Boolean(showTokenBalance) && form.tokenBalance !== undefined && form.tokenBalance !== null
+function AvatarHeader({
+  form,
+  showUpload,
+  showTokenBalance,
+  fileRef,
+  fileInputId,
+  onPick,
+  uploading = false,
+}) {
+  const hasTokenBalance =
+    Boolean(showTokenBalance) &&
+    form.tokenBalance !== undefined &&
+    form.tokenBalance !== null
   const businessName = form.tradesmanProfile?.businessName
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-4 min-w-0">
-        <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E5E7EB] text-[var(--secondary-text)] sm:size-[72px]">
-          {form.avatarUrl ? (
-            <img src={form.avatarUrl} alt="" className="size-full object-cover" />
-          ) : (
-            <User className="size-8" strokeWidth={1.5} />
-          )}
-        </div>
+        {showUpload ? (
+          <AvatarUpload
+            form={form}
+            fileRef={fileRef}
+            fileInputId={fileInputId}
+            onPick={onPick}
+            uploading={uploading}
+          />
+        ) : (
+          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E5E7EB] text-[var(--secondary-text)] sm:size-[72px]">
+            {form.avatarUrl ? (
+              <img src={form.avatarUrl} alt="" className="size-full object-cover" />
+            ) : (
+              <User className="size-8" strokeWidth={1.5} />
+            )}
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="truncate text-base font-semibold text-[var(--primary-text)] sm:text-lg">
-              {form.displayName || form.name || [form.firstName, form.lastName].filter(Boolean).join(' ') || '—'}
+              {form.displayName ||
+                form.name ||
+                [form.firstName, form.lastName].filter(Boolean).join(' ') ||
+                '—'}
             </h2>
             {form.tradesmanProfile?.isVerified ? (
               <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
@@ -314,7 +324,9 @@ function AvatarDisplay({ form, showTokenBalance }) {
         <div className="flex items-center gap-2 self-start sm:self-auto rounded-xl border border-amber-200 bg-amber-50/80 px-3.5 py-2 shadow-xs">
           <span className="text-base">🪙</span>
           <div className="text-xs">
-            <span className="font-bold text-amber-950">{Number(form.tokenBalance).toLocaleString()}</span>
+            <span className="font-bold text-amber-950">
+              {Number(form.tokenBalance).toLocaleString()}
+            </span>
             <span className="text-amber-800 ml-1 font-medium">Tokens</span>
           </div>
         </div>
@@ -381,12 +393,28 @@ export default function ProfileSettings({
   //   })
   // }
 
-  const handleAvatarPick = (event) => {
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+
+  const handleAvatarPick = async (event) => {
     const file = event.target.files?.[0]
     if (!file) return
-    onUploadAvatar?.(file)
-    patch({ avatarUrl: URL.createObjectURL(file) })
-    event.target.value = ''
+
+    setUploadingAvatar(true)
+    try {
+      const res = await onUploadAvatar?.(file)
+      if (res?.avatarUrl) {
+        patch({ avatarUrl: res.avatarUrl })
+      } else if (res?.profileImage) {
+        patch({ avatarUrl: res.profileImage })
+      } else if (typeof res === 'string') {
+        patch({ avatarUrl: res })
+      } else if (res !== null) {
+        patch({ avatarUrl: URL.createObjectURL(file) })
+      }
+    } finally {
+      setUploadingAvatar(false)
+      event.target.value = ''
+    }
   }
 
   const handleUpdateProfile = async () => {
@@ -645,6 +673,7 @@ export default function ProfileSettings({
               fileRef={fileRef}
               fileInputId={fileInputId}
               onPick={handleAvatarPick}
+              uploading={uploadingAvatar}
             />
           ) : null}
 
@@ -773,6 +802,7 @@ export default function ProfileSettings({
             fileRef={fileRef}
             fileInputId={fileInputId}
             onPick={handleAvatarPick}
+            uploading={uploadingAvatar}
           />
           <div className="mt-8">{accountFieldsDashboard}</div>
           {/* {warehouseSection} */}

@@ -3,7 +3,10 @@ import {
   submitJobQuote,
   validateQuoteForm,
 } from '@/services/tradesmanQuotesApi'
-import { isInsufficientTokensError } from '@/services/tradesmanWalletApi'
+import {
+  fetchTradesmanAvailableTokens,
+  isInsufficientTokensError,
+} from '@/services/tradesmanWalletApi'
 import { showApiErrorFromError, showErrorAlert, showSuccessAlert } from '@/helpers/showAppAlert'
 
 export async function submitQuoteCreate(jobId, form) {
@@ -28,6 +31,9 @@ export async function submitQuoteCreate(jobId, form) {
 
   try {
     const created = await submitJobQuote(jobId, form)
+
+    // Refresh token balance across the app immediately
+    fetchTradesmanAvailableTokens().catch(() => {})
 
     await showSuccessAlert({
       title: 'Quote submitted',

@@ -1,4 +1,4 @@
-import { ChevronLeft, Mail, MapPin, Phone } from 'lucide-react'
+import { ChevronLeft, Mail, MapPin, Phone, Trash2 } from 'lucide-react'
 import { Link } from 'react-router'
 import { StatusBadge } from '@/components/data-display/DataTable/DataTable'
 import { cn } from '@/helpers/cn'
@@ -7,6 +7,7 @@ export default function AdminTradesmanProfileHeader({
   tradesman,
   onSuspend,
   onSetActive,
+  onDelete,
   className = '',
 }) {
   return (
@@ -51,17 +52,27 @@ export default function AdminTradesmanProfileHeader({
           <button
             type="button"
             onClick={onSuspend}
-            className="inline-flex h-11 min-w-[160px] items-center justify-center rounded-lg bg-[#FFF7ED] px-5 text-sm font-semibold text-[#EA580C] transition-colors hover:bg-[#FFEDD5]"
+            className="inline-flex h-11 min-w-[140px] items-center justify-center rounded-lg bg-[#FFF7ED] px-4 text-sm font-semibold text-[#EA580C] transition-colors hover:bg-[#FFEDD5]"
           >
             Suspend Account
           </button>
           <button
             type="button"
             onClick={onSetActive}
-            className="inline-flex h-11 min-w-[160px] items-center justify-center rounded-lg bg-[#ECFDF5] px-5 text-sm font-semibold text-[#059669] transition-colors hover:bg-[#D1FAE5]"
+            className="inline-flex h-11 min-w-[140px] items-center justify-center rounded-lg bg-[#ECFDF5] px-4 text-sm font-semibold text-[#059669] transition-colors hover:bg-[#D1FAE5]"
           >
             Active Account
           </button>
+          {onDelete ? (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="inline-flex h-11 min-w-[140px] items-center justify-center gap-1.5 rounded-lg border border-[#FECACA] bg-white px-4 text-sm font-semibold text-[#DC2626] transition-colors hover:bg-[#FEF2F2]"
+            >
+              <Trash2 className="size-4" />
+              Delete Account
+            </button>
+          ) : null}
         </div>
       </div>
     </section>

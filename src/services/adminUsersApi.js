@@ -41,3 +41,18 @@ export async function updateAdminUserStatus(userId, status) {
 
   return toDisplayUserStatus(status)
 }
+
+/**
+ * Deletes a user or tradesman account via DELETE /api/admin/users/:userId
+ */
+export async function deleteAdminUser(userId) {
+  if (!userId) {
+    throw new Error('User not found.')
+  }
+
+  return await apiRequest(`/api/admin/users/${encodeURIComponent(userId)}`, {
+    method: 'DELETE',
+    token: getAccessToken(),
+  })
+}
+

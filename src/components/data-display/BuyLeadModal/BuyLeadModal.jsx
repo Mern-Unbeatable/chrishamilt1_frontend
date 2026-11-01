@@ -89,6 +89,7 @@ export default function BuyLeadModal({
 
     setPurchasing(true)
     try {
+      fetchTradesmanAvailableTokens().catch(() => {})
       await showSuccessAlert({
         title: 'Lead Unlocked!',
         text: `Successfully unlocked "${job.title}" using ${tokenCost} tokens. Customer contact details are now accessible.`,

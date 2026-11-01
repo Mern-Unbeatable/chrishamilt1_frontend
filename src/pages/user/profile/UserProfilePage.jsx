@@ -8,6 +8,7 @@ import { useAuth } from '@/auth/AuthProvider'
 import ProfileSettings from '@/components/forms/ProfileSettings/ProfileSettings'
 import { DEMO_USER_PROFILE } from '@/data/demoData'
 import { showApiErrorFromError } from '@/helpers/showAppAlert'
+import { submitAvatarUpload } from '@/helpers/submitAvatarUpload'
 import { submitPasswordChange } from '@/helpers/submitPasswordChange'
 import { submitProfileUpdate } from '@/helpers/submitProfileUpdate'
 
@@ -62,6 +63,20 @@ export default function UserProfilePage() {
     [refreshSession],
   )
 
+  const handleUploadAvatar = useCallback(
+    async (file) => {
+      const updatedProfile = await submitAvatarUpload(file, { role: 'user' })
+
+      if (updatedProfile) {
+        setProfile(updatedProfile)
+        refreshSession()
+      }
+
+      return updatedProfile
+    },
+    [refreshSession],
+  )
+
   if (loading) {
     return (
       <section className="bg-[#F8FAFC] py-8 lg:py-12">
@@ -97,6 +112,7 @@ export default function UserProfilePage() {
             value={profile}
             onChange={setProfile}
             onUpdateProfile={handleUpdateProfile}
+            onUploadAvatar={handleUploadAvatar}
             onChangePassword={(passwords) => submitPasswordChange(passwords)}
           />
         </div>

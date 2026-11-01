@@ -52,6 +52,8 @@ export function mapApiResponseToSession(data, rememberMe) {
       role,
       roleLabel: user?.roleLabel ?? ROLE_LABELS[role] ?? role,
       email,
+      avatarUrl: user?.profileImage ?? user?.avatarUrl ?? null,
+      profileImage: user?.profileImage ?? null,
     },
     rememberMe,
     {
@@ -302,6 +304,34 @@ export async function updateUserProfile(body) {
       return await fetchCurrentUser()
     } catch {
       return body
+    }
+  }
+
+  return user
+}
+
+export async function uploadUserProfileImage(file) {
+  if (!file) {
+    throw new ApiError('Please select an image file to upload.')
+  }
+
+  const formData = new FormData()
+  formData.append('profileImage', file)
+
+  const data = await apiRequest(AUTH_CONFIG.endpoints.profile, {
+    method: 'PUT',
+    body: formData,
+    token: getAccessToken(),
+  })
+
+  const payload = unwrapPayload(data)
+  const user = payload?.user ?? payload
+
+  if (!user || typeof user !== 'object' || (!user.id && !user.email)) {
+    try {
+      return await fetchCurrentUser()
+    } catch {
+      return user || payload
     }
   }
 
