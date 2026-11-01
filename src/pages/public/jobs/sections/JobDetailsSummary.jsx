@@ -1,4 +1,4 @@
-import { Clock, Flame, Mail, MapPin, Navigation, ShoppingCart } from 'lucide-react'
+import { Clock, FileText, Flame, Mail, MapPin, MessageCircle, Navigation, ShoppingCart } from 'lucide-react'
 import { cn } from '@/helpers/cn'
 
 const URGENCY_STYLES = {
@@ -10,8 +10,11 @@ const URGENCY_STYLES = {
 export default function JobDetailsSummary({
   job,
   onSendQuote,
-  sendQuoteLabel = 'Buy This',
+  sendQuoteLabel = 'Quotation',
   sendQuoteDisabled = false,
+  onMessage,
+  messageLabel = 'Message',
+  messageDisabled = false,
 }) {
   const {
     category,
@@ -86,21 +89,37 @@ export default function JobDetailsSummary({
       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-2xl font-bold text-[var(--primary-text)]">{price}</p>
 
-        {onSendQuote ? (
-          <button
-            type="button"
-            onClick={onSendQuote}
-            disabled={sendQuoteDisabled}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-btn-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-          >
-            {sendQuoteLabel.toLowerCase().includes('buy') ? (
-              <ShoppingCart className="size-4" />
-            ) : (
-              <Mail className="size-4" />
-            )}
-            {sendQuoteLabel}
-          </button>
-        ) : null}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {onMessage ? (
+            <button
+              type="button"
+              onClick={onMessage}
+              disabled={messageDisabled}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-btn-primary bg-white px-6 py-3 text-sm font-semibold text-btn-primary transition-colors hover:bg-[#EFF6FF] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            >
+              <MessageCircle className="size-4" />
+              {messageLabel}
+            </button>
+          ) : null}
+
+          {onSendQuote ? (
+            <button
+              type="button"
+              onClick={onSendQuote}
+              disabled={sendQuoteDisabled}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-btn-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0150CC] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            >
+              {sendQuoteLabel.toLowerCase().includes('buy') ? (
+                <ShoppingCart className="size-4" />
+              ) : sendQuoteLabel.toLowerCase().includes('quot') ? (
+                <FileText className="size-4" />
+              ) : (
+                <Mail className="size-4" />
+              )}
+              {sendQuoteLabel}
+            </button>
+          ) : null}
+        </div>
       </div>
     </section>
   )
