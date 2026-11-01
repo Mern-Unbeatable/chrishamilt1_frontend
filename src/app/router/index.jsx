@@ -47,6 +47,7 @@ import AdminCategoriesPage from '@/pages/admin/categories/AdminCategoriesPage'
 import AdminTokenManagementPage from '@/pages/admin/tokens/AdminTokenManagementPage'
 import AdminDashboardPage from '@/pages/admin/dashboard/AdminDashboardPage'
 import AdminSettingsPage from '@/pages/admin/settings/AdminSettingsPage'
+import AdminContactSettingsPage from '@/pages/admin/settings/AdminContactSettingsPage'
 import MessagesPage from '@/pages/shared/MessagesPage'
 import UserProfilePage from '@/pages/user/profile/UserProfilePage'
 import UserDashboardPage from '@/pages/user/dashboard/UserDashboardPage'
@@ -165,8 +166,8 @@ export const router = createBrowserRouter([
               { path: 'jobs/:jobId/quotes', element: <AdminJobQuotesPage /> },
               { path: 'categories', element: <AdminCategoriesPage /> },
               { path: 'tokens', element: <AdminTokenManagementPage /> },
+              { path: 'settings', element: <AdminContactSettingsPage /> },
               { path: 'profile', element: <AdminSettingsPage /> },
-              { path: 'settings', element: <Navigate to="/admin/profile" replace /> },
             ],
           },
         ],

@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { Mail, MapPin, Phone } from 'lucide-react'
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTwitter } from 'react-icons/fa'
 import Logo from '@/components/Logo'
+import { fetchContactSettings, DEFAULT_CONTACT_SETTINGS } from '@/services/adminSettingsApi'
 
 const CUSTOMER_LINKS = [
   { label: 'Post a Job', to: '/auth/signup' },
@@ -71,6 +73,39 @@ function FooterLinkColumn({ title, links }) {
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+  const [contact, setContact] = useState(DEFAULT_CONTACT_SETTINGS)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchContactSettings()
+      .then((data) => {
+        if (!cancelled && data) {
+          setContact(data)
+        }
+      })
+      .catch(() => {})
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const contactItems = [
+    {
+      icon: MapPin,
+      text: contact.address || DEFAULT_CONTACT_SETTINGS.address,
+    },
+    {
+      icon: Phone,
+      text: contact.phone || DEFAULT_CONTACT_SETTINGS.phone,
+      href: contact.phone ? `tel:${contact.phone.replace(/\s+/g, '')}` : undefined,
+    },
+    {
+      icon: Mail,
+      text: contact.email || DEFAULT_CONTACT_SETTINGS.email,
+      href: contact.email ? `mailto:${contact.email}` : undefined,
+    },
+  ]
 
   return (
     <footer className="bg-[#EBF2FF]">
@@ -104,7 +139,7 @@ export default function Footer() {
           <div>
             <h3 className="text-base font-semibold text-[#111827]">Contact Us</h3>
             <ul className="mt-5 space-y-4">
-              {CONTACT_ITEMS.map(({ icon: Icon, text, href }) => (
+              {contactItems.map(({ icon: Icon, text, href }) => (
                 <li key={text} className="flex gap-3">
                   <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center text-btn-primary">
                     <Icon className="size-5" strokeWidth={1.75} />
