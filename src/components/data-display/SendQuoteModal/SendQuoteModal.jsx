@@ -387,9 +387,9 @@ function ReviewStep({ form, customerBudget }) {
         </dl>
       </div>
 
-      <div className="rounded-xl border border-[#E5E7EB] bg-white p-4">
+      <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 overflow-hidden">
         <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Proposal preview</p>
-        <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[#111827]">
+        <p className="mt-3 whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-sm leading-6 text-[#111827]">
           {form.proposal || 'No proposal entered.'}
         </p>
       </div>
@@ -636,7 +636,7 @@ export default function SendQuoteModal({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-5 sm:px-6">
           {step === 1 ? (
             <QuoteDetailsStep
               form={form}
