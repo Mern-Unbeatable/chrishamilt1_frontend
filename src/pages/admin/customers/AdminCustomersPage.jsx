@@ -21,11 +21,21 @@ const CUSTOMER_COLUMNS = [
   {
     key: 'location',
     header: 'Location',
-    wrap: true,
-    className: 'max-w-[220px]',
-    render: (value) => (
-      <span className="whitespace-pre-line text-sm leading-5">{value}</span>
-    ),
+    wrap: false,
+    className: 'max-w-[200px]',
+    render: (value) => {
+      const firstLine = String(value || '')
+        .split('\n')[0]
+        .trim()
+      return (
+        <span
+          className="block truncate text-sm leading-5 text-[#334155]"
+          title={value}
+        >
+          {firstLine || '—'}
+        </span>
+      )
+    },
   },
   { key: 'jobsPosted', header: 'Jobs Posted' },
   {

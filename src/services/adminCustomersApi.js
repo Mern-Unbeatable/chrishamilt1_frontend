@@ -24,6 +24,15 @@ function formatJoinedDate(value) {
 }
 
 function formatLocation(user) {
+  if (user.address?.trim()) {
+    return user.address.trim().split(/\r?\n/)[0].trim()
+  }
+
+  const parts = [user.city, user.region, user.zipCode].filter(Boolean)
+  return parts.length ? parts.join(', ') : '—'
+}
+
+function formatFullLocation(user) {
   const parts = [user.address, user.city, user.region, user.zipCode].filter(Boolean)
   return parts.length ? parts.join('\n') : '—'
 }
@@ -61,6 +70,7 @@ export function mapApiCustomerDetail(user = {}) {
 
   return {
     ...row,
+    location: formatFullLocation(user),
     avatar: user.profileImage ?? null,
     address: user.address ?? '',
     city: user.city ?? '',

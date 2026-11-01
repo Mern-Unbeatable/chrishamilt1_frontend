@@ -12,6 +12,20 @@ export function isAdminTradesmenApiEnabled() {
 
 function formatLocation(user) {
   const profileLocation = user.tradesmanProfile?.location?.trim()
+  if (profileLocation) {
+    return profileLocation.split(/\r?\n/)[0].trim()
+  }
+
+  if (user.address?.trim()) {
+    return user.address.trim().split(/\r?\n/)[0].trim()
+  }
+
+  const parts = [user.city, user.region, user.zipCode].filter(Boolean)
+  return parts.length ? parts.join(', ') : '—'
+}
+
+function formatFullLocation(user) {
+  const profileLocation = user.tradesmanProfile?.location?.trim()
   if (profileLocation) return profileLocation
 
   const parts = [user.address, user.city, user.region, user.zipCode].filter(Boolean)
@@ -132,7 +146,7 @@ export function mapApiTradesmanDetail(user = {}) {
     initials,
     email: user.email ?? '—',
     phoneNumber: user.phoneNumber ?? '—',
-    location: formatLocation(user),
+    location: formatFullLocation(user),
     status: mapStatus(user.status),
     memberSince,
 
