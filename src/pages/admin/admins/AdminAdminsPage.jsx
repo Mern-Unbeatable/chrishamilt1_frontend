@@ -1,9 +1,9 @@
-import { useCallback, useMemo, useState } from 'react'
-import { Plus, ShieldCheck, UserCheck } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Plus, ShieldCheck } from 'lucide-react'
 import DataTable, { StatusBadge } from '@/components/data-display/DataTable/DataTable'
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
 import AddAdminModal from '@/pages/admin/admins/sections/AddAdminModal'
-import { createAdminUser, getStoredAdminUsers, saveStoredAdminUsers } from '@/services/adminAdminsApi'
+import { createAdminUser, getStoredAdminUsers } from '@/services/adminAdminsApi'
 import { showSuccessAlert } from '@/helpers/showAppAlert'
 
 const PAGE_SIZE = 7
@@ -90,31 +90,6 @@ export default function AdminAdminsPage() {
     }
   }
 
-  const handleToggleStatus = useCallback((row) => {
-    setAdmins((current) => {
-      const updated = current.map((admin) => {
-        if (admin.id === row.id) {
-          const nextStatus = admin.status === 'Active' ? 'Suspend' : 'Active'
-          return { ...admin, status: nextStatus }
-        }
-        return admin
-      })
-      saveStoredAdminUsers(updated)
-      return updated
-    })
-  }, [])
-
-  const actions = useMemo(
-    () => [
-      {
-        id: 'toggle-status',
-        label: 'Toggle Status',
-        onClick: handleToggleStatus,
-      },
-    ],
-    [handleToggleStatus],
-  )
-
   return (
     <>
       <div className="space-y-6">
@@ -136,8 +111,6 @@ export default function AdminAdminsPage() {
         <DataTable
           columns={ADMIN_COLUMNS}
           data={paginatedAdmins}
-          showActions
-          actions={actions}
           showPagination
           pagination={{
             page,
