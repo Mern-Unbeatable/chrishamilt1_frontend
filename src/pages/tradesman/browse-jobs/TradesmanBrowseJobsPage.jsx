@@ -40,9 +40,9 @@ export default function TradesmanBrowseJobsPage() {
     useApi
       ? getFallbackJobCategories()
       : DEMO_BROWSE_JOB_CATEGORIES.map((label) => ({
-          label,
-          slug: label === DEMO_BROWSE_JOB_CATEGORIES[0] ? '' : label,
-        })),
+        label,
+        slug: label === DEMO_BROWSE_JOB_CATEGORIES[0] ? '' : label,
+      })),
   )
   const [categorySlug, setCategorySlug] = useState('')
   const [page, setPage] = useState(1)

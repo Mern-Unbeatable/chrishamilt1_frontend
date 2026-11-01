@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { Coins } from 'lucide-react'
 import { useAuth } from '@/auth/AuthProvider'
-import { fetchTradesmanAvailableTokens } from '@/services/tradesmanWalletApi'
+import {
+  fetchTradesmanAvailableTokens,
+  TOKEN_BALANCE_UPDATED_EVENT,
+} from '@/services/tradesmanWalletApi'
 import { cn } from '@/helpers/cn'
 
 export default function TraderAccountWidget({ className = '', compact = false }) {
   const { session } = useAuth()
+  const location = useLocation()
   const [tokens, setTokens] = useState(() => Number(session?.tokenBalance ?? 0))
 
   useEffect(() => {
@@ -24,10 +28,23 @@ export default function TraderAccountWidget({ className = '', compact = false })
     }
 
     loadTokens()
+
+    const handleBalanceUpdated = (event) => {
+      const newBalance = event?.detail?.balance
+      if (typeof newBalance === 'number') {
+        setTokens(newBalance)
+      }
+    }
+
+    window.addEventListener(TOKEN_BALANCE_UPDATED_EVENT, handleBalanceUpdated)
+    window.addEventListener('focus', loadTokens)
+
     return () => {
       cancelled = true
+      window.removeEventListener(TOKEN_BALANCE_UPDATED_EVENT, handleBalanceUpdated)
+      window.removeEventListener('focus', loadTokens)
     }
-  }, [session?.tokenBalance])
+  }, [session?.tokenBalance, location.pathname])
 
   const traderName =
     session?.name?.trim() ||

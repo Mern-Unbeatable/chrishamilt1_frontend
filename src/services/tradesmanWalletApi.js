@@ -43,6 +43,16 @@ export function mapApiWalletToStats(wallet = {}) {
   ]
 }
 
+export const TOKEN_BALANCE_UPDATED_EVENT = 'tradetrust:token-balance-updated'
+
+export function notifyTokenBalanceUpdated(balance) {
+  if (typeof window !== 'undefined' && typeof balance === 'number' && !Number.isNaN(balance)) {
+    window.dispatchEvent(
+      new CustomEvent(TOKEN_BALANCE_UPDATED_EVENT, { detail: { balance } }),
+    )
+  }
+}
+
 export async function fetchTradesmanWallet() {
   const payload = await apiRequest('/api/tradesman/wallet', {
     token: getAccessToken(),
@@ -52,6 +62,9 @@ export async function fetchTradesmanWallet() {
   if (!wallet || typeof wallet !== 'object') {
     throw new Error('Unable to load wallet.')
   }
+
+  const available = Number(wallet.availableTokens ?? wallet.tokenBalance ?? 0)
+  notifyTokenBalanceUpdated(available)
 
   return mapApiWalletToStats(wallet)
 }
@@ -70,7 +83,9 @@ export async function fetchTradesmanAvailableTokens() {
   try {
     const user = await fetchCurrentUser()
     if (user && typeof user === 'object' && user.tokenBalance !== undefined) {
-      return Number(user.tokenBalance ?? 0)
+      const balance = Number(user.tokenBalance ?? 0)
+      notifyTokenBalanceUpdated(balance)
+      return balance
     }
   } catch {
     // continue to wallet check
@@ -83,7 +98,9 @@ export async function fetchTradesmanAvailableTokens() {
     if (wallet && typeof wallet === 'object') {
       const balance = wallet.availableTokens ?? wallet.tokenBalance
       if (balance !== undefined) {
-        return Number(balance ?? 0)
+        const num = Number(balance ?? 0)
+        notifyTokenBalanceUpdated(num)
+        return num
       }
     }
   } catch {
