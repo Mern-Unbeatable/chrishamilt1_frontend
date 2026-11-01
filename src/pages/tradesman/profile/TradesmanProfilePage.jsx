@@ -8,6 +8,7 @@ import { useAuth } from '@/auth/AuthProvider'
 import ProfileSettings from '@/components/forms/ProfileSettings/ProfileSettings'
 import { DEMO_TRADESMAN_PROFILE } from '@/data/demoData'
 import { showApiErrorFromError } from '@/helpers/showAppAlert'
+import { submitAvatarUpload } from '@/helpers/submitAvatarUpload'
 import { submitPasswordChange } from '@/helpers/submitPasswordChange'
 import { submitProfileUpdate } from '@/helpers/submitProfileUpdate'
 
@@ -62,6 +63,20 @@ export default function TradesmanProfilePage() {
     [refreshSession],
   )
 
+  const handleUploadAvatar = useCallback(
+    async (file) => {
+      const updatedProfile = await submitAvatarUpload(file, { role: 'tradesman' })
+
+      if (updatedProfile) {
+        setProfile(updatedProfile)
+        refreshSession()
+      }
+
+      return updatedProfile
+    },
+    [refreshSession],
+  )
+
   if (loading) {
     return (
       <div className="rounded-2xl border border-[#E5E7EB] bg-white px-6 py-16 text-center">
@@ -85,6 +100,7 @@ export default function TradesmanProfilePage() {
       onChange={setProfile}
       passwordMode={useApi ? 'full' : undefined}
       onUpdateProfile={handleUpdateProfile}
+      onUploadAvatar={handleUploadAvatar}
       onChangePassword={(passwords) =>
         submitPasswordChange(passwords, { requireCurrent: useApi })
       }

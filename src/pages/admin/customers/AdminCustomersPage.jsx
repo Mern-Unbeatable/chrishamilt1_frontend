@@ -4,6 +4,7 @@ import DataTable, { StatusBadge } from '@/components/data-display/DataTable/Data
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
 import { DEMO_ADMIN_CUSTOMERS } from '@/data/demoData'
 import { submitAdminUserStatus } from '@/helpers/submitAdminUserStatus'
+import { submitAdminUserDelete } from '@/helpers/submitAdminUserDelete'
 import {
   ADMIN_CUSTOMERS_PAGE_SIZE,
   fetchAdminCustomers,
@@ -35,7 +36,7 @@ const CUSTOMER_COLUMNS = [
   { key: 'joinedDate', header: 'Joined Date' },
 ]
 
-function buildCustomerActions({ onSeeDetails, onSetActive, onSetSuspend }) {
+function buildCustomerActions({ onSeeDetails, onSetActive, onSetSuspend, onDelete }) {
   return [
     {
       id: 'details',
@@ -52,6 +53,12 @@ function buildCustomerActions({ onSeeDetails, onSetActive, onSetSuspend }) {
       id: 'suspend',
       label: 'Suspend',
       onClick: onSetSuspend,
+    },
+    {
+      id: 'delete',
+      label: 'Delete',
+      variant: 'danger',
+      onClick: onDelete,
     },
   ]
 }
@@ -197,14 +204,23 @@ export default function AdminCustomersPage() {
     [useApi, updatingId],
   )
 
+  const handleDelete = useCallback(async (row) => {
+    const success = await submitAdminUserDelete(row.id, row.userName, { userType: 'Customer' })
+    if (success) {
+      setCustomers((current) => current.filter((customer) => customer.id !== row.id))
+      setTotalCount((current) => Math.max(0, current - 1))
+    }
+  }, [])
+
   const actions = useMemo(
     () =>
       buildCustomerActions({
         onSeeDetails: handleSeeDetails,
         onSetActive: handleSetActive,
         onSetSuspend: handleSetSuspend,
+        onDelete: handleDelete,
       }),
-    [handleSeeDetails, handleSetActive, handleSetSuspend],
+    [handleSeeDetails, handleSetActive, handleSetSuspend, handleDelete],
   )
 
   const from = displayTotalCount === 0 ? 0 : (page - 1) * pageSize + 1

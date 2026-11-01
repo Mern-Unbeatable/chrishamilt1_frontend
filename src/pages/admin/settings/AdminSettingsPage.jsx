@@ -8,6 +8,7 @@ import { useAuth } from '@/auth/AuthProvider'
 import ProfileSettings from '@/components/forms/ProfileSettings/ProfileSettings'
 import { DEMO_ADMIN_PROFILE } from '@/data/demoData'
 import { showApiErrorFromError } from '@/helpers/showAppAlert'
+import { submitAvatarUpload } from '@/helpers/submitAvatarUpload'
 import { submitPasswordChange } from '@/helpers/submitPasswordChange'
 import { submitProfileUpdate } from '@/helpers/submitProfileUpdate'
 
@@ -62,6 +63,20 @@ export default function AdminSettingsPage() {
     [refreshSession],
   )
 
+  const handleUploadAvatar = useCallback(
+    async (file) => {
+      const updatedProfile = await submitAvatarUpload(file, { role: 'admin' })
+
+      if (updatedProfile) {
+        setProfile(updatedProfile)
+        refreshSession()
+      }
+
+      return updatedProfile
+    },
+    [refreshSession],
+  )
+
   if (loading) {
     return (
       <div className="rounded-2xl border border-[#E5E7EB] bg-white px-6 py-16 text-center">
@@ -84,6 +99,7 @@ export default function AdminSettingsPage() {
       value={profile}
       onChange={setProfile}
       onUpdateProfile={handleUpdateProfile}
+      onUploadAvatar={handleUploadAvatar}
       onChangePassword={(passwords) => submitPasswordChange(passwords)}
     />
   )
