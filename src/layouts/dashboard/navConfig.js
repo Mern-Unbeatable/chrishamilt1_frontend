@@ -12,6 +12,7 @@ import {
   Wallet,
   FileText,
   CalendarCheck,
+  ShieldCheck,
 } from 'lucide-react'
 
 export const TRADESMAN_NAV = [
@@ -30,6 +31,7 @@ export const ADMIN_NAV = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, end: true },
   { label: 'Customers', to: '/admin/customers', icon: Users },
   { label: 'Tradesman', to: '/admin/tradesmen', icon: Briefcase },
+  { label: 'Admins', to: '/admin/admins', icon: ShieldCheck },
   { label: 'Jobs', to: '/admin/jobs', icon: CalendarCheck },
   { label: 'Categories', to: '/admin/categories', icon: Grid3x3 },
   { label: 'Token management', to: '/admin/tokens', icon: Coins },

@@ -26,8 +26,21 @@ export async function submitProfileUpdate(payload, { role = 'admin' } = {}) {
       text: 'Profile update is simulated in demo mode.',
     })
 
-    const firstName = payload.firstName?.trim() ?? ''
-    const lastName = payload.lastName?.trim() ?? ''
+    const rawName = (payload.name || payload.fullName || '').trim().replace(/\s+/g, ' ')
+    let firstName = payload.firstName?.trim() ?? ''
+    let lastName = payload.lastName?.trim() ?? ''
+
+    if (rawName) {
+      const lastSpaceIndex = rawName.lastIndexOf(' ')
+      if (lastSpaceIndex !== -1) {
+        firstName = rawName.slice(0, lastSpaceIndex).trim()
+        lastName = rawName.slice(lastSpaceIndex + 1).trim()
+      } else {
+        firstName = rawName
+        lastName = ''
+      }
+    }
+
     const fullName =
       payload.fullName ||
       [firstName, lastName].filter(Boolean).join(' ').trim() ||

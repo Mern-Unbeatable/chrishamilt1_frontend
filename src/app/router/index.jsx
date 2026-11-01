@@ -39,6 +39,7 @@ import AdminCustomersPage from '@/pages/admin/customers/AdminCustomersPage'
 import AdminCustomerDetailsPage from '@/pages/admin/customers/AdminCustomerDetailsPage'
 import AdminTradesmenPage from '@/pages/admin/tradesmen/AdminTradesmenPage'
 import AdminTradesmanDetailsPage from '@/pages/admin/tradesmen/AdminTradesmanDetailsPage'
+import AdminAdminsPage from '@/pages/admin/admins/AdminAdminsPage'
 import AdminJobsPage from '@/pages/admin/jobs/AdminJobsPage'
 import AdminJobDetailsPage from '@/pages/admin/jobs/AdminJobDetailsPage'
 import AdminJobQuotesPage from '@/pages/admin/jobs/AdminJobQuotesPage'
@@ -158,6 +159,7 @@ export const router = createBrowserRouter([
               { path: 'users', element: <Navigate to="/admin/customers" replace /> },
               { path: 'tradesmen', element: <AdminTradesmenPage /> },
               { path: 'tradesmen/:tradesmanId', element: <AdminTradesmanDetailsPage /> },
+              { path: 'admins', element: <AdminAdminsPage /> },
               { path: 'jobs', element: <AdminJobsPage /> },
               { path: 'jobs/:jobId', element: <AdminJobDetailsPage /> },
               { path: 'jobs/:jobId/quotes', element: <AdminJobQuotesPage /> },

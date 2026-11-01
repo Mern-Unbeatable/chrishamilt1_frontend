@@ -218,10 +218,6 @@ export function validateProfileUpdatePayload(payload, role = 'admin') {
     return 'Name is required.'
   }
 
-  if (payload.email?.trim() && !emailPattern.test(payload.email.trim())) {
-    return 'Enter a valid email address.'
-  }
-
   return null
 }
 
@@ -231,10 +227,36 @@ export function buildProfileUpdateBody(payload, role = 'admin') {
 
   // If separate first/last name were not provided, parse from fullName or name
   if (!firstName && !lastName && (payload.fullName || payload.name)) {
-    const rawName = (payload.fullName || payload.name).trim()
-    const parts = rawName.split(' ')
-    firstName = parts[0] || ''
-    lastName = parts.slice(1).join(' ') || ''
+    const rawName = (payload.fullName || payload.name).trim().replace(/\s+/g, ' ')
+    const lastSpaceIndex = rawName.lastIndexOf(' ')
+    if (lastSpaceIndex !== -1) {
+      firstName = rawName.slice(0, lastSpaceIndex).trim()
+      lastName = rawName.slice(lastSpaceIndex + 1).trim()
+    } else {
+      firstName = rawName
+      lastName = ''
+    }
+  }
+
+  // For Admin role:
+  // PUT /api/users/profile receives only: { "firstName": "...", "lastName": "..." }
+  if (role === 'admin') {
+    const rawName = (payload.name || payload.fullName || '').trim().replace(/\s+/g, ' ')
+    if (rawName) {
+      const lastSpaceIndex = rawName.lastIndexOf(' ')
+      if (lastSpaceIndex !== -1) {
+        firstName = rawName.slice(0, lastSpaceIndex).trim()
+        lastName = rawName.slice(lastSpaceIndex + 1).trim()
+      } else {
+        firstName = rawName
+        lastName = ''
+      }
+    }
+
+    return {
+      firstName,
+      lastName,
+    }
   }
 
   const fullName =
@@ -413,11 +435,9 @@ export function mapApiUserToProfile(user, role = 'admin') {
   return mapper(user)
 }
 
-function getSessionNameFromProfile(profile, role = 'admin') {
-  if (role === 'user' || role === 'tradesman') {
-    const fromParts = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim()
-    if (fromParts) return fromParts
-  }
+function getSessionNameFromProfile(profile) {
+  const fromParts = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim()
+  if (fromParts) return fromParts
 
   return profile.name ?? profile.displayName ?? profile.email ?? ''
 }
