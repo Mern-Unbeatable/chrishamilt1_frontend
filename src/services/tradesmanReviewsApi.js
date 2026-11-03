@@ -100,8 +100,14 @@ export async function fetchTradesmanPublicReviews(
     `/api/reviews/tradesman/${encodeURIComponent(tradesmanId)}?${params.toString()}`,
   )
 
-  const data = payload?.data ?? {}
-  const rows = data.reviews ?? []
+  const data = payload?.data ?? payload ?? {}
+  const rows = Array.isArray(data)
+    ? data
+    : Array.isArray(data.reviews)
+      ? data.reviews
+      : Array.isArray(data.items)
+        ? data.items
+        : []
   const pagination = normalizePagination(payload, { page, limit, rowsLength: rows.length })
 
   return {

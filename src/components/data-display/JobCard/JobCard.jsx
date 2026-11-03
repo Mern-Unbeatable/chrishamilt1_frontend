@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import {
   ChevronRight,
   Clock,
@@ -10,9 +11,12 @@ import {
   Trash2,
 } from 'lucide-react'
 import BuyLeadModal from '@/components/data-display/BuyLeadModal'
+import SendQuoteModal from '@/components/data-display/SendQuoteModal'
 import StatusBadge from '@/components/data-display/DataTable/StatusBadge'
 import { canCancelBooking } from '@/data/myBookingsData'
 import { cn } from '@/helpers/cn'
+import { getSession } from '@/auth/authService'
+import { submitQuoteCreate } from '@/helpers/submitQuoteCreate'
 
 const DEFAULT_JOB_IMAGE =
   'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=400&q=80'
@@ -60,10 +64,33 @@ export default function JobCard({
   deleteAriaLabel = 'Delete job',
   className = '',
 }) {
+  const navigate = useNavigate()
   const [buyModalOpen, setBuyModalOpen] = useState(false)
+  const [quoteModalOpen, setQuoteModalOpen] = useState(false)
+  const [quotedLocally, setQuotedLocally] = useState(false)
+
+  const session = getSession()
+  const role = session?.role?.toLowerCase()
+  const isTradesman = role === 'tradesman'
+  const isGuest = !role
+
+  // "Buy This" is ONLY visible for Public (Guest) and Tradesman.
+  // Customers (user) and Admins do not buy leads or quote.
+  const canSeeBuyThis = isGuest || isTradesman
+  const shouldShowBuyThis = showBuyThis && canSeeBuyThis
+
   const amount = price ?? priceRange
   const resolvedTokenCost = tokenCost ?? leadPrice ?? null
   const showCancel = variant === 'booking' && canCancelBooking(status) && onCancel
+
+  const handleQuoteSubmit = async (formData) => {
+    const result = await submitQuoteCreate(id, formData)
+    if (result && !result.needsTokens) {
+      setQuotedLocally(true)
+      setQuoteModalOpen(false)
+    }
+    return result
+  }
 
   if (variant === 'posted') {
     return (
@@ -109,21 +136,24 @@ export default function JobCard({
               </div>
 
               {category ? (
-                <span className="inline-flex shrink-0 self-start rounded-md border border-[#E5E7EB] px-3 py-1 text-xs font-medium text-[#64748B]">
-                  {category}
-                </span>
+                <div className="shrink-0">
+                  <span className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-xs font-medium text-[#475569]">
+                    <Tag className="size-3 text-[#64748B]" />
+                    {category}
+                  </span>
+                </div>
               ) : null}
             </div>
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+        <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-[#F1F5F9] pt-4">
           {onDelete ? (
             <button
               type="button"
               onClick={onDelete}
               aria-label={deleteAriaLabel}
-              className="inline-flex size-10 items-center justify-center rounded-lg bg-[#FEF2F2] text-[#EF4444] transition-colors hover:bg-[#FEE2E2]"
+              className="inline-flex size-10 items-center justify-center rounded-lg bg-[#FEF2F2] text-[#DC2626] transition-colors hover:bg-[#FEE2E2]"
             >
               <Trash2 className="size-4" strokeWidth={1.75} />
             </button>
@@ -220,11 +250,14 @@ export default function JobCard({
               {location}
             </span>
 
-            {variant === 'booking' && amount ? (
-              <span className="font-semibold text-[#111827]">{amount}</span>
+            {amount ? (
+              <span className="inline-flex items-center gap-1.5">
+                <PoundSterling className="size-4 shrink-0" />
+                {amount}
+              </span>
             ) : null}
 
-            {variant === 'browse' && postedAt ? (
+            {postedAt ? (
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="size-4 shrink-0" />
                 {postedAt}
@@ -236,11 +269,11 @@ export default function JobCard({
 
       {variant === 'browse' ? (
         <div className="flex w-full shrink-0 flex-wrap items-center justify-between gap-3 sm:w-auto sm:flex-nowrap sm:justify-end sm:gap-10 lg:gap-12">
-          {/* Token Badge */}
-          {resolvedTokenCost != null ? (
+          {/* Token Badge only for Public & Tradesman */}
+          {canSeeBuyThis && resolvedTokenCost != null ? (
             <span
               className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs sm:text-sm font-bold text-amber-900 shadow-xs"
-              title={`${resolvedTokenCost} Tokens to unlock`}
+              title={`${resolvedTokenCost} Tokens to quote`}
             >
               <Coins className="size-4 text-amber-600" />
               {resolvedTokenCost} T
@@ -269,13 +302,23 @@ export default function JobCard({
               </button>
             ) : null}
 
-            {showBuyThis ? (
+            {shouldShowBuyThis ? (
               <button
                 type="button"
-                onClick={onBuyThis || (() => setBuyModalOpen(true))}
-                className="rounded-lg bg-btn-primary px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs transition-colors hover:bg-[#0150CC] text-center sm:w-full"
+                disabled={quotedLocally}
+                onClick={
+                  quotedLocally
+                    ? undefined
+                    : onBuyThis || (() => setBuyModalOpen(true))
+                }
+                className={cn(
+                  'rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-center sm:w-full shadow-xs transition-colors',
+                  quotedLocally
+                    ? 'border border-emerald-300 bg-emerald-50 text-emerald-800 cursor-default'
+                    : 'bg-btn-primary text-white hover:bg-[#0150CC]',
+                )}
               >
-                {buyThisLabel}
+                {quotedLocally ? '✓ Quoted' : buyThisLabel}
               </button>
             ) : null}
           </div>
@@ -312,20 +355,40 @@ export default function JobCard({
       )}
 
       {variant === 'browse' ? (
-        <BuyLeadModal
-          open={buyModalOpen}
-          onClose={() => setBuyModalOpen(false)}
-          job={{
-            id,
-            title,
-            location,
-            priceRange: amount,
-            category,
-            tokenCost: resolvedTokenCost,
-            leadPrice,
-          }}
-          onBuyWithToken={onBuyWithToken}
-        />
+        <>
+          <BuyLeadModal
+            open={buyModalOpen}
+            onClose={() => setBuyModalOpen(false)}
+            job={{
+              id,
+              title,
+              location,
+              priceRange: amount,
+              category,
+              tokenCost: resolvedTokenCost,
+              leadPrice,
+            }}
+            onOpenQuote={() => {
+              setBuyModalOpen(false)
+              setQuoteModalOpen(true)
+            }}
+            onBuyWithToken={onBuyWithToken}
+          />
+
+          {quoteModalOpen ? (
+            <SendQuoteModal
+              open={quoteModalOpen}
+              onClose={() => setQuoteModalOpen(false)}
+              jobTitle={title}
+              customerBudget={amount}
+              onSubmit={handleQuoteSubmit}
+              onViewQuotes={() => {
+                setQuoteModalOpen(false)
+                navigate('/tradesman/quotes')
+              }}
+            />
+          ) : null}
+        </>
       ) : null}
     </article>
   )
