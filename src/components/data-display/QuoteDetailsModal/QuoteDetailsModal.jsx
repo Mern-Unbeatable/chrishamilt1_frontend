@@ -265,11 +265,15 @@ export default function QuoteDetailsModal({
         })
         if (cancelled) return
         setReviews(result.reviews)
-        setReviewsTotal(
+        const actualCount = result.reviews.length
+        const totalPages = Number(result.pagination?.totalPages || 1)
+        const reportedTotal = Number(
           result.summary?.totalReviews ??
             result.pagination?.total ??
-            result.reviews.length,
+            actualCount,
         )
+        const finalCount = totalPages <= 1 ? actualCount : reportedTotal
+        setReviewsTotal(finalCount)
         setReviewsLoadedFor(tradesmanId)
       } catch (err) {
         if (cancelled) return
@@ -339,7 +343,9 @@ export default function QuoteDetailsModal({
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-(--secondary-text) sm:text-sm">
                   <RatingStars rating={rating} />
                   <span className="font-medium text-(--primary-text)">{rating}</span>
-                  <span>({displayReviewCount} reviews)</span>
+                  <span>
+                    ({displayReviewCount} {displayReviewCount === 1 ? 'review' : 'reviews'})
+                  </span>
                   <span aria-hidden>·</span>
                   <span>{jobsCompleted} jobs</span>
                   <span aria-hidden>·</span>

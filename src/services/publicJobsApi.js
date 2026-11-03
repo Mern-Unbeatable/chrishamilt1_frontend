@@ -1,5 +1,6 @@
 import { apiRequest } from '@/auth/apiClient'
 import { AUTH_CONFIG } from '@/auth/authConfig'
+import { getAccessToken, getSession } from '@/auth/authService'
 import { DEFAULT_TRADE_CATEGORIES } from '@/data/categoriesData'
 import { DEMO_BROWSE_BUDGETS } from '@/data/demoData'
 import { formatBudgetRange } from '@/helpers/formatBudgetRange'
@@ -252,6 +253,11 @@ export async function fetchPublicJobs({
   status = 'OPEN',
   token,
 } = {}) {
+  // If tradesman is logged in and token wasn't explicitly passed, attach bearer token
+  const session = getSession()
+  const effectiveToken =
+    token ?? (session?.role === 'tradesman' ? getAccessToken() : undefined)
+
   // Marketplace browse is OPEN-only for public + tradesman.
   const marketplaceStatus = status || 'OPEN'
   const isOpen = (job) => String(job.status ?? 'OPEN').trim().toUpperCase() === 'OPEN'
@@ -274,7 +280,7 @@ export async function fetchPublicJobs({
     do {
       const payload = await apiRequest(
         `/api/jobs?${buildJobsQuery({ ...baseQuery, page: apiPage })}`,
-        { token },
+        { token: effectiveToken },
       )
       const rows = payload?.data ?? []
       all.push(...rows)
@@ -313,7 +319,7 @@ export async function fetchPublicJobs({
     status: marketplaceStatus,
   })
 
-  const payload = await apiRequest(`/api/jobs?${query}`, { token })
+  const payload = await apiRequest(`/api/jobs?${query}`, { token: effectiveToken })
   const rows = payload?.data ?? []
   const openOnly = rows.filter(isOpen)
   const pagination = normalizePagination(payload, {
@@ -333,7 +339,13 @@ export async function fetchPublicJobDetails(jobId, { token } = {}) {
     throw new Error('Job not found.')
   }
 
-  const payload = await apiRequest(`/api/jobs/${encodeURIComponent(jobId)}`, { token })
+  const session = getSession()
+  const effectiveToken =
+    token ?? (session?.role === 'tradesman' ? getAccessToken() : undefined)
+
+  const payload = await apiRequest(`/api/jobs/${encodeURIComponent(jobId)}`, {
+    token: effectiveToken,
+  })
   const job = payload?.data
 
   if (!job) {

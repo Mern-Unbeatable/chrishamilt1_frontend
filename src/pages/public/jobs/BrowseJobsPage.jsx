@@ -7,6 +7,7 @@ import {
 import useDebouncedValue from '@/hooks/useDebouncedValue'
 import BrowseJobsHero from '@/pages/public/jobs/sections/BrowseJobsHero'
 import BrowseJobsResults from '@/pages/public/jobs/sections/BrowseJobsResults'
+import { useAuth } from '@/auth/AuthProvider'
 import {
   ALL_CATEGORIES_OPTION,
   fetchJobCategories,
@@ -59,6 +60,7 @@ function filterByKeyword(jobs, keyword) {
 }
 
 export default function BrowseJobsPage() {
+  const { session } = useAuth()
   const useApi = isPublicJobsApiEnabled()
   const [searchParams] = useSearchParams()
   const initialCategorySlug = searchParams.get('category')?.trim() ?? ''
@@ -174,7 +176,7 @@ export default function BrowseJobsPage() {
     return () => {
       cancelled = true
     }
-  }, [useApi, categorySlug, debouncedLocation, debouncedKeyword, budget, page])
+  }, [useApi, categorySlug, debouncedLocation, debouncedKeyword, budget, page, session?.role, session?.accessToken])
 
   useEffect(() => {
     if (useApi) return

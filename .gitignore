@@ -10,13 +10,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+temp_auto_push.bat
 *.local
 luisfernandeslu_frontend
 chrishamilt1_backend
-.env
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
 .idea
 .DS_Store
 *.suo
@@ -24,3 +22,6 @@ chrishamilt1_backend
 *.njsproj
 *.sln
 *.sw?
+config.bat
+.gitignore
+branch_structure.json

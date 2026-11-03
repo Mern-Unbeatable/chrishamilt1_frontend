@@ -1,12 +1,21 @@
-import { useMemo, useState } from 'react'
-import { Plus, ShieldCheck } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Plus, ShieldCheck, Trash2 } from 'lucide-react'
 import DataTable, { StatusBadge } from '@/components/data-display/DataTable/DataTable'
 import DashboardPageHeader from '@/components/dashboard/DashboardPageHeader'
 import AddAdminModal from '@/pages/admin/admins/sections/AddAdminModal'
-import { createAdminUser, getStoredAdminUsers } from '@/services/adminAdminsApi'
-import { showSuccessAlert } from '@/helpers/showAppAlert'
+import { useAuth } from '@/auth/AuthProvider'
+import {
+  ADMIN_ADMINS_PAGE_SIZE,
+  createAdminUser,
+  deleteStoredAdminUser,
+  fetchAdminUsers,
+  getStoredAdminUsers,
+  isAdminUsersApiEnabled,
+} from '@/services/adminAdminsApi'
+import { submitAdminUserDelete } from '@/helpers/submitAdminUserDelete'
+import { showErrorAlert, showSuccessAlert } from '@/helpers/showAppAlert'
 
-const PAGE_SIZE = 7
+const DEMO_PAGE_SIZE = 7
 
 const ADMIN_COLUMNS = [
   {
@@ -18,7 +27,14 @@ const ADMIN_COLUMNS = [
           {value ? value.slice(0, 2).toUpperCase() : 'AD'}
         </div>
         <div className="min-w-0">
-          <p className="font-semibold text-[#111827] truncate">{value}</p>
+          <div className="flex items-center gap-2">
+            <p className="font-semibold text-[#111827] truncate">{value}</p>
+            {row.isPrimaryAdmin ? (
+              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
+                Primary
+              </span>
+            ) : null}
+          </div>
           <span className="text-xs text-[#64748B]">ID: {row.id}</span>
         </div>
       </div>
@@ -63,26 +79,132 @@ const ADMIN_COLUMNS = [
   { key: 'joinedDate', header: 'Joined Date' },
 ]
 
+function isProtectedAdmin(row = {}, currentUserId) {
+  const isPrimary =
+    Boolean(row.isPrimaryAdmin) ||
+    row.email?.toLowerCase() === 'admin@tradersinloop.co.uk'
+  const isSelf = currentUserId && String(row.id) === String(currentUserId)
+  return isPrimary || isSelf
+}
+
+function buildAdminActions({ onDelete, currentUserId }) {
+  return [
+    {
+      id: 'delete',
+      label: 'Delete',
+      icon: <Trash2 className="size-4 text-red-600" />,
+      variant: 'danger',
+      disabled: (row) => isProtectedAdmin(row, currentUserId),
+      onClick: onDelete,
+    },
+  ]
+}
+
 export default function AdminAdminsPage() {
-  const [admins, setAdmins] = useState(() => getStoredAdminUsers())
+  const { session } = useAuth()
+  const currentUserId = session?.user?.id
+  const useApi = isAdminUsersApiEnabled()
+  const pageSize = useApi ? ADMIN_ADMINS_PAGE_SIZE : DEMO_PAGE_SIZE
+
+  const [admins, setAdmins] = useState(useApi ? [] : () => getStoredAdminUsers())
   const [page, setPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading] = useState(useApi)
+  const [error, setError] = useState('')
   const [createModalOpen, setCreateModalOpen] = useState(false)
 
-  const paginatedAdmins = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE
-    return admins.slice(start, start + PAGE_SIZE)
-  }, [admins, page])
+  const loadAdmins = useCallback(async () => {
+    if (!useApi) return
 
-  const totalCount = admins.length
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
-  const from = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
-  const to = Math.min(page * PAGE_SIZE, totalCount)
+    setLoading(true)
+    setError('')
+
+    try {
+      const result = await fetchAdminUsers({ page, limit: pageSize })
+      setAdmins(result.admins)
+      setTotalCount(result.pagination.total ?? result.admins.length)
+      setTotalPages(Math.max(1, result.pagination.totalPages ?? 1))
+    } catch (err) {
+      setAdmins([])
+      setTotalCount(0)
+      setTotalPages(1)
+      setError(err?.message || 'Unable to load administrators.')
+    } finally {
+      setLoading(false)
+    }
+  }, [useApi, page, pageSize])
+
+  useEffect(() => {
+    loadAdmins()
+  }, [loadAdmins])
+
+  const demoPaginatedAdmins = useMemo(() => {
+    if (useApi) return admins
+    const start = (page - 1) * pageSize
+    return admins.slice(start, start + pageSize)
+  }, [useApi, admins, page, pageSize])
+
+  const displayAdmins = useApi ? admins : demoPaginatedAdmins
+  const displayTotalCount = useApi ? totalCount : admins.length
+  const displayTotalPages = useApi
+    ? totalPages
+    : Math.max(1, Math.ceil(admins.length / pageSize))
+
+  const from = displayTotalCount === 0 ? 0 : (page - 1) * pageSize + 1
+  const to = Math.min(page * pageSize, displayTotalCount)
+
+  const handleDelete = useCallback(
+    async (row) => {
+      if (row.isPrimaryAdmin || row.email?.toLowerCase() === 'admin@tradersinloop.co.uk') {
+        await showErrorAlert({
+          title: 'Action Not Allowed',
+          text: 'The primary admin account cannot be deleted.',
+        })
+        return
+      }
+
+      if (currentUserId && String(row.id) === String(currentUserId)) {
+        await showErrorAlert({
+          title: 'Action Not Allowed',
+          text: 'You cannot delete your own logged-in admin account.',
+        })
+        return
+      }
+
+      const success = await submitAdminUserDelete(row.id, row.fullName, {
+        userType: 'Admin',
+      })
+
+      if (success) {
+        if (useApi) {
+          loadAdmins()
+        } else {
+          deleteStoredAdminUser(row.id)
+          setAdmins((current) => current.filter((admin) => admin.id !== row.id))
+          setTotalCount((current) => Math.max(0, current - 1))
+        }
+      }
+    },
+    [currentUserId, useApi, loadAdmins],
+  )
+
+  const actions = useMemo(
+    () =>
+      buildAdminActions({
+        onDelete: handleDelete,
+        currentUserId,
+      }),
+    [handleDelete, currentUserId],
+  )
 
   const handleCreateAdmin = async (formData) => {
     try {
       const result = await createAdminUser(formData)
 
-      if (result?.admin) {
+      if (useApi) {
+        await loadAdmins()
+      } else if (result?.admin) {
         setAdmins((current) => [result.admin, ...current])
       }
 
@@ -118,18 +240,27 @@ export default function AdminAdminsPage() {
           }
         />
 
+        {error ? (
+          <p className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
+            {error}
+          </p>
+        ) : null}
+
         <DataTable
           columns={ADMIN_COLUMNS}
-          data={paginatedAdmins}
+          data={displayAdmins}
+          showActions
+          actions={actions}
+          loading={useApi && loading}
           showPagination
           pagination={{
             page,
-            pageSize: PAGE_SIZE,
-            total: totalCount,
+            pageSize,
+            total: displayTotalCount,
             from,
             to,
             hasPrevious: page > 1,
-            hasNext: page < totalPages,
+            hasNext: page < displayTotalPages,
             onPageChange: setPage,
           }}
           emptyMessage="No admins found."
