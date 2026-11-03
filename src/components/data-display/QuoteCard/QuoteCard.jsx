@@ -218,7 +218,9 @@ function CustomerQuoteCard({
             <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--secondary-text)] sm:text-sm">
               <RatingStars rating={rating} />
               <span className="font-medium text-[var(--primary-text)]">{rating}</span>
-              <span>({reviewCount} reviews)</span>
+              <span>
+                ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+              </span>
               <span aria-hidden>·</span>
               <span>{jobsCompleted} jobs</span>
               <span aria-hidden>·</span>

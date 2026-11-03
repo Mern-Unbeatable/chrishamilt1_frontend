@@ -287,14 +287,6 @@ export default function TradesmanQuotesPage() {
                       ? undefined
                       : () => handleWithdraw(quote.id)
                   }
-                  onMessageCustomer={() =>
-                    navigate('/tradesman/messages', {
-                      state: {
-                        customerId: quote.customerId ?? null,
-                        jobId: quote.jobId ?? null,
-                      },
-                    })
-                  }
                 />
               )
             })}
