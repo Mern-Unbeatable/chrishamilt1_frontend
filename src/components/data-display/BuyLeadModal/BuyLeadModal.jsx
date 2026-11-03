@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router'
 import { Coins, CreditCard, MapPin, Tag, X, CheckCircle2, AlertCircle } from 'lucide-react'
 import { getSession } from '@/auth/authService'
 import { fetchTradesmanAvailableTokens, resolveQuoteTokenCost } from '@/services/tradesmanWalletApi'
-import { showSuccessAlert } from '@/helpers/showAppAlert'
+import { showConfirmAlert } from '@/helpers/showAppAlert'
 
 export default function BuyLeadModal({
   open,
   onClose,
   job,
+  onOpenQuote,
   onBuyWithToken,
 }) {
   const navigate = useNavigate()
@@ -21,7 +22,7 @@ export default function BuyLeadModal({
   const isTradesman = session?.role === 'tradesman'
   const isLoggedIn = Boolean(session?.accessToken || session?.name)
 
-  const tokenCost = Number(job?.tokenCost ?? job?.leadPrice ?? 0)
+  const tokenCost = Number(job?.tokenCost ?? job?.leadPrice ?? resolveQuoteTokenCost?.(job) ?? 0)
 
   useEffect(() => {
     if (!open) {
@@ -63,7 +64,7 @@ export default function BuyLeadModal({
   const handleBuyWithToken = async () => {
     if (!isLoggedIn) {
       onClose?.()
-      navigate('/auth/login')
+      navigate('/auth/login', { state: { from: `/jobs/${job.id}` } })
       return
     }
 
@@ -76,8 +77,21 @@ export default function BuyLeadModal({
     if (loadingBalance) return
 
     if (!hasEnoughTokens) {
-      onClose?.()
-      navigate('/pricing')
+      const confirm = await showConfirmAlert({
+        title: 'More Tokens Needed',
+        text: `You have ${tokenBalance ?? 0} tokens, but submitting a quote on this job requires ${tokenCost} tokens. Would you like to buy tokens?`,
+        confirmButtonText: 'View Pricing',
+        cancelButtonText: 'Cancel',
+      })
+      if (confirm.isConfirmed) {
+        onClose?.()
+        navigate('/pricing')
+      }
+      return
+    }
+
+    if (onOpenQuote) {
+      onOpenQuote(job)
       return
     }
 
@@ -87,18 +101,8 @@ export default function BuyLeadModal({
       return
     }
 
-    setPurchasing(true)
-    try {
-      fetchTradesmanAvailableTokens().catch(() => {})
-      await showSuccessAlert({
-        title: 'Lead Unlocked!',
-        text: `Successfully unlocked "${job.title}" using ${tokenCost} tokens. Customer contact details are now accessible.`,
-      })
-      onClose?.()
-      navigate(`/tradesman/browse-jobs/${job.id}`)
-    } finally {
-      setPurchasing(false)
-    }
+    onClose?.()
+    navigate(`/tradesman/browse-jobs/${job.id}`)
   }
 
   return createPortal(
@@ -182,7 +186,7 @@ export default function BuyLeadModal({
           {/* Purchase Options */}
           <div className="space-y-3 pt-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B]">
-              Choose payment method
+              CHOOSE PAYMENT METHOD
             </p>
 
             {/* Option 1: Buy with Token */}
@@ -190,7 +194,7 @@ export default function BuyLeadModal({
               type="button"
               onClick={handleBuyWithToken}
               disabled={purchasing || loadingBalance}
-              className={`group flex w-full items-center rounded-xl border p-3.5 text-left transition-all ${
+              className={`group flex w-full items-center rounded-xl border p-3.5 text-left transition-all cursor-pointer ${
                 hasEnoughTokens
                   ? 'border-btn-primary/40 bg-btn-primary/5 hover:border-btn-primary hover:bg-btn-primary/10'
                   : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1] hover:bg-[#F8FAFC]'
@@ -225,7 +229,7 @@ export default function BuyLeadModal({
             <button
               type="button"
               onClick={handleBuyWithCard}
-              className="group flex w-full items-center rounded-xl border border-[#E2E8F0] bg-white p-3.5 text-left transition-all hover:border-btn-primary hover:bg-btn-primary/5"
+              className="group flex w-full items-center rounded-xl border border-[#E2E8F0] bg-white p-3.5 text-left transition-all hover:border-btn-primary hover:bg-btn-primary/5 cursor-pointer"
             >
               <div className="flex items-center gap-3.5">
                 <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-btn-primary/10 text-btn-primary">
@@ -240,11 +244,11 @@ export default function BuyLeadModal({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[#E5E7EB] bg-[#F8FAFC] px-6 py-3.5 flex justify-end">
+        <div className="border-t border-[#E5E7EB] bg-white px-6 py-4 flex justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F1F5F9]"
+            className="rounded-lg border border-[#CBD5E1] bg-white px-5 py-2 text-sm font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC] cursor-pointer"
           >
             Cancel
           </button>

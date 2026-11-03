@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { Mail, MapPin, Phone } from 'lucide-react'
-import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTwitter } from 'react-icons/fa'
+import { FaFacebookF, FaInstagram, FaLinkedinIn } from 'react-icons/fa'
+import { FaXTwitter } from 'react-icons/fa6'
 import Logo from '@/components/Logo'
 import { fetchContactSettings, DEFAULT_CONTACT_SETTINGS } from '@/services/adminSettingsApi'
 
@@ -45,10 +46,26 @@ const CONTACT_ITEMS = [
 ]
 
 const SOCIAL_LINKS = [
-  { label: 'Facebook', href: 'https://facebook.com', Icon: FaFacebookF },
-  { label: 'Twitter', href: 'https://twitter.com', Icon: FaTwitter },
-  { label: 'Instagram', href: 'https://instagram.com', Icon: FaInstagram },
-  { label: 'LinkedIn', href: 'https://linkedin.com', Icon: FaLinkedinIn },
+  {
+    label: 'Facebook',
+    href: 'https://www.facebook.com/people/Traders-in-loop-Ltd/61596088145284/',
+    Icon: FaFacebookF,
+  },
+  {
+    label: 'X (Twitter)',
+    href: 'https://x.com/tradersinloop?s=11',
+    Icon: FaXTwitter,
+  },
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com/til.tradersinloop?vrfl=MW5zYndlZWRlZHEwYQ%3D%3D&utm_source=qr',
+    Icon: FaInstagram,
+  },
+  {
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/in/chris-hamilton-a44880448?utm_source=share_via&utm_content=profile&utm_medium=member_ios',
+    Icon: FaLinkedinIn,
+  },
 ]
 
 function FooterLinkColumn({ title, links }) {

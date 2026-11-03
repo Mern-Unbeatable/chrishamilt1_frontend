@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import JobCard from '@/components/data-display/JobCard/JobCard'
 import { DEMO_RECENT_JOBS } from '@/data/demoData'
+import { useAuth } from '@/auth/AuthProvider'
 import {
   fetchPublicJobs,
   isPublicJobsApiEnabled,
@@ -13,6 +14,7 @@ const browseAllJobsBtn =
 
 export default function RecentJobs() {
   const navigate = useNavigate()
+  const { session } = useAuth()
   const useApi = isPublicJobsApiEnabled()
 
   const [jobs, setJobs] = useState(useApi ? [] : DEMO_RECENT_JOBS)
@@ -45,7 +47,7 @@ export default function RecentJobs() {
     return () => {
       cancelled = true
     }
-  }, [useApi])
+  }, [useApi, session?.role, session?.accessToken])
 
   return (
     <section data-scroll-section className="bg-white py-16 lg:py-20">

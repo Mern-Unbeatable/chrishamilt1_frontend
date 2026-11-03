@@ -1,8 +1,84 @@
+import { AUTH_CONFIG } from '@/auth/authConfig'
 import { apiRequest } from '@/auth/apiClient'
 import { getAccessToken } from '@/auth/authService'
 import { DEMO_ADMINS } from '@/data/demoData'
+import { toDisplayUserStatus, deleteAdminUser } from '@/services/adminUsersApi'
+
+export { deleteAdminUser }
+
+export const ADMIN_ADMINS_PAGE_SIZE = 10
 
 const LOCAL_STORAGE_KEY = 'tradetrust_admin_users'
+
+export function isAdminUsersApiEnabled() {
+  return Boolean(AUTH_CONFIG.apiBaseUrl)
+}
+
+function formatJoinedDate(value) {
+  if (!value) return '—'
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+
+  return date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+export function mapApiAdminToRow(admin = {}) {
+  const fullName =
+    admin.fullName?.trim() ||
+    [admin.firstName, admin.lastName].filter(Boolean).join(' ').trim() ||
+    admin.email?.split('@')[0] ||
+    'Admin'
+
+  const isPrimary =
+    Boolean(admin.isPrimaryAdmin) ||
+    admin.email?.toLowerCase() === 'admin@tradersinloop.co.uk'
+
+  return {
+    id: admin.id,
+    fullName,
+    email: admin.email ?? '—',
+    phoneNumber: admin.phoneNumber ?? '—',
+    address: admin.address ?? '—',
+    role: admin.role || 'ADMIN',
+    status: toDisplayUserStatus(admin.status) || 'Active',
+    joinedDate: formatJoinedDate(admin.createdAt),
+    isPrimaryAdmin: isPrimary,
+    raw: admin,
+  }
+}
+
+export async function fetchAdminUsers({ page = 1, limit = 7 } = {}) {
+  const params = new URLSearchParams()
+  params.set('page', String(page))
+  params.set('limit', String(limit))
+
+  const payload = await apiRequest(`/api/admin/admins?${params.toString()}`, {
+    token: getAccessToken(),
+  })
+
+  const rows = Array.isArray(payload?.data)
+    ? payload.data
+    : Array.isArray(payload?.data?.admins)
+      ? payload.data.admins
+      : []
+
+  const pagination = payload?.pagination ?? {
+    page,
+    limit,
+    total: rows.length,
+    totalPages: Math.max(1, Math.ceil(rows.length / limit)),
+  }
+
+  return {
+    admins: rows.map(mapApiAdminToRow),
+    pagination,
+  }
+}
 
 export function getStoredAdminUsers() {
   try {
@@ -20,6 +96,17 @@ export function saveStoredAdminUsers(admins) {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(admins))
   } catch {
     // ignore
+  }
+}
+
+export function deleteStoredAdminUser(adminId) {
+  try {
+    const current = getStoredAdminUsers()
+    const updated = current.filter((admin) => String(admin.id) !== String(adminId))
+    saveStoredAdminUsers(updated)
+    return updated
+  } catch {
+    return []
   }
 }
 
